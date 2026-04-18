@@ -23,13 +23,37 @@ export function Navigation() {
 
   return (
     <>
-      {/* Top Bar para Mobile & Desktop Logo/Auth */}
+      {/* Top Bar - Visível em todos, com Links em Desktop */}
       <nav className="fixed top-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-b border-white/5 px-4 h-16 z-50 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,0,0,0.5)]">
-            <span className="text-primary-foreground font-bold font-headline">F</span>
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,0,0,0.5)]">
+              <span className="text-primary-foreground font-bold font-headline">F</span>
+            </div>
+            <span className="font-headline font-bold text-xl text-primary italic uppercase tracking-tighter">ForgeFit</span>
+          </Link>
+
+          {/* Nav Links - Apenas Desktop */}
+          <div className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                    isActive 
+                      ? "text-primary bg-primary/10" 
+                      : "text-muted-foreground hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <item.icon className="w-4 h-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
-          <span className="font-headline font-bold text-xl text-primary italic uppercase tracking-tighter">ForgeFit</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -60,7 +84,7 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Bottom Nav para Mobile */}
+      {/* Bottom Nav - Apenas Mobile */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-white/5 px-2 py-3 z-50 safe-area-bottom md:hidden">
         <div className="flex items-center justify-around">
           {navItems.map((item) => {
@@ -89,7 +113,7 @@ export function Navigation() {
         </div>
       </nav>
 
-      <div className="hidden md:block h-16 w-full" />
+      <div className="h-16 w-full" />
     </>
   );
 }
