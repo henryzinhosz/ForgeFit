@@ -15,27 +15,32 @@ service cloud.firestore {
 
     /**
      * EXERCÍCIOS GLOBAIS (BANCO DE DADOS)
-     * Todos os usuários logados podem ler, mas ninguém pode alterar via app.
+     * Todos os usuários logados podem ler o banco de dados de exercícios padrão.
      */
     match /exercises/{exerciseId} {
       allow read: if isSignedIn();
     }
 
     /**
-     * DADOS DO USUÁRIO (Silo Privado)
-     * Implementa o modelo de Propriedade Total: 
-     * Se o ID no caminho coincide com o ID do usuário logado, ele tem acesso total
-     * a todos os documentos e subcoleções recursivamente.
+     * SILO PRIVADO DO USUÁRIO
+     * Esta regra garante que um usuário tenha acesso total (leitura e escrita)
+     * a TODOS os documentos e subcoleções dentro do seu próprio ID.
+     * Isso inclui: workouts, metrics, water, meals, etc.
+     */
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    /**
+     * Documento raiz do usuário (opcional, para metadados de perfil)
      */
     match /users/{userId} {
       allow read, write: if isOwner(userId);
-      
-      match /{allSubPaths=**} {
-        allow read, write: if isOwner(userId);
-      }
     }
 
-    // Compatibilidade com rotas antigas de exercícios personalizados se existirem fora da subárvore /users/{userId}
+    /**
+     * EXERCÍCIOS PERSONALIZADOS (Legado/Compatibilidade)
+     */
     match /custom_exercises/{exerciseId} {
       allow read, write: if isSignedIn() && resource.data.creatorUserId == request.auth.uid;
       allow create: if isSignedIn() && request.resource.data.creatorUserId == request.auth.uid;
