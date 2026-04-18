@@ -1,0 +1,80 @@
+
+{
+  "entities": {
+    "PlannedExercise": {
+      "title": "Exercício Planejado",
+      "description": "Um exercício adicionado ao plano semanal do usuário",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "exerciseId": { "type": "string" },
+        "title": { "type": "string" },
+        "sets": { "type": "string" },
+        "reps": { "type": "string" },
+        "time": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "day": { "type": "string" }
+      },
+      "required": ["id", "exerciseId", "title", "completed", "day"]
+    },
+    "UserMetric": {
+      "title": "Métrica do Usuário",
+      "description": "Registros de peso, distância ou carga máxima",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "value": { "type": "number" },
+        "type": { "type": "string" },
+        "exerciseName": { "type": "string" },
+        "label": { "type": "string" }
+      },
+      "required": ["date", "value", "type"]
+    },
+    "MealLog": {
+      "title": "Registro de Refeição",
+      "description": "Alimento consumido no rancho",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "portion": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "slot": { "type": "string" },
+        "date": { "type": "string", "format": "date" }
+      },
+      "required": ["id", "name", "calories", "protein", "slot", "date"]
+    },
+    "WaterLog": {
+      "title": "Registro de Água",
+      "description": "Consumo diário de água em litros",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "amount": { "type": "number" }
+      },
+      "required": ["date", "amount"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/users/{userId}/workouts/{workoutId}": {
+      "schema": "PlannedExercise",
+      "description": "Exercícios planejados do usuário"
+    },
+    "/users/{userId}/metrics/{metricId}": {
+      "schema": "UserMetric",
+      "description": "Histórico de performance e peso"
+    },
+    "/users/{userId}/meals/{mealId}": {
+      "schema": "MealLog",
+      "description": "Diário alimentar do rancho"
+    },
+    "/users/{userId}/water/{waterId}": {
+      "schema": "WaterLog",
+      "description": "Logs de hidratação diária"
+    }
+  }
+}

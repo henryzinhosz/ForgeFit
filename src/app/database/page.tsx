@@ -10,9 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Info } from 'lucide-react';
-import { useForgeStore, DayOfWeek } from '@/lib/store';
+import { DayOfWeek } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +34,8 @@ import {
 import { Label } from '@/components/ui/label';
 
 export default function DatabasePage() {
+  const { user } = useUser();
+  const db = useFirestore();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>('Todos');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -39,8 +43,6 @@ export default function DatabasePage() {
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('12');
   const [time, setTime] = useState('');
-  
-  const addExerciseToDay = useForgeStore(state => state.addExerciseToDay);
 
   const filteredExercises = EXERCISE_DATABASE.filter(ex => {
     const matchesSearch = ex.title.toLowerCase().includes(search.toLowerCase());
@@ -48,14 +50,18 @@ export default function DatabasePage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAdd = () => {
-    if (selectedExercise) {
-      addExerciseToDay(targetDay, {
+  const handleAdd = async () => {
+    if (selectedExercise && db && user) {
+      const workoutRef = collection(db, 'users', user.uid, 'workouts');
+      await addDoc(workoutRef, {
         exerciseId: selectedExercise.id,
         title: selectedExercise.title,
         sets,
         reps,
-        time
+        time,
+        day: targetDay,
+        completed: false,
+        createdAt: new Date().toISOString()
       });
       setSelectedExercise(null);
     }
@@ -83,7 +89,7 @@ export default function DatabasePage() {
             </div>
             <div className="space-y-1">
               <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter text-white">Banco de Exercícios</h1>
-              <p className="text-muted-foreground font-medium">Guia anatômico 3D de alta performance.</p>
+              <p className="text-muted-foreground font-medium">Dados reais salvos na sua conta.</p>
             </div>
           </div>
           

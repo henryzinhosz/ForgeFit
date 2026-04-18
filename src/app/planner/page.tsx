@@ -1,14 +1,17 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { useForgeStore, DayOfWeek, PlannedExercise } from '@/lib/store';
+import { useForgeStore, DayOfWeek } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trash2, Sparkles, Plus, Loader2, Calendar } from 'lucide-react';
 import { aiAssistWorkoutInstructions } from '@/ai/flows/ai-assist-workout-instructions';
+import { useCollection, useFirestore, useUser } from '@/firebase';
+import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
@@ -20,12 +23,20 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export default function PlannerPage() {
-  const { weeklyPlan, toggleExercise, removeExercise } = useForgeStore();
+  const { user } = useUser();
+  const db = useFirestore();
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
 
-  const handleAiRefine = async (exercise: PlannedExercise) => {
+  const workoutsQuery = useMemo(() => {
+    if (!db || !user) return null;
+    return collection(db, 'users', user.uid, 'workouts');
+  }, [db, user]);
+
+  const { data: workouts = [], loading } = useCollection(workoutsQuery);
+
+  const handleAiRefine = async (exercise: any) => {
     setIsAiLoading(true);
     try {
       const result = await aiAssistWorkoutInstructions({
@@ -41,6 +52,18 @@ export default function PlannerPage() {
     }
   };
 
+  const toggleExercise = (workoutId: string, currentStatus: boolean) => {
+    if (!db || !user) return;
+    const docRef = doc(db, 'users', user.uid, 'workouts', workoutId);
+    updateDoc(docRef, { completed: !currentStatus });
+  };
+
+  const removeExercise = (workoutId: string) => {
+    if (!db || !user) return;
+    const docRef = doc(db, 'users', user.uid, 'workouts', workoutId);
+    deleteDoc(docRef);
+  };
+
   const days: { key: DayOfWeek; label: string }[] = [
     { key: 'Monday', label: 'Segunda' },
     { key: 'Tuesday', label: 'Terça' },
@@ -51,6 +74,8 @@ export default function PlannerPage() {
     { key: 'Sunday', label: 'Domingo' }
   ];
 
+  const filteredWorkouts = workouts.filter(w => w.day === selectedDay);
+
   return (
     <div className="min-h-screen pb-24 md:pt-20 bg-background">
       <Navigation />
@@ -59,7 +84,7 @@ export default function PlannerPage() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold">Agenda Semanal</h1>
-            <p className="text-muted-foreground">Gerencie suas rotinas e acompanhe suas sessões concluídas.</p>
+            <p className="text-muted-foreground">Gerencie suas rotinas reais sincronizadas na nuvem.</p>
           </div>
           <Button asChild className="shadow-xl h-12 px-8 rounded-full bg-primary hover:bg-primary/90">
             <Link href="/database">
@@ -83,80 +108,86 @@ export default function PlannerPage() {
             </TabsList>
           </div>
 
-          {days.map((day) => (
-            <TabsContent key={day.key} value={day.key} className="space-y-6">
-              <Card className="border-border bg-card shadow-xl overflow-hidden">
-                <CardHeader className="bg-primary/5 border-b border-white/5">
-                  <div>
-                    <CardTitle className="text-2xl font-headline text-primary">{day.label}</CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      {weeklyPlan[day.key].length} exercícios planejados para este dia
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {weeklyPlan[day.key].length > 0 ? (
-                    <div className="divide-y divide-border">
-                      {weeklyPlan[day.key].map((ex) => (
-                        <div key={ex.id} className={cn(
-                          "flex items-center gap-4 p-4 md:p-6 transition-colors",
-                          ex.completed ? "bg-green-500/5" : "hover:bg-white/5"
-                        )}>
-                          <Checkbox 
-                            checked={ex.completed} 
-                            onCheckedChange={() => toggleExercise(day.key, ex.id)}
-                            className="w-6 h-6 rounded-full border-primary/50 data-[state=checked]:bg-primary"
-                          />
-                          <div className="flex-1 space-y-1">
-                            <h4 className={cn("text-lg font-semibold", ex.completed && "line-through text-muted-foreground")}>
-                              {ex.title}
-                            </h4>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                              <span>{ex.sets} Séries</span>
-                              <span>{ex.reps} Repetições</span>
-                              {ex.time && <span>{ex.time}</span>}
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            </div>
+          ) : (
+            days.map((day) => (
+              <TabsContent key={day.key} value={day.key} className="space-y-6">
+                <Card className="border-border bg-card shadow-xl overflow-hidden">
+                  <CardHeader className="bg-primary/5 border-b border-white/5">
+                    <div>
+                      <CardTitle className="text-2xl font-headline text-primary">{day.label}</CardTitle>
+                      <CardDescription className="text-muted-foreground">
+                        {workouts.filter(w => w.day === day.key).length} exercícios planejados
+                      </CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {workouts.filter(w => w.day === day.key).length > 0 ? (
+                      <div className="divide-y divide-border">
+                        {workouts.filter(w => w.day === day.key).map((ex) => (
+                          <div key={ex.id} className={cn(
+                            "flex items-center gap-4 p-4 md:p-6 transition-colors",
+                            ex.completed ? "bg-green-500/5" : "hover:bg-white/5"
+                          )}>
+                            <Checkbox 
+                              checked={ex.completed} 
+                              onCheckedChange={() => toggleExercise(ex.id, ex.completed)}
+                              className="w-6 h-6 rounded-full border-primary/50 data-[state=checked]:bg-primary"
+                            />
+                            <div className="flex-1 space-y-1">
+                              <h4 className={cn("text-lg font-semibold", ex.completed && "line-through text-muted-foreground")}>
+                                {ex.title}
+                              </h4>
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                <span>{ex.sets} Séries</span>
+                                <span>{ex.reps} Repetições</span>
+                                {ex.time && <span>{ex.time}</span>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleAiRefine(ex)}
+                                className="text-accent hover:text-accent hover:bg-accent/10"
+                                disabled={isAiLoading}
+                              >
+                                {isAiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => removeExercise(ex.id)}
+                                className="text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => handleAiRefine(ex)}
-                              className="text-accent hover:text-accent hover:bg-accent/10"
-                              disabled={isAiLoading}
-                            >
-                              {isAiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => removeExercise(day.key, ex.id)}
-                              className="text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </Button>
-                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-20 px-4 text-center space-y-4">
+                        <div className="bg-white/5 p-6 rounded-full">
+                          <Calendar className="w-12 h-12 text-muted-foreground" />
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-20 px-4 text-center space-y-4">
-                      <div className="bg-white/5 p-6 rounded-full">
-                        <Calendar className="w-12 h-12 text-muted-foreground" />
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-headline font-semibold">Dia de Descanso?</h3>
+                          <p className="text-muted-foreground max-w-xs mx-auto">Nenhum exercício agendado para {day.label.toLowerCase()}. Adicione alguns para começar.</p>
+                        </div>
+                        <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10">
+                          <Link href="/database">Explorar Exercícios</Link>
+                        </Button>
                       </div>
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-headline font-semibold">Dia de Descanso?</h3>
-                        <p className="text-muted-foreground max-w-xs mx-auto">Nenhum exercício agendado para {day.label.toLowerCase()}. Adicione alguns para começar.</p>
-                      </div>
-                      <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10">
-                        <Link href="/database">Explorar Exercícios</Link>
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            ))
+          )}
         </Tabs>
 
         <Dialog open={!!aiResponse} onOpenChange={(open) => !open && setAiResponse(null)}>
