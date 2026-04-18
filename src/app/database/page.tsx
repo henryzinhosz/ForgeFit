@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -23,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -77,7 +77,7 @@ export default function DatabasePage() {
 
       toast({
         title: "Treino Agendado!",
-        description: `${selectedExercise.title} foi adicionado à sua ${targetDay === 'Monday' ? 'Segunda-feira' : targetDay}.`,
+        description: `${selectedExercise.title} foi adicionado à sua ${targetDay === 'Monday' ? 'Segunda-feira' : targetDay === 'Tuesday' ? 'Terça-feira' : targetDay === 'Wednesday' ? 'Quarta-feira' : targetDay === 'Thursday' ? 'Quinta-feira' : targetDay === 'Friday' ? 'Sexta-feira' : targetDay === 'Saturday' ? 'Sábado' : 'Domingo'}.`,
       });
 
       setIsDialogOpen(false);
@@ -112,7 +112,7 @@ export default function DatabasePage() {
               <Plus className="text-white w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter text-white">Banco de Exercícios</h1>
+              <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter text-white italic">Banco de Exercícios</h1>
               <p className="text-muted-foreground font-medium">Dados reais salvos na sua conta Cloud.</p>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function DatabasePage() {
                   <Badge className="absolute top-4 right-4 bg-primary text-white border-none shadow-xl font-bold px-3 py-1">{ex.category}</Badge>
                 </div>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-2xl font-headline group-hover:text-primary transition-colors text-white">{ex.title}</CardTitle>
+                  <CardTitle className="text-2xl font-headline group-hover:text-primary transition-colors text-white italic">{ex.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 space-y-6">
                   <p className="text-sm text-muted-foreground line-clamp-2 italic leading-relaxed border-l-2 border-accent/30 pl-3">"{ex.instructions}"</p>
@@ -214,7 +214,6 @@ export default function DatabasePage() {
         </div>
       </main>
 
-      {/* Diálogo de Configuração Único e Controlado */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-card border-white/10 text-white rounded-3xl">
           <DialogHeader>
