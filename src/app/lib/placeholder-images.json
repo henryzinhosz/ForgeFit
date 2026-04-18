@@ -96,6 +96,12 @@
       "description": "GIF de Isometria na barra fixa",
       "imageUrl": "https://i.pinimg.com/originals/1b/18/65/1b1865514735f5b576466d26b25441e3.gif",
       "imageHint": "Pullup Isometric"
+    },
+    {
+      "id": "flexao-aberta-gif",
+      "description": "GIF de Flexão Aberta",
+      "imageUrl": "https://www.hipertrofia.org/blog/wp-content/uploads/2023/11/wide-hand-push-up.gif",
+      "imageHint": "Wide Pushup"
     }
   ]
 }

@@ -88,6 +88,12 @@ const nextConfig: NextConfig = {
         hostname: 'www.lyfta.app',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.hipertrofia.org',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
