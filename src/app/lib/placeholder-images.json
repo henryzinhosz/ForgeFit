@@ -3,57 +3,57 @@
   "placeholderImages": [
     {
       "id": "musculacao-peito",
-      "description": "Ilustração 3D de exercício para o peitoral mostrando anatomia muscular",
-      "imageUrl": "https://picsum.photos/seed/chest-anatomy/800/600",
-      "imageHint": "chest anatomy"
+      "description": "Ilustração 3D de anatomia muscular do peitoral",
+      "imageUrl": "https://picsum.photos/seed/gym-chest-3d/800/600",
+      "imageHint": "Muscle anatomy"
     },
     {
       "id": "musculacao-costas",
-      "description": "Ilustração 3D de exercício para as costas mostrando anatomia muscular",
-      "imageUrl": "https://picsum.photos/seed/back-anatomy/800/600",
-      "imageHint": "back anatomy"
+      "description": "Ilustração 3D de anatomia muscular das costas",
+      "imageUrl": "https://picsum.photos/seed/gym-back-3d/800/600",
+      "imageHint": "Muscle anatomy"
     },
     {
       "id": "musculacao-pernas",
-      "description": "Ilustração 3D de exercício para pernas mostrando anatomia muscular",
-      "imageUrl": "https://picsum.photos/seed/legs-anatomy/800/600",
-      "imageHint": "leg anatomy"
+      "description": "Ilustração 3D de anatomia muscular das pernas",
+      "imageUrl": "https://picsum.photos/seed/gym-legs-3d/800/600",
+      "imageHint": "Muscle anatomy"
     },
     {
       "id": "musculacao-ombros",
-      "description": "Ilustração 3D de exercício para ombros mostrando anatomia muscular",
-      "imageUrl": "https://picsum.photos/seed/shoulder-anatomy/800/600",
-      "imageHint": "shoulder anatomy"
+      "description": "Ilustração 3D de anatomia muscular dos ombros",
+      "imageUrl": "https://picsum.photos/seed/gym-shoulders-3d/800/600",
+      "imageHint": "Muscle anatomy"
     },
     {
       "id": "musculacao-bracos",
-      "description": "Ilustração 3D de exercício para braços mostrando anatomia muscular",
-      "imageUrl": "https://picsum.photos/seed/arms-anatomy/800/600",
-      "imageHint": "arm anatomy"
+      "description": "Ilustração 3D de anatomia muscular dos braços",
+      "imageUrl": "https://picsum.photos/seed/gym-arms-3d/800/600",
+      "imageHint": "Muscle anatomy"
     },
     {
       "id": "calistenia-geral",
-      "description": "Ilustração 3D de exercício de calistenia mostrando anatomia muscular",
-      "imageUrl": "https://picsum.photos/seed/bodyweight-anatomy/800/600",
-      "imageHint": "fitness anatomy"
+      "description": "Ilustração 3D de exercício de peso corporal",
+      "imageUrl": "https://picsum.photos/seed/calisthenics-3d/800/600",
+      "imageHint": "Gym workout"
     },
     {
       "id": "cardio-corrida",
-      "description": "Ilustração 3D de anatomia humana durante corrida",
-      "imageUrl": "https://picsum.photos/seed/running-anatomy/800/600",
-      "imageHint": "running anatomy"
+      "description": "Ilustração 3D de movimento de corrida",
+      "imageUrl": "https://picsum.photos/seed/running-3d/800/600",
+      "imageHint": "Gym workout"
     },
     {
       "id": "cardio-ciclismo",
-      "description": "Ilustração 3D de anatomia humana durante ciclismo",
-      "imageUrl": "https://picsum.photos/seed/cycling-anatomy/800/600",
-      "imageHint": "cycling anatomy"
+      "description": "Ilustração 3D de movimento de ciclismo",
+      "imageUrl": "https://picsum.photos/seed/cycling-3d/800/600",
+      "imageHint": "Gym workout"
     },
     {
       "id": "abs-workout",
-      "description": "Ilustração 3D de exercício abdominal mostrando anatomia muscular",
-      "imageUrl": "https://picsum.photos/seed/abs-anatomy/800/600",
-      "imageHint": "abs anatomy"
+      "description": "Ilustração 3D de anatomia muscular abdominal",
+      "imageUrl": "https://picsum.photos/seed/abs-3d/800/600",
+      "imageHint": "Muscle anatomy"
     }
   ]
 }
