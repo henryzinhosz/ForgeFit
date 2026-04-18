@@ -13,15 +13,15 @@ import { Search, Plus, Info } from 'lucide-react';
 import { DayOfWeek } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
@@ -35,10 +35,12 @@ import { Label } from '@/components/ui/label';
 
 export default function DatabasePage() {
   const { user } = useUser();
+  const { toast } = useToast();
   const db = useFirestore();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>('Todos');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [targetDay, setTargetDay] = useState<DayOfWeek>('Monday');
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('12');
@@ -50,10 +52,10 @@ export default function DatabasePage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAdd = async () => {
+  const handleAdd = () => {
     if (selectedExercise && db && user) {
       const workoutRef = collection(db, 'users', user.uid, 'workouts');
-      await addDoc(workoutRef, {
+      const data = {
         exerciseId: selectedExercise.id,
         title: selectedExercise.title,
         sets,
@@ -62,8 +64,30 @@ export default function DatabasePage() {
         day: targetDay,
         completed: false,
         createdAt: new Date().toISOString()
+      };
+
+      addDoc(workoutRef, data).catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: workoutRef.path,
+          operation: 'create',
+          requestResourceData: data,
+        });
+        errorEmitter.emit('permission-error', permissionError);
       });
+
+      toast({
+        title: "Treino Agendado!",
+        description: `${selectedExercise.title} foi adicionado à sua ${targetDay === 'Monday' ? 'Segunda-feira' : targetDay}.`,
+      });
+
+      setIsDialogOpen(false);
       setSelectedExercise(null);
+    } else if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Acesso Negado",
+        description: "Você precisa estar logado para salvar treinos.",
+      });
     }
   };
 
@@ -89,7 +113,7 @@ export default function DatabasePage() {
             </div>
             <div className="space-y-1">
               <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter text-white">Banco de Exercícios</h1>
-              <p className="text-muted-foreground font-medium">Dados reais salvos na sua conta.</p>
+              <p className="text-muted-foreground font-medium">Dados reais salvos na sua conta Cloud.</p>
             </div>
           </div>
           
@@ -144,53 +168,15 @@ export default function DatabasePage() {
                 <CardContent className="flex-1 space-y-6">
                   <p className="text-sm text-muted-foreground line-clamp-2 italic leading-relaxed border-l-2 border-accent/30 pl-3">"{ex.instructions}"</p>
                   <div className="flex gap-3">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button className="flex-1 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl h-12 shadow-[0_4px_15px_rgba(255,0,0,0.3)]" onClick={() => setSelectedExercise(ex)}>
-                          <Plus className="mr-2 w-5 h-5" /> Adicionar
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px] bg-card border-white/10 text-white rounded-3xl">
-                        <DialogHeader>
-                          <DialogTitle className="text-3xl font-headline text-primary uppercase italic">Configurar Treino</DialogTitle>
-                          <DialogDescription className="text-muted-foreground">
-                            Defina as metas para {selectedExercise?.title}.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-6 py-4">
-                          <div className="grid gap-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Dia da Semana</Label>
-                            <Select onValueChange={(v) => setTargetDay(v as DayOfWeek)} defaultValue="Monday">
-                              <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14">
-                                <SelectValue placeholder="Escolha um dia" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-card border-white/10">
-                                {dayOptions.map(d => (
-                                  <SelectItem key={d.key} value={d.key}>{d.label}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                              <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Séries</Label>
-                              <Input value={sets} onChange={(e) => setSets(e.target.value)} placeholder="ex: 3" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl" />
-                            </div>
-                            <div className="grid gap-2">
-                              <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Reps</Label>
-                              <Input value={reps} onChange={(e) => setReps(e.target.value)} placeholder="ex: 12" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl" />
-                            </div>
-                          </div>
-                          <div className="grid gap-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Tempo / Descanso (opcional)</Label>
-                            <Input value={time} onChange={(e) => setTime(e.target.value)} placeholder="ex: 45s" className="bg-white/5 border-white/10 h-14 rounded-xl" />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 h-16 text-xl font-black rounded-2xl shadow-2xl">CONFIRMAR</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                    <Button 
+                      className="flex-1 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl h-12 shadow-[0_4px_15px_rgba(255,0,0,0.3)]" 
+                      onClick={() => {
+                        setSelectedExercise(ex);
+                        setIsDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="mr-2 w-5 h-5" /> Adicionar
+                    </Button>
                     
                     <Dialog>
                       <DialogTrigger asChild>
@@ -217,12 +203,6 @@ export default function DatabasePage() {
                             <h4 className="font-bold text-lg text-white border-l-4 border-primary pl-4 uppercase italic">Guia de Execução Profissional</h4>
                             <p className="text-muted-foreground leading-relaxed text-base bg-white/5 p-4 rounded-2xl border border-white/5">{ex.instructions}</p>
                           </div>
-                          <div className="p-5 rounded-2xl bg-gradient-to-r from-primary/20 to-accent/20 border border-white/10">
-                            <p className="text-sm text-white font-medium flex items-center gap-2">
-                              <span className="w-2 h-2 bg-primary rounded-full animate-ping" />
-                              Dica Pro: Controle a fase excêntrica para recrutar mais fibras.
-                            </p>
-                          </div>
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -233,6 +213,50 @@ export default function DatabasePage() {
           })}
         </div>
       </main>
+
+      {/* Diálogo de Configuração Único e Controlado */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-card border-white/10 text-white rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-headline text-primary uppercase italic">Configurar Treino</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Defina as metas para {selectedExercise?.title}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="grid gap-2">
+              <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Dia da Semana</Label>
+              <Select onValueChange={(v) => setTargetDay(v as DayOfWeek)} defaultValue="Monday">
+                <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-14">
+                  <SelectValue placeholder="Escolha um dia" />
+                </SelectTrigger>
+                <SelectContent className="bg-card border-white/10 text-white">
+                  {dayOptions.map(d => (
+                    <SelectItem key={d.key} value={d.key}>{d.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Séries</Label>
+                <Input value={sets} onChange={(e) => setSets(e.target.value)} placeholder="ex: 3" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Reps</Label>
+                <Input value={reps} onChange={(e) => setReps(e.target.value)} placeholder="ex: 12" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl" />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Tempo / Descanso (opcional)</Label>
+              <Input value={time} onChange={(e) => setTime(e.target.value)} placeholder="ex: 45s" className="bg-white/5 border-white/10 h-14 rounded-xl" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 h-16 text-xl font-black rounded-2xl shadow-2xl">CONFIRMAR</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
