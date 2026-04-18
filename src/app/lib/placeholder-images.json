@@ -2,6 +2,12 @@
 {
   "placeholderImages": [
     {
+      "id": "app-logo-neon",
+      "description": "Logotipo ForgeFit estilo academia neon vermelha",
+      "imageUrl": "https://picsum.photos/seed/gym-neon-forge/200/200",
+      "imageHint": "Neon Gym"
+    },
+    {
       "id": "flexao-anatomia",
       "description": "Ilustração 3D da anatomia muscular na flexão de braços",
       "imageUrl": "https://picsum.photos/seed/pushup-anatomy-pro/800/600",
