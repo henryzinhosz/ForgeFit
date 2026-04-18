@@ -158,7 +158,7 @@ export default function DatabasePage() {
                     alt={ex.title}
                     width={800}
                     height={600}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+                    className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100"
                     data-ai-hint={imgData.imageHint}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
@@ -197,7 +197,7 @@ export default function DatabasePage() {
                               src={imgData.imageUrl} 
                               alt={ex.title}
                               fill
-                              className="object-cover opacity-90"
+                              className="object-cover object-top opacity-90"
                               data-ai-hint={imgData.imageHint}
                             />
                           </div>
