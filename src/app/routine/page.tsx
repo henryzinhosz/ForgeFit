@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle } from 'lucide-react';
+import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -67,8 +67,10 @@ export default function RoutinePage() {
 
   const waterCount = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
-  // Cálculo dinâmico de metas
   const userWeight = profile?.weight || 0;
+  const userHeight = profile?.height || 0;
+  const userGender = profile?.gender || 'Masculino';
+  
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? (userWeight * 2) : 150;
   
@@ -118,9 +120,34 @@ export default function RoutinePage() {
           <p className="text-muted-foreground font-medium">Anote sua rotina alimentar e tenha uma média aproximada de calorias e proteínas.</p>
         </header>
 
+        {/* Info Biográfica */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
+             <div className="bg-primary/20 p-3 rounded-xl text-primary"><Scale className="w-5 h-5" /></div>
+             <div>
+               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Peso Atual</p>
+               <p className="text-xl font-black text-white italic">{userWeight || '--'} KG</p>
+             </div>
+          </Card>
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
+             <div className="bg-accent/20 p-3 rounded-xl text-accent"><Scale className="w-5 h-5" /></div>
+             <div>
+               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Altura</p>
+               <p className="text-xl font-black text-white italic">{userHeight || '--'} CM</p>
+             </div>
+          </Card>
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
+             <div className="bg-blue-500/20 p-3 rounded-xl text-blue-500"><Zap className="w-5 h-5" /></div>
+             <div>
+               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Gênero</p>
+               <p className="text-xl font-black text-white italic uppercase tracking-tighter">{userGender}</p>
+             </div>
+          </Card>
+        </div>
+
         <section className="space-y-6">
           <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2">
-            <Utensils className="text-primary w-6 h-6" /> Alimentação Do Dia
+            <Utensils className="text-primary w-6 h-6" /> Refeições Do Dia
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -155,7 +182,7 @@ export default function RoutinePage() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md rounded-3xl">
-                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio do Rancho</DialogTitle></DialogHeader>
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid gap-2">
                             {MILITARY_FOOD_DB.map((food) => (
@@ -183,9 +210,9 @@ export default function RoutinePage() {
           <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl overflow-hidden relative rounded-3xl">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-2">
-                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo</h3>
+                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
                 {userWeight > 0 && (
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Meta baseada em {userWeight}kg: {proteinGoal}g de proteína.</p>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Meta para {userWeight}kg: {proteinGoal}g de proteína / dia.</p>
                 )}
               </div>
               <div className="flex gap-12">
@@ -216,7 +243,7 @@ export default function RoutinePage() {
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta: {waterGoal.toFixed(1)} Litros</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Recomendada: {waterGoal.toFixed(1)} Litros</p>
                 <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
               </div>
             </CardContent>
@@ -229,10 +256,11 @@ export default function RoutinePage() {
             <CardContent className="p-8 space-y-6">
               <div className="p-8 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center space-y-4 group hover:bg-white/10 transition-colors">
                 <CheckCircle2 className={cn("w-12 h-12 transition-colors", totalProtein >= proteinGoal ? "text-primary" : "text-muted-foreground")} />
-                <h3 className="text-2xl font-headline font-bold uppercase italic">Meta de Proteína</h3>
+                <h3 className="text-2xl font-headline font-bold uppercase italic">Meta Proteica</h3>
                 <p className="text-sm text-muted-foreground font-bold uppercase italic tracking-tighter">
-                  Progresso: {totalProtein}g de {proteinGoal}g {userWeight > 0 ? `(pelo peso: ${userWeight}kg)` : '(estimado)'}
+                  {totalProtein}g alcançados de {proteinGoal}g necessários.
                 </p>
+                <p className="text-[10px] text-muted-foreground uppercase italic">Cálculo: 2g x {userWeight || '--'}kg</p>
               </div>
             </CardContent>
           </Card>

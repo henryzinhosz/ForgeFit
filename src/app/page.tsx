@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Droplets, Zap, CheckCircle2, ChevronRight, Info, Settings2, User as UserIcon } from 'lucide-react';
+import { Droplets, Zap, CheckCircle2, ChevronRight, Settings2, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
@@ -22,6 +22,13 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -37,6 +44,8 @@ export default function Home() {
   } | null>(null);
 
   const [weightInput, setWeightInput] = useState<string>('');
+  const [heightInput, setHeightInput] = useState<string>('');
+  const [genderInput, setGenderInput] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
@@ -77,7 +86,6 @@ export default function Home() {
   
   const currentWater = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
-  // Cálculo dinâmico: 50ml por kg. Se não tiver peso, padrão 4L.
   const userWeight = profile?.weight || 0;
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
 
@@ -92,17 +100,21 @@ export default function Home() {
   };
 
   const handleSaveProfile = () => {
-    if (!profileRef || !weightInput) return;
+    if (!profileRef) return;
     setDocumentNonBlocking(profileRef, {
-      weight: parseFloat(weightInput),
+      weight: weightInput ? parseFloat(weightInput) : profile?.weight || 0,
+      height: heightInput ? parseFloat(heightInput) : profile?.height || 0,
+      gender: genderInput || profile?.gender || "Masculino",
       updatedAt: new Date().toISOString()
     }, { merge: true });
     setIsSettingsOpen(false);
   };
 
   useEffect(() => {
-    if (profile?.weight) {
-      setWeightInput(profile.weight.toString());
+    if (profile) {
+      setWeightInput(profile.weight?.toString() || '');
+      setHeightInput(profile.height?.toString() || '');
+      setGenderInput(profile.gender || '');
     }
   }, [profile]);
 
@@ -125,26 +137,54 @@ export default function Home() {
                 <Settings2 className="w-5 h-5" /> Configurar Perfil
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-card border-white/10 text-white rounded-3xl">
+            <DialogContent className="bg-card border-white/10 text-white rounded-3xl sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Meu Perfil</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Suas metas são calculadas com base nos seus dados.</DialogDescription>
+                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Meu Perfil Militar</DialogTitle>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Suas metas são calculadas com base nos seus dados biométricos.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
-                <div className="space-y-2">
-                  <Label className="uppercase font-black text-xs italic text-primary">Seu Peso Corporal (kg)</Label>
-                  <Input 
-                    type="number" 
-                    placeholder="Ex: 85" 
-                    value={weightInput} 
-                    onChange={(e) => setWeightInput(e.target.value)}
-                    className="h-14 bg-white/5 border-white/10 rounded-2xl text-xl font-bold"
-                  />
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Usamos seu peso para calcular metas de água (50ml/kg) e proteína (2g/kg).</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] italic text-primary">Peso (kg)</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Ex: 85" 
+                      value={weightInput} 
+                      onChange={(e) => setWeightInput(e.target.value)}
+                      className="h-12 bg-white/5 border-white/10 rounded-xl text-lg font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] italic text-primary">Altura (cm)</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Ex: 180" 
+                      value={heightInput} 
+                      onChange={(e) => setHeightInput(e.target.value)}
+                      className="h-12 bg-white/5 border-white/10 rounded-xl text-lg font-bold"
+                    />
+                  </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="uppercase font-black text-[10px] italic text-primary">Gênero</Label>
+                  <Select value={genderInput} onValueChange={setGenderInput}>
+                    <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl font-bold">
+                      <SelectValue placeholder="Selecione o Gênero" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-white/10 text-white">
+                      <SelectItem value="Masculino">Masculino</SelectItem>
+                      <SelectItem value="Feminino">Feminino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
+                  Usamos esses dados para calcular metas precisas de hidratação (50ml/kg), proteína (2g/kg) e futuramente seu IMC e Taxa Metabólica.
+                </p>
               </div>
               <DialogFooter>
-                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic">Salvar Alterações</Button>
+                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">Salvar Dados</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -215,20 +255,23 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <UserIcon className="w-5 h-5" /> Meta de Peso
+                  <UserIcon className="w-5 h-5" /> Perfil Físico
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
                 {userWeight > 0 ? (
-                  <>
-                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Sua meta de proteína para {userWeight}kg é de {(userWeight * 2)}g por dia.</p>
-                    <div className="bg-white/20 p-3 rounded-xl">
-                      <p className="text-[10px] font-black uppercase italic">Proteína Diária: {(userWeight * 2)}g</p>
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">
+                      Meta de proteína: {(userWeight * 2)}g por dia.
+                    </p>
+                    <div className="bg-white/20 p-3 rounded-xl flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase italic">Peso: {userWeight}kg</span>
+                      <span className="text-[10px] font-black uppercase italic">Altura: {profile?.height || '--'}cm</span>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <>
-                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Defina seu peso nas configurações para calcular suas metas nutricionais ideais.</p>
+                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Defina seus dados biométricos para calcular suas metas nutricionais ideais.</p>
                     <Button onClick={() => setIsSettingsOpen(true)} variant="secondary" className="w-full h-10 font-black bg-white text-black hover:bg-white/90 rounded-2xl uppercase italic text-[10px]">Configurar Agora</Button>
                   </>
                 )}
@@ -243,7 +286,7 @@ export default function Home() {
           </div>
           <div className="space-y-1">
             <p className="font-black text-primary uppercase italic text-sm tracking-wider">Status: Operacional</p>
-            <p className="text-xs text-muted-foreground font-bold uppercase">Todos os dados estão sendo sincronizados em tempo real com o Cloud Firestore.</p>
+            <p className="text-xs text-muted-foreground font-bold uppercase">Todos os dados biométricos e de rotina são sincronizados via Cloud Firestore.</p>
           </div>
         </div>
       </main>

@@ -8,6 +8,8 @@
       "properties": {
         "id": { "type": "string" },
         "weight": { "type": "number" },
+        "height": { "type": "number" },
+        "gender": { "type": "string", "enum": ["Masculino", "Feminino"] },
         "dailyWaterGoal": { "type": "number" },
         "dailyProteinGoal": { "type": "number" }
       }
