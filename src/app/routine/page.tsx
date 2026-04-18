@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -102,13 +101,13 @@ export default function RoutinePage() {
       
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
-          <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina do Quartel</h1>
-          <p className="text-muted-foreground font-medium">Controle de prontidão real no Cloud Firestore.</p>
+          <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
+          <p className="text-muted-foreground font-medium">Anote sua rotina alimentar e tenha uma média aproximada de calorias e proteínas.</p>
         </header>
 
         <section className="space-y-6">
           <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2">
-            <Utensils className="text-primary w-6 h-6" /> Diário do Rancho
+            <Utensils className="text-primary w-6 h-6" /> Alimentação do Dia
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -144,7 +143,7 @@ export default function RoutinePage() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md rounded-3xl">
-                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio do Rancho</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio</DialogTitle></DialogHeader>
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid gap-2">
                             {MILITARY_FOOD_DB.map((food) => (
@@ -172,7 +171,7 @@ export default function RoutinePage() {
           <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl overflow-hidden relative rounded-3xl">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-2">
-                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo do Rancho</h3>
+                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo</h3>
               </div>
               <div className="flex gap-12">
                 <div className="text-center space-y-1">
