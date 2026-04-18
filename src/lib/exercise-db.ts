@@ -1,3 +1,4 @@
+
 export interface Exercise {
   id: string;
   title: string;
@@ -19,7 +20,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '21', title: 'Flexão de Braços', category: 'Calistenia', instructions: 'Corpo reto, desça o peito até o chão e empurre de volta.', imageId: 'flexao-gif' },
   { id: '25', title: 'Prancha', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'prancha-img' },
   { id: '27', title: 'Abdominal Remador', category: 'Calistenia', instructions: 'Deitado em decúbito dorsal, braços estendidos atrás da cabeça. Flexione o tronco e os joelhos simultaneamente, abraçando as pernas.', imageId: 'remador-gif' },
-  { id: '28', title: 'Combo Força Superior', category: 'Calistenia', instructions: 'Realize 5 descidas lentas na barra (segure o topo e desça controlando por 5 segundos). Sem descanso, faça o máximo de flexões que conseguir. Repita o ciclo por 4 séries.', imageId: 'flexao-gif' },
+  { id: '28', title: 'Força Superior', category: 'Calistenia', instructions: 'Para a barra na atura do queixo, após isso desça lentamente os braços, segurando por 5 segundos', imageId: 'forca-superior-gif' },
   
   // Cardio
   { id: '41', title: 'Corrida Alternada', category: 'Cardio', instructions: 'Corrida alternada em trote leve em cadencia com tiros curtos de alta respiração', imageId: 'corrida-tfm-gif' },

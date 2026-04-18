@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -77,6 +78,12 @@
       "description": "GIF de Ciclismo Operacional",
       "imageUrl": "https://i.pinimg.com/originals/4d/d0/63/4dd0633d430ee5d98f9a630685a464a6.gif",
       "imageHint": "Cycling Exercise"
+    },
+    {
+      "id": "forca-superior-gif",
+      "description": "GIF de Força Superior (Barra Negativa)",
+      "imageUrl": "https://i.pinimg.com/originals/e0/a0/0b/e0a00bdb854f75c72f2bf2a33f192964.gif",
+      "imageHint": "Pull up Negative"
     }
   ]
 }
