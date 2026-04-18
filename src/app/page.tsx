@@ -167,22 +167,22 @@ export default function Home() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="uppercase font-black text-[10px] italic text-primary">Peso (kg)</Label>
-                    <Input 
+                    <input 
                       type="number" 
                       placeholder="Ex: 85" 
                       value={weightInput} 
                       onChange={(e) => setWeightInput(e.target.value)}
-                      className="h-12 bg-white/5 border-white/10 rounded-xl text-lg font-bold"
+                      className="h-12 w-full bg-white/5 border border-white/10 rounded-xl text-lg font-bold px-4 focus:outline-none focus:border-primary"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label className="uppercase font-black text-[10px] italic text-primary">Altura (cm)</Label>
-                    <Input 
+                    <input 
                       type="number" 
                       placeholder="Ex: 180" 
                       value={heightInput} 
                       onChange={(e) => setHeightInput(e.target.value)}
-                      className="h-12 bg-white/5 border-white/10 rounded-xl text-lg font-bold"
+                      className="h-12 w-full bg-white/5 border border-white/10 rounded-xl text-lg font-bold px-4 focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -190,12 +190,12 @@ export default function Home() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="uppercase font-black text-[10px] italic text-primary">Idade</Label>
-                    <Input 
+                    <input 
                       type="number" 
                       placeholder="Ex: 25" 
                       value={ageInput} 
                       onChange={(e) => setAgeInput(e.target.value)}
-                      className="h-12 bg-white/5 border-white/10 rounded-xl text-lg font-bold"
+                      className="h-12 w-full bg-white/5 border border-white/10 rounded-xl text-lg font-bold px-4 focus:outline-none focus:border-primary"
                     />
                   </div>
                   <div className="space-y-2">
@@ -294,7 +294,7 @@ export default function Home() {
                       <CheckCircle2 className="w-4 h-4 text-white" /> Proteína: {proteinGoal}g/dia
                     </div>
                     <div className="flex items-center gap-2 text-[10px] font-bold uppercase">
-                      <Flame className="w-4 h-4 text-white" /> Meta Calórica: {calorieGoal} kcal
+                      <Flame className="w-4 h-4 text-white" /> Calorias: {calorieGoal} kcal/dia
                     </div>
                     <div className="bg-white/20 p-3 rounded-xl flex justify-between items-center">
                       <span className="text-[10px] font-black uppercase italic">{userWeight}kg | {userHeight}cm</span>

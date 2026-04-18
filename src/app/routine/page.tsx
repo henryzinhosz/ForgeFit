@@ -128,7 +128,7 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium text-sm">Controle de ingestão calórica e proteica sincronizado.</p>
+          <p className="text-muted-foreground font-medium text-sm">Anote sua rotina alimentar e tenha uma média aproximada de Calorias e Proteínas.</p>
         </header>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -213,7 +213,7 @@ export default function RoutinePage() {
           <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl rounded-3xl overflow-hidden">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-3">
-                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
+                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo</h3>
                 <div className="space-y-1">
                    <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões baseadas no seu perfil:</p>
                    <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>

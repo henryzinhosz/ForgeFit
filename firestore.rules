@@ -5,16 +5,15 @@ service cloud.firestore {
 
     /**
      * REGRAS DE SILO DO USUÁRIO
-     * Permite acesso total (leitura e escrita) ao proprietário dos dados em seu próprio silo.
-     * O wildcard {document=**} garante que todas as subcoleções (metrics, workouts, etc.) herdem a permissão.
+     * Estrutura aninhada para garantir que o proprietário tenha acesso total
+     * tanto ao documento raiz quanto a todas as subcoleções (metrics, workouts, water, meals).
      */
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Permite leitura e escrita no documento raiz do usuário
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      match /{allSubcollections=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     /**
@@ -31,6 +30,6 @@ service cloud.firestore {
       allow read, write: if request.auth != null && (resource == null || resource.data.creatorUserId == request.auth.uid);
     }
     
-    // Deploy trigger: Ajuste de recursividade para garantir listagem em subcoleções privadas.
+    // Deploy trigger: Refactor para garantir listagem de subcoleções privadas sem erro de permissão.
   }
 }
