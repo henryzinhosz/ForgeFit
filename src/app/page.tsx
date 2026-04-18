@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Droplets, Zap, CheckCircle2, ChevronRight, Settings2, User as UserIcon } from 'lucide-react';
+import { Droplets, Zap, CheckCircle2, ChevronRight, Settings2, User as UserIcon, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
@@ -88,7 +88,23 @@ export default function Home() {
   const currentWater = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
   const userWeight = profile?.weight || 0;
+  const userHeight = profile?.height || 0;
+  const userAge = profile?.age || 0;
+  const userGender = profile?.gender || 'Masculino';
+
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
+  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
+
+  const calculateCalorieGoal = () => {
+    if (userWeight > 0 && userHeight > 0 && userAge > 0) {
+      const bmr = userGender === 'Masculino'
+        ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
+        : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
+      return Math.round(bmr * 1.6);
+    }
+    return 2500;
+  };
+  const calorieGoal = calculateCalorieGoal();
 
   const handleIncrementWater = () => {
     if (!db || !user || !currentDate) return;
@@ -195,7 +211,7 @@ export default function Home() {
                 </div>
 
                 <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
-                  Calculamos hidratação (50ml/kg) e proteína (2g/kg). Alterar o peso aqui ou na Evolução atualizará suas metas em todo o app.
+                  Calculamos hidratação (50ml/kg), proteína (2g/kg) e calorias (Mifflin-St Jeor). Alterar o peso aqui ou na Evolução atualizará suas metas em todo o app.
                 </p>
               </div>
               <DialogFooter>
@@ -275,13 +291,16 @@ export default function Home() {
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
                 {userWeight > 0 ? (
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">
-                      Meta de proteína: {(userWeight * 2)}g por dia.
-                    </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase">
+                      <CheckCircle2 className="w-4 h-4 text-white" /> Proteína: {proteinGoal}g/dia
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase">
+                      <Flame className="w-4 h-4 text-white" /> Meta Calórica: {calorieGoal} kcal
+                    </div>
                     <div className="bg-white/20 p-3 rounded-xl flex justify-between items-center">
                       <span className="text-[10px] font-black uppercase italic">Peso: {userWeight}kg</span>
-                      <span className="text-[10px] font-black uppercase italic">Idade: {profile?.age || '--'}</span>
+                      <span className="text-[10px] font-black uppercase italic">Idade: {userAge}</span>
                     </div>
                   </div>
                 ) : (

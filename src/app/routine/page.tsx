@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle, Scale, Calendar } from 'lucide-react';
+import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle, Scale, Calendar, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -72,11 +72,23 @@ export default function RoutinePage() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
   
+  // Metas Oficiais (Base Médica/Nutricional)
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
-  const proteinGoal = userWeight > 0 ? (userWeight * 2) : 150;
+  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
+
+  // Cálculo TDEE (Mifflin-St Jeor) com fator de atividade ativa (1.6)
+  const calculateCalorieGoal = () => {
+    if (userWeight > 0 && userHeight > 0 && userAge > 0) {
+      const bmr = userGender === 'Masculino'
+        ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
+        : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
+      return Math.round(bmr * 1.6);
+    }
+    return 2500; // Padrão base
+  };
+  const calorieGoal = calculateCalorieGoal();
   
   const waterProgress = (waterCount / waterGoal) * 100;
-
   const totalCalories = meals.reduce((acc, curr) => acc + (curr.calories || 0), 0);
   const totalProtein = meals.reduce((acc, curr) => acc + (curr.protein || 0), 0);
 
@@ -220,7 +232,11 @@ export default function RoutinePage() {
               <div className="space-y-2">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
                 {userWeight > 0 && (
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Meta para {userWeight}kg: {proteinGoal}g de proteína / dia.</p>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestão Diária para {userWeight}kg (Mifflin-St Jeor):</p>
+                    <p className="text-[10px] text-primary/80 font-black uppercase italic">• Proteína Recomendada: {proteinGoal}g</p>
+                    <p className="text-[10px] text-accent/80 font-black uppercase italic">• Meta Calórica Estimada: {calorieGoal} kcal</p>
+                  </div>
                 )}
               </div>
               <div className="flex gap-12">
@@ -263,12 +279,12 @@ export default function RoutinePage() {
             </CardHeader>
             <CardContent className="p-8 space-y-6">
               <div className="p-8 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center space-y-4 group hover:bg-white/10 transition-colors">
-                <CheckCircle2 className={cn("w-12 h-12 transition-colors", totalProtein >= proteinGoal ? "text-primary" : "text-muted-foreground")} />
-                <h3 className="text-2xl font-headline font-bold uppercase italic">Meta Proteica</h3>
+                <Flame className={cn("w-12 h-12 transition-colors", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
+                <h3 className="text-2xl font-headline font-bold uppercase italic">Aporte Calórico</h3>
                 <p className="text-sm text-muted-foreground font-bold uppercase italic tracking-tighter">
-                  {totalProtein}g alcançados de {proteinGoal}g necessários.
+                  {totalCalories} kcal de {calorieGoal} kcal recomendadas.
                 </p>
-                <p className="text-[10px] text-muted-foreground uppercase italic">Cálculo: 2g x {userWeight || '--'}kg</p>
+                <p className="text-[10px] text-muted-foreground uppercase italic">Baseado em atividade física militar intensa.</p>
               </div>
             </CardContent>
           </Card>
