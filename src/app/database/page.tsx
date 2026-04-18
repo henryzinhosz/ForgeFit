@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { EXERCISE_DATABASE, Exercise } from '@/lib/exercise-db';
 import { getPlaceholderById } from '@/lib/placeholder-images';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Info, LogIn, Lock } from 'lucide-react';
+import { Search, Plus, Info, LogIn, Lock, Loader2 } from 'lucide-react';
 import { DayOfWeek } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -33,6 +33,56 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
+
+// Componente para carregar a imagem apenas quando visível
+function LazyExerciseImage({ ex, imgData }: { ex: Exercise, imgData: any }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          // Uma vez visível, podemos parar de observar se quisermos manter o GIF rodando
+          // ou manter observando para "pausar" quando sair da tela. 
+          // Para máxima performance, vamos manter setIsVisible condicional.
+        } else {
+          setIsVisible(false);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef} className="aspect-video bg-white relative overflow-hidden flex items-center justify-center border-b border-white/5">
+      {isVisible ? (
+        <Image 
+          src={imgData.imageUrl} 
+          alt={ex.title}
+          width={800}
+          height={600}
+          unoptimized
+          className="w-full h-full object-contain object-center transition-opacity duration-500 opacity-100"
+          data-ai-hint={imgData.imageHint}
+        />
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-2 text-zinc-300">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">Carregando...</span>
+        </div>
+      )}
+      <Badge className="absolute top-4 right-4 bg-primary text-white border-none shadow-xl font-bold px-3 py-1 z-10">{ex.category}</Badge>
+    </div>
+  );
+}
 
 export default function DatabasePage() {
   const { user } = useUser();
@@ -145,18 +195,7 @@ export default function DatabasePage() {
             const imgData = getPlaceholderById(ex.imageId);
             return (
               <Card key={ex.id} className="overflow-hidden border-white/10 bg-card/60 backdrop-blur-md shadow-2xl hover:border-primary/50 transition-all group flex flex-col rounded-3xl">
-                <div className="aspect-video bg-white relative overflow-hidden flex items-center justify-center">
-                  <Image 
-                    src={imgData.imageUrl} 
-                    alt={ex.title}
-                    width={800}
-                    height={600}
-                    unoptimized
-                    className="w-full h-full object-contain object-center transition-transform duration-700 group-hover:scale-105"
-                    data-ai-hint={imgData.imageHint}
-                  />
-                  <Badge className="absolute top-4 right-4 bg-primary text-white border-none shadow-xl font-bold px-3 py-1">{ex.category}</Badge>
-                </div>
+                <LazyExerciseImage ex={ex} imgData={imgData} />
                 <CardHeader className="pb-2">
                   <CardTitle className="text-2xl font-headline group-hover:text-primary transition-colors text-white italic">{ex.title}</CardTitle>
                 </CardHeader>
