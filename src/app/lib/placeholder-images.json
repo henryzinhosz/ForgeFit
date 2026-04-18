@@ -9,63 +9,69 @@
     },
     {
       "id": "flexao-gif",
-      "description": "GIF de Flexão de braço enviado pelo usuário",
+      "description": "GIF de Flexão de braço",
       "imageUrl": "https://i.pinimg.com/originals/ca/e0/9e/cae09e7705b846f109b1f342707c9379.gif",
       "imageHint": "Pushup Exercise"
     },
     {
-      "id": "musculacao-peito",
-      "description": "Ilustração 3D da anatomia muscular do peitoral",
-      "imageUrl": "https://picsum.photos/seed/chest-anatomy-pro/800/600",
-      "imageHint": "Pectoral Anatomy"
+      "id": "supino-gif",
+      "description": "GIF de Supino Reto",
+      "imageUrl": "https://i.pinimg.com/originals/c9/8a/37/c98a37a436ac78308d44533aa04fdee8.gif",
+      "imageHint": "Bench Press"
     },
     {
-      "id": "musculacao-costas",
-      "description": "Ilustração 3D da anatomia muscular das costas",
-      "imageUrl": "https://picsum.photos/seed/back-anatomy-pro/800/600",
-      "imageHint": "Back Anatomy"
+      "id": "agachamento-gif",
+      "description": "GIF de Agachamento Livre",
+      "imageUrl": "https://i.pinimg.com/originals/c4/53/9f/c4539fddb77d7660ee8fc1bc6ceac79f.gif",
+      "imageHint": "Squat Exercise"
     },
     {
-      "id": "musculacao-pernas",
-      "description": "Ilustração 3D da anatomia muscular das pernas",
-      "imageUrl": "https://picsum.photos/seed/legs-anatomy-pro/800/600",
-      "imageHint": "Leg Anatomy"
+      "id": "terra-gif",
+      "description": "GIF de Levantamento Terra",
+      "imageUrl": "https://i.pinimg.com/originals/9e/05/96/9e0596eaff8188a0a08d8a0212e2c009.gif",
+      "imageHint": "Deadlift Exercise"
     },
     {
-      "id": "musculacao-ombros",
-      "description": "Ilustração 3D da anatomia muscular dos ombros",
-      "imageUrl": "https://picsum.photos/seed/shoulders-anatomy-pro/800/600",
-      "imageHint": "Shoulder Anatomy"
+      "id": "militar-gif",
+      "description": "GIF de Desenvolvimento Militar",
+      "imageUrl": "https://i.pinimg.com/originals/0d/e1/98/0de1986e80eba3c85cf3853c8fc0b8d7.gif",
+      "imageHint": "Military Press"
     },
     {
-      "id": "musculacao-bracos",
-      "description": "Ilustração 3D da anatomia muscular dos braços",
-      "imageUrl": "https://picsum.photos/seed/arms-anatomy-pro/800/600",
-      "imageHint": "Biceps Anatomy"
+      "id": "remada-gif",
+      "description": "GIF de Remada Curvada",
+      "imageUrl": "https://i.pinimg.com/originals/c6/f7/47/c6f7479b3c35d406e71e8575e7df528d.gif",
+      "imageHint": "Bent Over Row"
     },
     {
-      "id": "calistenia-geral",
-      "description": "Ilustração 3D de calistenia e anatomia",
-      "imageUrl": "https://picsum.photos/seed/calisthenics-pro/800/600",
-      "imageHint": "Muscle Diagram"
+      "id": "rosca-gif",
+      "description": "GIF de Rosca Direta",
+      "imageUrl": "https://i.pinimg.com/originals/9b/0c/71/9b0c7154b4493000fe199dae00a4644c.gif",
+      "imageHint": "Bicep Curl"
     },
     {
-      "id": "abs-workout",
-      "description": "Ilustração 3D da anatomia muscular abdominal",
-      "imageUrl": "https://picsum.photos/seed/abs-anatomy-pro/800/600",
-      "imageHint": "Abdominal Anatomy"
+      "id": "prancha-img",
+      "description": "Imagem de Prancha",
+      "imageUrl": "https://i.pinimg.com/736x/37/aa/9c/37aa9cb866d10d09a93ce9587e2a4835.jpg",
+      "imageHint": "Plank Exercise"
     },
     {
-      "id": "cardio-corrida",
-      "description": "Ilustração 3D de sistema cardiovascular e corrida",
-      "imageUrl": "https://picsum.photos/seed/running-anatomy/800/600",
-      "imageHint": "Running Anatomy"
+      "id": "remador-gif",
+      "description": "GIF de Abdominal Remador",
+      "imageUrl": "https://i.pinimg.com/originals/d3/87/94/d3879408bbdcff86a5d2be538bececc3.gif",
+      "imageHint": "Situp Exercise"
     },
     {
-      "id": "cardio-bike",
-      "description": "Ilustração 3D de biomecânica do ciclismo",
-      "imageUrl": "https://picsum.photos/seed/cycling-anatomy/800/600",
-      "imageHint": "Cycling Anatomy"
+      "id": "corrida-img",
+      "description": "Imagem de Corrida de Velocidade",
+      "imageUrl": "https://i.pinimg.com/736x/85/db/17/85db1722e68bf57748d487debd1abbf4.jpg",
+      "imageHint": "Sprint Running"
+    },
+    {
+      "id": "ciclismo-gif",
+      "description": "GIF de Ciclismo Operacional",
+      "imageUrl": "https://i.pinimg.com/originals/4d/d0/63/4dd0633d430ee5d98f9a630685a464a6.gif",
+      "imageHint": "Cycling Exercise"
     }
   ]
 }
