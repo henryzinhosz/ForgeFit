@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -44,9 +43,6 @@ function LazyExerciseImage({ ex, imgData }: { ex: Exercise, imgData: any }) {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Uma vez visível, podemos parar de observar se quisermos manter o GIF rodando
-          // ou manter observando para "pausar" quando sair da tela. 
-          // Para máxima performance, vamos manter setIsVisible condicional.
         } else {
           setIsVisible(false);
         }
@@ -64,15 +60,21 @@ function LazyExerciseImage({ ex, imgData }: { ex: Exercise, imgData: any }) {
   return (
     <div ref={containerRef} className="aspect-video bg-white relative overflow-hidden flex items-center justify-center border-b border-white/5">
       {isVisible ? (
-        <Image 
-          src={imgData.imageUrl} 
-          alt={ex.title}
-          width={800}
-          height={600}
-          unoptimized
-          className="w-full h-full object-contain object-center transition-opacity duration-500 opacity-100"
-          data-ai-hint={imgData.imageHint}
-        />
+        <>
+          <Image 
+            src={imgData.imageUrl} 
+            alt={ex.title}
+            width={800}
+            height={600}
+            unoptimized
+            className="w-full h-full object-contain object-center transition-opacity duration-500 opacity-100"
+            data-ai-hint={imgData.imageHint}
+          />
+          {/* Marca d'água ForgeFIT */}
+          <div className="absolute bottom-2 right-2 pointer-events-none select-none">
+            <span className="text-[10px] font-black uppercase italic text-primary/30 tracking-tighter">ForgeFIT</span>
+          </div>
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center gap-2 text-zinc-300">
           <Loader2 className="w-6 h-6 animate-spin" />
@@ -233,6 +235,10 @@ export default function DatabasePage() {
                               className="object-contain object-center"
                               data-ai-hint={imgData.imageHint}
                             />
+                            {/* Marca d'água ForgeFIT no Dialog */}
+                            <div className="absolute bottom-3 right-3 pointer-events-none select-none">
+                              <span className="text-[12px] font-black uppercase italic text-primary/30 tracking-tighter">ForgeFIT</span>
+                            </div>
                           </div>
                           <div className="space-y-4">
                             <h4 className="font-bold text-lg text-white border-l-4 border-primary pl-4 uppercase italic">Guia de Execução Profissional</h4>
