@@ -8,8 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trash2, Sparkles, Plus, Loader2, Calendar } from 'lucide-react';
-import { aiAssistWorkoutInstructions } from '@/ai/flows/ai-assist-workout-instructions';
+import { Trash2, Pencil, Plus, Loader2, Calendar } from 'lucide-react';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
@@ -18,16 +17,25 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PlannerPage() {
   const { user } = useUser();
   const db = useFirestore();
+  const { toast } = useToast();
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  
+  // Estados para Edição
+  const [editingExercise, setEditingExercise] = useState<any | null>(null);
+  const [editSets, setEditSets] = useState('');
+  const [editReps, setEditReps] = useState('');
+  const [editTime, setEditTime] = useState('');
 
   const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -36,22 +44,6 @@ export default function PlannerPage() {
 
   const { data: rawWorkouts, loading } = useCollection(workoutsQuery);
   const workouts = rawWorkouts || [];
-
-  const handleAiRefine = async (exercise: any) => {
-    setIsAiLoading(true);
-    try {
-      const result = await aiAssistWorkoutInstructions({
-        exerciseName: exercise.title,
-        currentInstructions: `Meta: ${exercise.sets} séries de ${exercise.reps}.`,
-        userGoals: "Melhorar a forma e maximizar o recrutamento muscular"
-      });
-      setAiResponse(result.detailedInstructions);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
 
   const toggleExercise = (workoutId: string, currentStatus: boolean) => {
     if (!db || !user) return;
@@ -63,6 +55,34 @@ export default function PlannerPage() {
     if (!db || !user) return;
     const docRef = doc(db, 'users', user.uid, 'workouts', workoutId);
     deleteDoc(docRef);
+    toast({
+      title: "Exercício removido",
+      description: "O item foi excluído da sua agenda.",
+    });
+  };
+
+  const openEditDialog = (ex: any) => {
+    setEditingExercise(ex);
+    setEditSets(ex.sets || '');
+    setEditReps(ex.reps || '');
+    setEditTime(ex.time || '');
+  };
+
+  const handleUpdateExercise = () => {
+    if (!db || !user || !editingExercise) return;
+    const docRef = doc(db, 'users', user.uid, 'workouts', editingExercise.id);
+    
+    updateDoc(docRef, {
+      sets: editSets,
+      reps: editReps,
+      time: editTime
+    });
+
+    toast({
+      title: "Treino atualizado",
+      description: "As alterações foram salvas com sucesso.",
+    });
+    setEditingExercise(null);
   };
 
   const days: { key: DayOfWeek; label: string }[] = [
@@ -82,10 +102,10 @@ export default function PlannerPage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-4xl font-headline font-bold">Agenda Semanal</h1>
-            <p className="text-muted-foreground">Gerencie suas rotinas reais sincronizadas na nuvem.</p>
+            <h1 className="text-4xl font-headline font-bold uppercase italic tracking-tighter">Agenda Semanal</h1>
+            <p className="text-muted-foreground font-medium">Gerencie suas rotinas reais sincronizadas na nuvem.</p>
           </div>
-          <Button asChild className="shadow-xl h-12 px-8 rounded-full bg-primary hover:bg-primary/90">
+          <Button asChild className="shadow-xl h-12 px-8 rounded-full bg-primary hover:bg-primary/90 font-black uppercase italic">
             <Link href="/database">
               <Plus className="mr-2 w-5 h-5" /> Adicionar Exercício
             </Link>
@@ -94,12 +114,12 @@ export default function PlannerPage() {
 
         <Tabs defaultValue="Monday" className="w-full" onValueChange={(v) => setSelectedDay(v as DayOfWeek)}>
           <div className="flex justify-center mb-8">
-            <TabsList className="bg-secondary/30 p-1 h-auto flex flex-wrap justify-center gap-1 md:gap-2 border border-white/5">
+            <TabsList className="bg-secondary/30 p-1 h-auto flex flex-wrap justify-center gap-1 md:gap-2 border border-white/5 rounded-2xl">
               {days.map((day) => (
                 <TabsTrigger 
                   key={day.key} 
                   value={day.key}
-                  className="px-4 py-2 md:px-6 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white font-medium transition-all"
+                  className="px-4 py-2 md:px-6 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-bold uppercase text-[10px] transition-all"
                 >
                   {day.label.substring(0, 3)}
                 </TabsTrigger>
@@ -114,18 +134,18 @@ export default function PlannerPage() {
           ) : (
             days.map((day) => (
               <TabsContent key={day.key} value={day.key} className="space-y-6">
-                <Card className="border-border bg-card shadow-xl overflow-hidden">
-                  <CardHeader className="bg-primary/5 border-b border-white/5">
+                <Card className="border-white/10 bg-card/60 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden">
+                  <CardHeader className="bg-primary/5 border-b border-white/5 p-6">
                     <div>
-                      <CardTitle className="text-2xl font-headline text-primary">{day.label}</CardTitle>
-                      <CardDescription className="text-muted-foreground">
+                      <CardTitle className="text-3xl font-headline text-primary uppercase italic">{day.label}</CardTitle>
+                      <CardDescription className="font-bold text-muted-foreground uppercase text-xs">
                         {workouts.filter(w => w.day === day.key).length} exercícios planejados
                       </CardDescription>
                     </div>
                   </CardHeader>
                   <CardContent className="p-0">
                     {workouts.filter(w => w.day === day.key).length > 0 ? (
-                      <div className="divide-y divide-border">
+                      <div className="divide-y divide-white/5">
                         {workouts.filter(w => w.day === day.key).map((ex) => (
                           <div key={ex.id} className={cn(
                             "flex items-center gap-4 p-4 md:p-6 transition-colors",
@@ -137,12 +157,12 @@ export default function PlannerPage() {
                               className="w-6 h-6 rounded-full border-primary/50 data-[state=checked]:bg-primary"
                             />
                             <div className="flex-1 space-y-1">
-                              <h4 className={cn("text-lg font-semibold", ex.completed && "line-through text-muted-foreground")}>
+                              <h4 className={cn("text-lg font-bold uppercase italic", ex.completed && "line-through text-muted-foreground")}>
                                 {ex.title}
                               </h4>
-                              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-black text-primary/80 italic">
                                 <span>{ex.sets} Séries</span>
-                                <span>{ex.reps} Repetições</span>
+                                <span>{ex.reps} Reps</span>
                                 {ex.time && <span>{ex.time}</span>}
                               </div>
                             </div>
@@ -150,17 +170,16 @@ export default function PlannerPage() {
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                onClick={() => handleAiRefine(ex)}
-                                className="text-accent hover:text-accent hover:bg-accent/10"
-                                disabled={isAiLoading}
+                                onClick={() => openEditDialog(ex)}
+                                className="text-accent hover:text-accent hover:bg-accent/10 rounded-xl"
                               >
-                                {isAiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                                <Pencil className="w-5 h-5" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => removeExercise(ex.id)}
-                                className="text-destructive hover:bg-destructive/10"
+                                className="text-destructive hover:bg-destructive/10 rounded-xl"
                               >
                                 <Trash2 className="w-5 h-5" />
                               </Button>
@@ -174,10 +193,10 @@ export default function PlannerPage() {
                           <Calendar className="w-12 h-12 text-muted-foreground" />
                         </div>
                         <div className="space-y-2">
-                          <h3 className="text-xl font-headline font-semibold">Dia de Descanso?</h3>
-                          <p className="text-muted-foreground max-w-xs mx-auto">Nenhum exercício agendado para {day.label.toLowerCase()}. Adicione alguns para começar.</p>
+                          <h3 className="text-xl font-headline font-bold uppercase italic">Dia de Descanso?</h3>
+                          <p className="text-muted-foreground max-w-xs mx-auto text-sm uppercase font-medium">Nenhum exercício agendado para {day.label.toLowerCase()}.</p>
                         </div>
-                        <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10">
+                        <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase">
                           <Link href="/database">Explorar Exercícios</Link>
                         </Button>
                       </div>
@@ -189,22 +208,51 @@ export default function PlannerPage() {
           )}
         </Tabs>
 
-        <Dialog open={!!aiResponse} onOpenChange={(open) => !open && setAiResponse(null)}>
-          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto bg-card border-border">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-primary font-headline text-xl">
-                <Sparkles className="w-5 h-5" /> Refinamento do Coach IA
-              </DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                Dicas avançadas e variações para seu exercício.
+        {/* Modal de Edição */}
+        <Dialog open={!!editingExercise} onOpenChange={(open) => !open && setEditingExercise(null)}>
+          <DialogContent className="sm:max-w-[425px] bg-card border-white/10 text-white rounded-3xl">
+            <DialogHeader className="text-left">
+              <DialogTitle className="text-3xl font-headline text-primary uppercase italic">Editar Treino</DialogTitle>
+              <DialogDescription className="text-muted-foreground uppercase text-xs font-bold">
+                Ajuste os parâmetros para {editingExercise?.title}
               </DialogDescription>
             </DialogHeader>
-            <div className="prose prose-invert mt-4 whitespace-pre-wrap text-muted-foreground leading-relaxed bg-white/5 p-4 rounded-xl border border-white/5">
-              {aiResponse}
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
+                  <Input 
+                    value={editSets} 
+                    onChange={(e) => setEditSets(e.target.value)} 
+                    placeholder="ex: 3" 
+                    className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl font-bold" 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
+                  <Input 
+                    value={editReps} 
+                    onChange={(e) => setEditReps(e.target.value)} 
+                    placeholder="ex: 12" 
+                    className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl font-bold" 
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo / Descanso</Label>
+                <Input 
+                  value={editTime} 
+                  onChange={(e) => setEditTime(e.target.value)} 
+                  placeholder="ex: 45s" 
+                  className="bg-white/5 border-white/10 h-14 rounded-xl font-bold" 
+                />
+              </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <Button onClick={() => setAiResponse(null)} className="w-full bg-primary hover:bg-primary/90">Entendido!</Button>
-            </div>
+            <DialogFooter>
+              <Button onClick={handleUpdateExercise} className="w-full bg-primary hover:bg-primary/90 h-16 text-xl font-black rounded-2xl shadow-2xl uppercase italic">
+                SALVAR ALTERAÇÕES
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </main>
