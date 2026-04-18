@@ -72,11 +72,9 @@ export default function RoutinePage() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
   
-  // Metas Oficiais (Base Médica/Nutricional)
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
-  // Cálculo TDEE (Mifflin-St Jeor) com fator de atividade ativa (1.6)
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
       const bmr = userGender === 'Masculino'
@@ -84,7 +82,7 @@ export default function RoutinePage() {
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
       return Math.round(bmr * 1.6);
     }
-    return 2500; // Padrão base
+    return 2500;
   };
   const calorieGoal = calculateCalorieGoal();
   
@@ -130,38 +128,25 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium">Anote sua rotina alimentar e tenha uma média aproximada de calorias e proteínas.</p>
+          <p className="text-muted-foreground font-medium text-sm">Controle de ingestão calórica e proteica sincronizado.</p>
         </header>
 
-        {/* Info Biográfica */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
-             <div className="bg-primary/20 p-3 rounded-xl text-primary"><Scale className="w-5 h-5" /></div>
-             <div>
-               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Peso Atual</p>
-               <p className="text-xl font-black text-white italic">{userWeight || '--'} KG</p>
-             </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
+             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Peso</p>
+             <p className="text-xl font-black text-white italic">{userWeight || '--'} KG</p>
           </Card>
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
-             <div className="bg-accent/20 p-3 rounded-xl text-accent"><Scale className="w-5 h-5" /></div>
-             <div>
-               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Altura</p>
-               <p className="text-xl font-black text-white italic">{userHeight || '--'} CM</p>
-             </div>
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
+             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Altura</p>
+             <p className="text-xl font-black text-white italic">{userHeight || '--'} CM</p>
           </Card>
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
-             <div className="bg-blue-500/20 p-3 rounded-xl text-blue-500"><Calendar className="w-5 h-5" /></div>
-             <div>
-               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Idade</p>
-               <p className="text-xl font-black text-white italic">{userAge || '--'} ANOS</p>
-             </div>
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
+             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Idade</p>
+             <p className="text-xl font-black text-white italic">{userAge || '--'} ANOS</p>
           </Card>
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
-             <div className="bg-zinc-500/20 p-3 rounded-xl text-white"><Zap className="w-5 h-5" /></div>
-             <div>
-               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Gênero</p>
-               <p className="text-xl font-black text-white italic uppercase tracking-tighter">{userGender}</p>
-             </div>
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
+             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Gênero</p>
+             <p className="text-xl font-black text-white italic uppercase tracking-tighter">{userGender}</p>
           </Card>
         </div>
 
@@ -174,31 +159,29 @@ export default function RoutinePage() {
             {mealSlots.map((slot) => {
               const items = meals.filter(m => m.slot === slot.key);
               return (
-                <Card key={slot.key} className="bg-card/50 border-white/10 overflow-hidden group hover:border-primary/30 transition-all rounded-3xl">
+                <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden group hover:border-primary/30 transition-all">
                   <CardHeader className="p-4 bg-white/5 flex flex-row items-center justify-between space-y-0">
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/20 p-2 rounded-lg text-primary"><slot.icon className="w-5 h-5" /></div>
-                      <div>
-                        <CardTitle className="text-sm font-bold text-white uppercase italic">{slot.label}</CardTitle>
-                      </div>
+                      <CardTitle className="text-xs font-bold text-white uppercase italic">{slot.label}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 space-y-4">
-                    <div className="space-y-2 min-h-[80px]">
+                    <div className="space-y-2 min-h-[60px]">
                       {items.map((food) => (
-                        <div key={food.id} className="flex items-center justify-between text-[11px] bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors">
+                        <div key={food.id} className="flex items-center justify-between text-[10px] bg-white/5 p-2 rounded-lg border border-white/5">
                           <span className="text-zinc-300 truncate mr-2 font-bold uppercase">{food.name}</span>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-primary font-black italic">{food.calories}kcal</span>
-                            <button onClick={() => handleRemoveFood(food.id)} className="text-zinc-500 hover:text-red-500 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                            <button onClick={() => handleRemoveFood(food.id)} className="text-zinc-500 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                           </div>
                         </div>
                       ))}
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="w-full h-10 bg-secondary hover:bg-white/10 text-white border-white/10 border text-[11px] font-black uppercase italic rounded-xl" onClick={() => setActiveSlot(slot.key)}>
-                          <PlusCircle className="mr-2 w-4 h-4" /> Adicionar
+                        <Button className="w-full h-10 bg-secondary hover:bg-white/10 text-white border-white/10 border text-[10px] font-black uppercase italic rounded-xl" onClick={() => setActiveSlot(slot.key)}>
+                          Adicionar Refeição
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md rounded-3xl">
@@ -206,14 +189,14 @@ export default function RoutinePage() {
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid gap-2">
                             {MILITARY_FOOD_DB.map((food) => (
-                              <button key={food.id} onClick={() => activeSlot && handleAddFood(activeSlot, food)} className="flex items-center justify-between p-4 bg-white/5 hover:bg-primary/20 rounded-2xl transition-all text-left group border border-white/5">
+                              <button key={food.id} onClick={() => activeSlot && handleAddFood(activeSlot, food)} className="flex items-center justify-between p-4 bg-white/5 hover:bg-primary/20 rounded-2xl transition-all text-left border border-white/5">
                                 <div className="space-y-1">
-                                  <p className="font-bold text-sm text-white group-hover:text-primary transition-colors uppercase italic">{food.name}</p>
-                                  <p className="text-[10px] text-muted-foreground italic font-medium">{food.portion}</p>
+                                  <p className="font-bold text-sm text-white uppercase italic">{food.name}</p>
+                                  <p className="text-[10px] text-muted-foreground italic">{food.portion}</p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-xs font-black text-primary italic leading-none">{food.calories} KCAL</p>
-                                  <p className="text-[10px] text-accent font-black uppercase mt-1">{food.protein}g PROT</p>
+                                  <p className="text-xs font-black text-primary italic">{food.calories} KCAL</p>
+                                  <p className="text-[10px] text-accent font-black uppercase">{food.protein}g PROT</p>
                                 </div>
                               </button>
                             ))}
@@ -227,26 +210,24 @@ export default function RoutinePage() {
             })}
           </div>
 
-          <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl overflow-hidden relative rounded-3xl">
+          <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl rounded-3xl overflow-hidden">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
-                {userWeight > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestão Diária para {userWeight}kg (Mifflin-St Jeor):</p>
-                    <p className="text-[10px] text-primary/80 font-black uppercase italic">• Proteína Recomendada: {proteinGoal}g</p>
-                    <p className="text-[10px] text-accent/80 font-black uppercase italic">• Meta Calórica Estimada: {calorieGoal} kcal</p>
-                  </div>
-                )}
+                <div className="space-y-1">
+                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões baseadas no seu perfil:</p>
+                   <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>
+                   <p className="text-sm text-accent font-black uppercase italic">Meta Proteica: {proteinGoal}g</p>
+                </div>
               </div>
               <div className="flex gap-12">
                 <div className="text-center space-y-1">
                   <p className="text-4xl font-black text-primary italic leading-none">{totalCalories}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Kcal Totais</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Kcal Consumidas</p>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-4xl font-black text-accent italic leading-none">{totalProtein}g</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Proteína Total</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Proteína Total</p>
                 </div>
               </div>
             </CardContent>
@@ -260,14 +241,14 @@ export default function RoutinePage() {
             </CardHeader>
             <CardContent className="p-8 space-y-8 flex flex-col items-center">
               <div className="relative w-48 h-48 rounded-full border-8 border-white/5 flex items-center justify-center overflow-hidden">
-                <div className="absolute bottom-0 left-0 right-0 bg-accent/20 transition-all duration-700 ease-out" style={{ height: `${Math.min(waterProgress, 100)}%` }} />
+                <div className="absolute bottom-0 left-0 right-0 bg-accent/20 transition-all duration-700" style={{ height: `${Math.min(waterProgress, 100)}%` }} />
                 <div className="relative z-10 flex flex-col items-center">
-                  <span className="text-7xl font-black text-accent font-headline italic leading-none">{waterCount}</span>
-                  <span className="text-xs font-bold text-accent/80 uppercase tracking-[0.2em] mt-1">Litros</span>
+                  <span className="text-7xl font-black text-accent font-headline italic">{waterCount}</span>
+                  <span className="text-xs font-bold text-accent/80 uppercase tracking-widest">Litros</span>
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Recomendada: {waterGoal.toFixed(1)} Litros</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária: {waterGoal.toFixed(1)}L</p>
                 <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
               </div>
             </CardContent>
@@ -275,16 +256,15 @@ export default function RoutinePage() {
 
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="bg-white/5 pb-6 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Zap className="w-7 h-7" /> Prontidão</CardTitle>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Zap className="w-7 h-7" /> Prontidão Calórica</CardTitle>
             </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              <div className="p-8 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center space-y-4 group hover:bg-white/10 transition-colors">
-                <Flame className={cn("w-12 h-12 transition-colors", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
-                <h3 className="text-2xl font-headline font-bold uppercase italic">Aporte Calórico</h3>
-                <p className="text-sm text-muted-foreground font-bold uppercase italic tracking-tighter">
+            <CardContent className="p-8">
+              <div className="p-8 rounded-3xl bg-white/5 border border-white/5 text-center space-y-4">
+                <Flame className={cn("w-12 h-12 mx-auto", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
+                <h3 className="text-xl font-headline font-bold uppercase italic">Aporte Diário</h3>
+                <p className="text-sm text-muted-foreground font-bold">
                   {totalCalories} kcal de {calorieGoal} kcal recomendadas.
                 </p>
-                <p className="text-[10px] text-muted-foreground uppercase italic">Baseado em atividade física militar intensa.</p>
               </div>
             </CardContent>
           </Card>

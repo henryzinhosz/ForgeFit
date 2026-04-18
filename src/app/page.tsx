@@ -97,9 +97,11 @@ export default function Home() {
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
+      // Equação de Mifflin-St Jeor (Padrão Ouro Médico)
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
+      // Fator de atividade 1.6 para rotina militar/ativa
       return Math.round(bmr * 1.6);
     }
     return 2500;
@@ -153,13 +155,13 @@ export default function Home() {
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="rounded-2xl border-white/10 hover:bg-white/5 h-12 gap-2 uppercase font-black italic">
-                <Settings2 className="w-5 h-5" /> Configurar Perfil
+                <Settings2 className="w-5 h-5" /> Perfil Militar
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Meu Perfil Militar</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Seus dados biométricos são usados para calcular metas dinâmicas.</DialogDescription>
+                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Dados Biométricos</DialogTitle>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Suas metas de saúde são calculadas com base nestes dados.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -210,12 +212,14 @@ export default function Home() {
                   </div>
                 </div>
 
-                <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
-                  Calculamos hidratação (50ml/kg), proteína (2g/kg) e calorias (Mifflin-St Jeor). Alterar o peso aqui ou na Evolução atualizará suas metas em todo o app.
-                </p>
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
+                    Cálculos Oficiais: Hidratação (50ml/kg), Proteína (2g/kg) e Calorias via Equação de Mifflin-St Jeor. O peso é sincronizado com seu histórico de evolução.
+                  </p>
+                </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">Salvar Perfil</Button>
+                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">Atualizar Dados</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -225,7 +229,7 @@ export default function Home() {
           <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
-                <CardTitle className="text-2xl font-headline uppercase italic text-white">Sessão de Hoje</CardTitle>
+                <CardTitle className="text-2xl font-headline uppercase italic text-white">Treino de Hoje</CardTitle>
                 <CardDescription className="font-bold text-muted-foreground">
                   {totalToday > 0 ? `${completedToday} de ${totalToday} exercícios concluídos` : 'Nenhum exercício planejado para hoje.'}
                 </CardDescription>
@@ -248,19 +252,13 @@ export default function Home() {
                   ))
                 ) : (
                   <div className="text-center py-12 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                    <p className="text-muted-foreground italic mb-6 uppercase font-bold tracking-widest">Nada agendado para este dia.</p>
+                    <p className="text-muted-foreground italic mb-6 uppercase font-bold tracking-widest">Nada agendado para hoje.</p>
                     <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase italic">
-                      <Link href="/planner">Ir para o Planejador</Link>
+                      <Link href="/planner">Montar Treino</Link>
                     </Button>
                   </div>
                 )}
               </div>
-              
-              {totalToday > 0 && (
-                <Button asChild className="w-full h-14 text-lg font-black rounded-2xl shadow-[0_0_20px_rgba(255,0,0,0.3)] bg-primary hover:bg-primary/90 uppercase italic">
-                  <Link href="/planner">Abrir Agenda Completa <ChevronRight className="ml-2 w-6 h-6" /></Link>
-                </Button>
-              )}
             </CardContent>
           </Card>
 
@@ -275,10 +273,10 @@ export default function Home() {
               <CardContent className="space-y-6">
                 <div className="flex items-end gap-2">
                   <span className="text-5xl font-black text-accent italic leading-none">{currentWater}</span>
-                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {waterGoal.toFixed(1)} Litros</span>
+                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {waterGoal.toFixed(1)}L</span>
                 </div>
                 <Button onClick={handleIncrementWater} className="w-full h-14 bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 border-2 rounded-2xl font-black uppercase italic">
-                  Adicionar 1 Litro <Droplets className="ml-2 w-5 h-5" />
+                  +1 Litro <Droplets className="ml-2 w-5 h-5" />
                 </Button>
               </CardContent>
             </Card>
@@ -286,7 +284,7 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <UserIcon className="w-5 h-5" /> Perfil Físico
+                  <UserIcon className="w-5 h-5" /> Resumo de Saúde
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
@@ -299,28 +297,15 @@ export default function Home() {
                       <Flame className="w-4 h-4 text-white" /> Meta Calórica: {calorieGoal} kcal
                     </div>
                     <div className="bg-white/20 p-3 rounded-xl flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase italic">Peso: {userWeight}kg</span>
-                      <span className="text-[10px] font-black uppercase italic">Idade: {userAge}</span>
+                      <span className="text-[10px] font-black uppercase italic">{userWeight}kg | {userHeight}cm</span>
+                      <span className="text-[10px] font-black uppercase italic">{userAge} anos</span>
                     </div>
                   </div>
                 ) : (
-                  <>
-                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Defina seus dados para calcular metas automáticas.</p>
-                    <Button onClick={() => setIsSettingsOpen(true)} variant="secondary" className="w-full h-10 font-black bg-white text-black hover:bg-white/90 rounded-2xl uppercase italic text-[10px]">Configurar Agora</Button>
-                  </>
+                  <Button onClick={() => setIsSettingsOpen(true)} variant="secondary" className="w-full h-10 font-black bg-white text-black hover:bg-white/90 rounded-2xl uppercase italic text-[10px]">Configurar Agora</Button>
                 )}
               </CardContent>
             </Card>
-          </div>
-        </div>
-
-        <div className="bg-secondary/20 rounded-2xl p-6 flex items-center gap-6 border border-white/10 backdrop-blur-sm">
-          <div className="bg-primary/20 p-3 rounded-2xl text-primary animate-glow shrink-0">
-            <Zap className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <p className="font-black text-primary uppercase italic text-sm tracking-wider">Status: Operacional</p>
-            <p className="text-xs text-muted-foreground font-bold uppercase">Sincronização biométrica ativa via Cloud Firestore.</p>
           </div>
         </div>
       </main>
