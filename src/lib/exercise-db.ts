@@ -16,7 +16,14 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '5', title: 'Remada Curvada', category: 'Musculação', instructions: 'Incline o tronco, mantenha a coluna reta e puxe a barra em direção ao abdômen.', imageId: 'musculacao-costas' },
   { id: '6', title: 'Rosca Direta', category: 'Musculação', instructions: 'Em pé, flexione os cotovelos trazendo a barra em direção aos ombros.', imageId: 'musculacao-bracos' },
   { id: '7', title: 'Tríceps Corda', category: 'Musculação', instructions: 'Na polia alta, estenda os braços para baixo separando as pontas da corda.', imageId: 'musculacao-bracos' },
+  
+  // Calistenia
   { id: '21', title: 'Flexão de Braços', category: 'Calistenia', instructions: 'Corpo reto, desça o peito até o chão e empurre de volta.', imageId: 'flexao-anatomia' },
   { id: '25', title: 'Prancha Abdominal', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'abs-workout' },
-  // ... outros exercícios podem ser adicionados aqui conforme necessário
+  { id: '26', title: 'Barra Fixa', category: 'Calistenia', instructions: 'Segure a barra com as mãos em pronação e puxe o corpo até o queixo ultrapassar a barra.', imageId: 'musculacao-costas' },
+  
+  // Cardio
+  { id: '41', title: 'Corrida TFM', category: 'Cardio', instructions: 'Trote contínuo mantendo a cadência e respiração controlada. Foco na resistência aeróbica.', imageId: 'cardio-corrida' },
+  { id: '42', title: 'Ciclismo Operacional', category: 'Cardio', instructions: 'Pedalagem em intensidade moderada/alta. Excelente para fortalecimento de membros inferiores e fôlego.', imageId: 'cardio-bike' },
+  { id: '43', title: 'Corrida de Velocidade', category: 'Cardio', instructions: 'Sprints de curta distância em esforço máximo para ganho de potência explosiva.', imageId: 'cardio-corrida' }
 ];

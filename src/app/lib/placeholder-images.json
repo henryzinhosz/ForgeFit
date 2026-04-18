@@ -48,6 +48,18 @@
       "description": "Ilustração 3D da anatomia muscular abdominal",
       "imageUrl": "https://picsum.photos/seed/abs-anatomy-pro/800/600",
       "imageHint": "Abdominal Anatomy"
+    },
+    {
+      "id": "cardio-corrida",
+      "description": "Ilustração 3D de sistema cardiovascular e corrida",
+      "imageUrl": "https://picsum.photos/seed/running-anatomy/800/600",
+      "imageHint": "Running Anatomy"
+    },
+    {
+      "id": "cardio-bike",
+      "description": "Ilustração 3D de biomecânica do ciclismo",
+      "imageUrl": "https://picsum.photos/seed/cycling-anatomy/800/600",
+      "imageHint": "Cycling Anatomy"
     }
   ]
 }
