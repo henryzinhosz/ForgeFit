@@ -84,6 +84,12 @@
       "description": "GIF de Força Superior (Negativas)",
       "imageUrl": "https://i.pinimg.com/originals/e0/a0/0b/e0a00bdb854f75c72f2bf2a33f192964.gif",
       "imageHint": "Pull up Negative"
+    },
+    {
+      "id": "flexao-joelho-img",
+      "description": "Flexão de braço com apoio dos joelhos",
+      "imageUrl": "https://www.lyfta.app/thumbnails/32111201.jpg",
+      "imageHint": "Knee Pushup"
     }
   ]
 }

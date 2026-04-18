@@ -18,6 +18,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
   
   // Calistenia
   { id: '21', title: 'Flexão de Braços', category: 'Calistenia', instructions: 'Corpo reto, desça o peito até o chão e empurre de volta.', imageId: 'flexao-gif' },
+  { id: '22', title: 'Flexão de Braços com joelho', category: 'Calistenia', instructions: 'Corpo reto, com joelhos apoiados no chão, desça o peito até o chão e empurre de volta.', imageId: 'flexao-joelho-img' },
   { id: '25', title: 'Prancha', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'prancha-img' },
   { id: '27', title: 'Abdominal Remador', category: 'Calistenia', instructions: 'Deitado em decúbito dorsal, braços estendidos atrás da cabeça. Flexione o tronco e os joelhos simultaneamente, abraçando as pernas.', imageId: 'remador-gif' },
   { id: '28', title: 'Força superior (negativas)', category: 'Calistenia', instructions: 'Para a barra na atura do queixo, após isso desça lentamente os braços, segurando por 5 segundos', imageId: 'forca-superior-gif' },

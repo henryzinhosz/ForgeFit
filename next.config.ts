@@ -82,6 +82,12 @@ const nextConfig: NextConfig = {
         hostname: 'media4.giphy.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.lyfta.app',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
