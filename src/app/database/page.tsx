@@ -145,17 +145,17 @@ export default function DatabasePage() {
             const imgData = getPlaceholderById(ex.imageId);
             return (
               <Card key={ex.id} className="overflow-hidden border-white/10 bg-card/60 backdrop-blur-md shadow-2xl hover:border-primary/50 transition-all group flex flex-col rounded-3xl">
-                <div className="h-56 bg-black relative overflow-hidden">
+                <div className="aspect-video bg-black relative overflow-hidden flex items-center justify-center">
                   <Image 
                     src={imgData.imageUrl} 
                     alt={ex.title}
                     width={800}
                     height={600}
                     unoptimized
-                    className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+                    className="w-full h-full object-contain object-center transition-transform duration-700 group-hover:scale-105"
                     data-ai-hint={imgData.imageHint}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                   <Badge className="absolute top-4 right-4 bg-primary text-white border-none shadow-xl font-bold px-3 py-1">{ex.category}</Badge>
                 </div>
                 <CardHeader className="pb-2">
@@ -186,13 +186,13 @@ export default function DatabasePage() {
                           <DialogDescription className="text-accent font-bold uppercase tracking-widest">{ex.category}</DialogDescription>
                         </DialogHeader>
                         <div className="space-y-6 p-6">
-                          <div className="aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 relative shadow-2xl">
+                          <div className="aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 relative shadow-2xl flex items-center justify-center">
                             <Image 
                               src={imgData.imageUrl} 
                               alt={ex.title}
                               fill
                               unoptimized
-                              className="object-cover object-center opacity-90"
+                              className="object-contain object-center"
                               data-ai-hint={imgData.imageHint}
                             />
                           </div>
