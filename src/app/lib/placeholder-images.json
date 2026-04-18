@@ -120,6 +120,12 @@
       "description": "GIF de Pendurar na barra fixa",
       "imageUrl": "https://www.hipertrofia.org/blog/wp-content/uploads/2023/10/band-assisted-pullup.gif",
       "imageHint": "Hanging bar"
+    },
+    {
+      "id": "flexao-banco-gif",
+      "description": "GIF de Flexão no banco",
+      "imageUrl": "https://i.pinimg.com/originals/5a/69/79/5a6979535284a51d7184a5131f2a17d0.gif",
+      "imageHint": "Bench Pushup"
     }
   ]
 }
