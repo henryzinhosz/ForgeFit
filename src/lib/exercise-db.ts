@@ -27,6 +27,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '29', title: 'Isometria na barra fixa', category: 'Calistenia', instructions: 'Segure por 15 segundos no topo da barra fixa', imageId: 'isometria-barra-gif' },
   { id: '30', title: 'Abdominais supras', category: 'Calistenia', instructions: 'Deitado de costas, com os joelhos flexionados e pés no chão, eleve apenas a parte superior do tronco (escápulas/ombros)', imageId: 'abdominal-supra-gif' },
   { id: '31', title: 'Pendurar na barra fixa', category: 'Calistenia', instructions: 'segure com o corpo esticado pelo maior tempo na barra fixa', imageId: 'pendurar-barra-gif' },
+  { id: '32', title: 'Elevação de perna', category: 'Calistenia', instructions: 'Mantenha o corpo totalmente esticado e reto no chão, eleve as pernas a 90º e volte lentamente', imageId: 'elevacao-perna-img' },
   
   // Cardio
   { id: '41', title: 'Corrida Alternada', category: 'Cardio', instructions: 'Corrida alternada em trote leve em cadencia com tiros curtos de alta respiração', imageId: 'corrida-tfm-gif' },

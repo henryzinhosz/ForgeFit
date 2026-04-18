@@ -126,6 +126,12 @@
       "description": "GIF de Flexão no banco",
       "imageUrl": "https://i.pinimg.com/originals/5a/69/79/5a6979535284a51d7184a5131f2a17d0.gif",
       "imageHint": "Bench Pushup"
+    },
+    {
+      "id": "elevacao-perna-img",
+      "description": "Imagem de Elevação de pernas",
+      "imageUrl": "https://www.lyfta.app/thumbnails/08651201.jpg",
+      "imageHint": "Leg Raise"
     }
   ]
 }
