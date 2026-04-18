@@ -1,0 +1,177 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * CORE SECURITY PHILOSOPHY
+     * This ruleset implements a strict User-Ownership Model. All user-generated content is segregated
+     * under private user-specific paths (/users/{userId}/...).
+     * 
+     * DATA STRUCTURE & ACCESS
+     * - Public Data: Pre-loaded exercises are stored in a top-level collection and are read-only for
+     *   authenticated users.
+     * - Private Data: User profiles, custom exercises, workout plans, and health logs are nested
+     *   under the user's unique ID.
+     * 
+     * KEY SECURITY DECISIONS
+     * - Path-Based Authorization: We primarily use the {userId} wildcard in the document path
+     *   to verify ownership, ensuring highly performant rules.
+     * - Denormalization for Deep Nests: For deeply nested entities like PlannedWorkoutDay and
+     *   PlannedExercise, we enforce the storage of a 'userId' field within the document. This
+     *   allows for "Authorization Independence," enabling rules to verify ownership without
+     *   expensive parent-document lookups (get() calls).
+     * - Prototyping Flexibility: We strictly enforce "Who" can access data, but remain flexible on
+     *   the "What" (data schema), allowing for rapid iteration of features without constant rule updates.
+     */
+
+    // --- Helper Functions ---
+
+    /**
+     * @description Checks if the request is made by an authenticated user.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user's ID matches the provided userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks ownership and ensures the document exists for state-changing operations.
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /**
+     * @description Ensures a field is not changed during an update.
+     */
+    function isUnchanged(fieldName) {
+      return request.resource.data[fieldName] == resource.data[fieldName];
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Global pre-loaded exercises. Read-only for all authenticated users.
+     * @path /exercises/{exerciseId}
+     * @allow (get, list) if a user is signed in.
+     * @deny (create, update, delete) for all client-side requests.
+     * @principle Structural Segregation: Separates public app data from private user data.
+     */
+    match /exercises/{exerciseId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description User profile documents. Users manage their own settings.
+     * @path /users/{userId}
+     * @allow (create) if the user is creating their own profile.
+     * @deny (update) if the user tries to change their ID.
+     * @principle Ownership: Enforces that users can only manage their own profile.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('id');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Custom exercises created by users. Private to the creator.
+     * @path /users/{userId}/custom_exercises/{exerciseId}
+     * @allow (create) if creatorUserId matches the path userId.
+     * @principle Relational Integrity: Ensures internal ownership fields match the secure path.
+     */
+    match /users/{userId}/custom_exercises/{exerciseId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.creatorUserId == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('creatorUserId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description User's weekly workout plan templates.
+     * @path /users/{userId}/workout_plans/{planId}
+     */
+    match /users/{userId}/workout_plans/{planId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('userId');
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Days within a workout plan.
+       * @path /users/{userId}/workout_plans/{planId}/planned_days/{dayId}
+       * @principle Denormalization: Uses denormalized userId for fast, non-recursive auth checks.
+       */
+      match /planned_days/{dayId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Specific exercises within a planned day.
+         * @path /users/{userId}/workout_plans/{planId}/planned_days/{dayId}/planned_exercises/{plannedExerciseId}
+         */
+        match /planned_exercises/{plannedExerciseId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && request.resource.data.userId == userId;
+          allow update: if isExistingOwner(userId) && isUnchanged('userId');
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+    }
+
+    /**
+     * @description Tracks completion status for the current week.
+     * @path /users/{userId}/weekly_status/{statusId}
+     */
+    match /users/{userId}/weekly_status/{statusId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('userId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Historical logs for exercise performance.
+     * @path /users/{userId}/performance_logs/{logId}
+     */
+    match /users/{userId}/performance_logs/{logId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('userId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Historical logs for body measurements (weight, etc).
+     * @path /users/{userId}/body_measurements/{logId}
+     */
+    match /users/{userId}/body_measurements/{logId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('userId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Logs for daily habits like water and protein.
+     * @path /users/{userId}/daily_health_logs/{logId}
+     */
+    match /users/{userId}/daily_health_logs/{logId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isUnchanged('userId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+  }
+}

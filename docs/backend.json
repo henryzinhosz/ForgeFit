@@ -1,80 +1,783 @@
-
 {
   "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores user-specific settings, preferences, and general profile information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity, typically matching the user's authentication ID."
+        },
+        "dailyWaterGoalCups": {
+          "type": "number",
+          "description": "The user's customizable daily goal for water consumption, in cups."
+        },
+        "dailyProteinGoalGrams": {
+          "type": "number",
+          "description": "The user's customizable daily goal for protein intake, in grams."
+        },
+        "heightCm": {
+          "type": "number",
+          "description": "The user's height in centimeters.",
+          "format": "number"
+        },
+        "preferredWeightUnit": {
+          "type": "string",
+          "description": "The user's preferred unit for weight measurements (e.g., 'kg', 'lb')."
+        },
+        "preferredDistanceUnit": {
+          "type": "string",
+          "description": "The user's preferred unit for distance measurements (e.g., 'km', 'mi')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "dailyWaterGoalCups",
+        "dailyProteinGoalGrams",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Exercise": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Exercise",
+      "type": "object",
+      "description": "Defines details for pre-loaded exercises and user-created custom exercises.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Exercise entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "A clear, concise title for the exercise (e.g., 'Supino Inclinado com Halteres')."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Detailed execution instructions for the exercise."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to an image depicting the exercise movement.",
+          "format": "uri"
+        },
+        "gifUrl": {
+          "type": "string",
+          "description": "URL to a GIF depicting the exercise movement.",
+          "format": "uri"
+        },
+        "isPreloaded": {
+          "type": "boolean",
+          "description": "Indicates if the exercise is part of the app's pre-loaded database (true) or user-created (false)."
+        },
+        "type": {
+          "type": "string",
+          "description": "The general type or modality of the exercise (e.g., 'WEIGHTLIFTING', 'CALISTHENICS', 'CARDIO', 'OTHER')."
+        },
+        "muscleGroups": {
+          "type": "array",
+          "description": "A list of primary and secondary muscle groups targeted by the exercise (e.g., ['CHEST', 'TRICEPS', 'SHOULDERS']).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "equipmentNeeded": {
+          "type": "array",
+          "description": "A list of equipment required for the exercise (e.g., ['DUMBBELLS', 'BENCH']).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "creatorUserId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N Exercise) - Nullable, only for user-created custom exercises."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the exercise was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the exercise was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "instructions",
+        "isPreloaded",
+        "type",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserWorkoutPlan": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserWorkoutPlan",
+      "type": "object",
+      "description": "Represents a user's overall customizable weekly workout plan template (e.g., 'My Standard Routine', 'Bulking Phase').",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserWorkoutPlan entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N UserWorkoutPlan)"
+        },
+        "name": {
+          "type": "string",
+          "description": "A descriptive name for the workout plan (e.g., 'Rotina Padrão', 'Plano de Hipertrofia')."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional longer description for the workout plan."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if this is the currently active workout plan for the user. Only one plan can be active at a time."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the workout plan was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the workout plan was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "isActive",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PlannedWorkoutDay": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlannedWorkoutDay",
+      "type": "object",
+      "description": "Defines what exercises are planned for a specific day within a UserWorkoutPlan.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PlannedWorkoutDay entity."
+        },
+        "userWorkoutPlanId": {
+          "type": "string",
+          "description": "Reference to UserWorkoutPlan. (Relationship: UserWorkoutPlan 1:N PlannedWorkoutDay)"
+        },
+        "dayOfWeek": {
+          "type": "string",
+          "description": "The day of the week this workout plan applies to (e.g., 'MONDAY', 'TUESDAY', 'SUNDAY')."
+        },
+        "order": {
+          "type": "number",
+          "description": "The display order for this specific day's plan if multiple plans exist for the same day (e.g., 'Morning Workout', 'Evening Workout')."
+        },
+        "plannedExerciseIds": {
+          "type": "array",
+          "description": "References to PlannedExercise entities that constitute the workout for this specific day. (Relationship: PlannedWorkoutDay 1:N PlannedExercise)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the planned workout day was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the planned workout day was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userWorkoutPlanId",
+        "dayOfWeek",
+        "order",
+        "plannedExerciseIds",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
     "PlannedExercise": {
-      "title": "Exercício Planejado",
-      "description": "Um exercício adicionado ao plano semanal do usuário",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlannedExercise",
       "type": "object",
+      "description": "Represents a specific exercise with its custom goals (reps, sets, time, distance) as part of a PlannedWorkoutDay.",
       "properties": {
-        "id": { "type": "string" },
-        "exerciseId": { "type": "string" },
-        "title": { "type": "string" },
-        "sets": { "type": "string" },
-        "reps": { "type": "string" },
-        "time": { "type": "string" },
-        "completed": { "type": "boolean" },
-        "day": { "type": "string" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PlannedExercise entity."
+        },
+        "plannedWorkoutDayId": {
+          "type": "string",
+          "description": "Reference to PlannedWorkoutDay. (Relationship: PlannedWorkoutDay 1:N PlannedExercise)"
+        },
+        "exerciseId": {
+          "type": "string",
+          "description": "Reference to Exercise (can be pre-loaded or custom). (Relationship: Exercise 1:N PlannedExercise)"
+        },
+        "goalType": {
+          "type": "string",
+          "description": "The type of goal for this exercise (e.g., 'REPS_SETS', 'TIME', 'DISTANCE', 'OTHER')."
+        },
+        "repsGoal": {
+          "type": "number",
+          "description": "The target number of repetitions for the exercise, if applicable for the goalType."
+        },
+        "setsGoal": {
+          "type": "number",
+          "description": "The target number of sets for the exercise, if applicable for the goalType."
+        },
+        "timeGoalMinutes": {
+          "type": "number",
+          "description": "The target duration in minutes for the exercise, if applicable for the goalType."
+        },
+        "distanceGoalKm": {
+          "type": "number",
+          "description": "The target distance in kilometers for the exercise, if applicable for the goalType."
+        },
+        "order": {
+          "type": "number",
+          "description": "The sequential order of this exercise within its PlannedWorkoutDay."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional personal notes or specific instructions for the user regarding this planned exercise."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the planned exercise was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the planned exercise was last updated.",
+          "format": "date-time"
+        }
       },
-      "required": ["id", "exerciseId", "title", "completed", "day"]
+      "required": [
+        "id",
+        "plannedWorkoutDayId",
+        "exerciseId",
+        "goalType",
+        "order",
+        "createdAt",
+        "updatedAt"
+      ]
     },
-    "UserMetric": {
-      "title": "Métrica do Usuário",
-      "description": "Registros de peso, distância ou carga máxima",
+    "WeeklyWorkoutStatus": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WeeklyWorkoutStatus",
       "type": "object",
+      "description": "Tracks the completion status of a user's active workout plan for a specific week. This entity is designed to be reset weekly.",
       "properties": {
-        "date": { "type": "string", "format": "date" },
-        "value": { "type": "number" },
-        "type": { "type": "string" },
-        "exerciseName": { "type": "string" },
-        "label": { "type": "string" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WeeklyWorkoutStatus entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N WeeklyWorkoutStatus)"
+        },
+        "weekStartDate": {
+          "type": "string",
+          "description": "The date (specifically Monday at 00:00:00) marking the beginning of the week this status applies to. This is used for the weekly reset logic.",
+          "format": "date-time"
+        },
+        "dayStatuses": {
+          "type": "array",
+          "description": "An array of objects, each representing the completion status for a specific day of the week.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this weekly workout status record was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when this weekly workout status record was last updated (e.g., an exercise was checked off).",
+          "format": "date-time"
+        }
       },
-      "required": ["date", "value", "type"]
+      "required": [
+        "id",
+        "userId",
+        "weekStartDate",
+        "dayStatuses",
+        "createdAt",
+        "updatedAt"
+      ]
     },
-    "MealLog": {
-      "title": "Registro de Refeição",
-      "description": "Alimento consumido no rancho",
+    "DayStatus": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DayStatus",
       "type": "object",
+      "description": "Represents the completion status of a specific day's workout within a WeeklyWorkoutStatus.",
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "portion": { "type": "string" },
-        "calories": { "type": "number" },
-        "protein": { "type": "number" },
-        "slot": { "type": "string" },
-        "date": { "type": "string", "format": "date" }
+        "dayOfWeek": {
+          "type": "string",
+          "description": "The day of the week (e.g., 'MONDAY')."
+        },
+        "isDayCompleted": {
+          "type": "boolean",
+          "description": "True if the entire workout for this day has been marked as completed."
+        },
+        "exerciseStatuses": {
+          "type": "array",
+          "description": "An array of objects, each representing the completion status for a specific planned exercise within this day.",
+          "items": {
+            "type": "string"
+          }
+        }
       },
-      "required": ["id", "name", "calories", "protein", "slot", "date"]
+      "required": [
+        "dayOfWeek",
+        "isDayCompleted",
+        "exerciseStatuses"
+      ]
     },
-    "WaterLog": {
-      "title": "Registro de Água",
-      "description": "Consumo diário de água em litros",
+    "ExerciseStatus": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ExerciseStatus",
       "type": "object",
+      "description": "Represents the completion status of a single planned exercise within a DayStatus.",
       "properties": {
-        "date": { "type": "string", "format": "date" },
-        "amount": { "type": "number" }
+        "plannedExerciseId": {
+          "type": "string",
+          "description": "Reference to PlannedExercise. (Relationship: PlannedExercise 1:N ExerciseStatus)"
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "True if this specific exercise has been marked as completed."
+        },
+        "completionTimestamp": {
+          "type": "string",
+          "description": "Timestamp when the exercise was marked as completed.",
+          "format": "date-time"
+        }
       },
-      "required": ["date", "amount"]
+      "required": [
+        "plannedExerciseId",
+        "isCompleted"
+      ]
+    },
+    "ExercisePerformanceLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ExercisePerformanceLog",
+      "type": "object",
+      "description": "Records historical performance data for specific exercises, allowing users to track progress and evolution.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ExercisePerformanceLog entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N ExercisePerformanceLog)"
+        },
+        "exerciseId": {
+          "type": "string",
+          "description": "Reference to Exercise. (Relationship: Exercise 1:N ExercisePerformanceLog)"
+        },
+        "logDate": {
+          "type": "string",
+          "description": "The date and time when this performance log entry was recorded.",
+          "format": "date-time"
+        },
+        "maxLoadKg": {
+          "type": "number",
+          "description": "The maximum load (weight) lifted for the exercise in kilograms, if applicable."
+        },
+        "repsAchieved": {
+          "type": "number",
+          "description": "The actual number of repetitions achieved for the exercise, if applicable."
+        },
+        "setsAchieved": {
+          "type": "number",
+          "description": "The actual number of sets achieved for the exercise, if applicable."
+        },
+        "timeTakenMinutes": {
+          "type": "number",
+          "description": "The actual time taken for the exercise in minutes, if applicable."
+        },
+        "distanceKm": {
+          "type": "number",
+          "description": "The actual distance covered for the exercise in kilometers, if applicable."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional detailed notes from the user about this specific performance."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the performance log was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the performance log was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "exerciseId",
+        "logDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BodyMeasurementLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "BodyMeasurementLog",
+      "type": "object",
+      "description": "Records historical body weight and other physical measurements, allowing users to track their physical evolution.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the BodyMeasurementLog entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N BodyMeasurementLog)"
+        },
+        "logDate": {
+          "type": "string",
+          "description": "The date and time when these body measurements were recorded.",
+          "format": "date-time"
+        },
+        "weightKg": {
+          "type": "number",
+          "description": "The user's body weight in kilograms."
+        },
+        "chestCm": {
+          "type": "number",
+          "description": "The user's chest circumference in centimeters."
+        },
+        "waistCm": {
+          "type": "number",
+          "description": "The user's waist circumference in centimeters."
+        },
+        "armCm": {
+          "type": "number",
+          "description": "The user's arm circumference in centimeters."
+        },
+        "legCm": {
+          "type": "number",
+          "description": "The user's leg circumference in centimeters."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes from the user regarding their body measurements."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the body measurement log was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the body measurement log was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "logDate",
+        "weightKg",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DailyHealthLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DailyHealthLog",
+      "type": "object",
+      "description": "Tracks daily achievements for healthy routines like protein intake and water consumption.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DailyHealthLog entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N DailyHealthLog)"
+        },
+        "logDate": {
+          "type": "string",
+          "description": "The specific date for which this health log entry is recorded (YYYY-MM-DD).",
+          "format": "date"
+        },
+        "proteinGoalAchieved": {
+          "type": "boolean",
+          "description": "Indicates if the user met their daily protein intake goal for this date."
+        },
+        "waterCupsConsumed": {
+          "type": "number",
+          "description": "The number of cups of water consumed by the user on this date."
+        },
+        "waterGoalCupsAtLog": {
+          "type": "number",
+          "description": "The user's water goal in cups at the time this log was created, for historical context."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the daily health log was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the daily health log was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "logDate",
+        "proteinGoalAchieved",
+        "waterCupsConsumed",
+        "waterGoalCupsAtLog",
+        "createdAt",
+        "updatedAt"
+      ]
     }
   },
   "auth": {
-    "providers": ["google.com"]
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   },
   "firestore": {
-    "/users/{userId}/workouts/{workoutId}": {
-      "schema": "PlannedExercise",
-      "description": "Exercícios planejados do usuário"
-    },
-    "/users/{userId}/metrics/{metricId}": {
-      "schema": "UserMetric",
-      "description": "Histórico de performance e peso"
-    },
-    "/users/{userId}/meals/{mealId}": {
-      "schema": "MealLog",
-      "description": "Diário alimentar do rancho"
-    },
-    "/users/{userId}/water/{waterId}": {
-      "schema": "WaterLog",
-      "description": "Logs de hidratação diária"
-    }
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user-specific settings and profile information. Owned by the user whose ID matches {userId} in the path."
+        }
+      },
+      {
+        "path": "/exercises/{exerciseId}",
+        "definition": {
+          "entityName": "Exercise",
+          "schema": {
+            "$ref": "#/backend/entities/Exercise"
+          },
+          "description": "Stores pre-loaded, global exercise definitions. These are read-only for all users. The 'isPreloaded' field will be true, and 'creatorUserId' will be null.",
+          "params": [
+            {
+              "name": "exerciseId",
+              "description": "Unique identifier for the pre-loaded exercise."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/custom_exercises/{exerciseId}",
+        "definition": {
+          "entityName": "Exercise",
+          "schema": {
+            "$ref": "#/backend/entities/Exercise"
+          },
+          "description": "Stores custom exercises created by a specific user. The 'isPreloaded' field will be false, and 'creatorUserId' will match {userId}. Access is restricted to the owning user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who created this custom exercise."
+            },
+            {
+              "name": "exerciseId",
+              "description": "Unique identifier for the user's custom exercise."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/workout_plans/{planId}",
+        "definition": {
+          "entityName": "UserWorkoutPlan",
+          "schema": {
+            "$ref": "#/backend/entities/UserWorkoutPlan"
+          },
+          "description": "Represents a user's customizable weekly workout plan template. Owned by the user whose ID matches {userId}.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who owns this workout plan."
+            },
+            {
+              "name": "planId",
+              "description": "Unique identifier for the user's workout plan."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/workout_plans/{planId}/planned_days/{dayId}",
+        "definition": {
+          "entityName": "PlannedWorkoutDay",
+          "schema": {
+            "$ref": "#/backend/entities/PlannedWorkoutDay"
+          },
+          "description": "Defines exercises planned for a specific day within a workout plan. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who owns this planned workout day (denormalized)."
+            },
+            {
+              "name": "planId",
+              "description": "Unique identifier for the parent user's workout plan."
+            },
+            {
+              "name": "dayId",
+              "description": "Unique identifier for the planned workout day."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/workout_plans/{planId}/planned_days/{dayId}/planned_exercises/{plannedExerciseId}",
+        "definition": {
+          "entityName": "PlannedExercise",
+          "schema": {
+            "$ref": "#/backend/entities/PlannedExercise"
+          },
+          "description": "Represents a specific exercise with custom goals as part of a PlannedWorkoutDay. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who owns this planned exercise (denormalized)."
+            },
+            {
+              "name": "planId",
+              "description": "Unique identifier for the parent user's workout plan."
+            },
+            {
+              "name": "dayId",
+              "description": "Unique identifier for the parent planned workout day."
+            },
+            {
+              "name": "plannedExerciseId",
+              "description": "Unique identifier for the planned exercise."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/weekly_status/{statusId}",
+        "definition": {
+          "entityName": "WeeklyWorkoutStatus",
+          "schema": {
+            "$ref": "#/backend/entities/WeeklyWorkoutStatus"
+          },
+          "description": "Tracks the completion status of a user's active workout plan for a specific week. 'dayStatuses' and 'exerciseStatuses' are embedded as objects within this document for atomic updates and authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who owns this weekly workout status."
+            },
+            {
+              "name": "statusId",
+              "description": "Unique identifier for the weekly workout status record (e.g., YYYY-MM-DD of week start)."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/performance_logs/{logId}",
+        "definition": {
+          "entityName": "ExercisePerformanceLog",
+          "schema": {
+            "$ref": "#/backend/entities/ExercisePerformanceLog"
+          },
+          "description": "Records historical performance data for specific exercises. Owned by the user whose ID matches {userId}.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who owns this performance log."
+            },
+            {
+              "name": "logId",
+              "description": "Unique identifier for the performance log entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/body_measurements/{logId}",
+        "definition": {
+          "entityName": "BodyMeasurementLog",
+          "schema": {
+            "$ref": "#/backend/entities/BodyMeasurementLog"
+          },
+          "description": "Records historical body weight and other physical measurements. Owned by the user whose ID matches {userId}.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who owns this body measurement log."
+            },
+            {
+              "name": "logId",
+              "description": "Unique identifier for the body measurement log entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/daily_health_logs/{logId}",
+        "definition": {
+          "entityName": "DailyHealthLog",
+          "schema": {
+            "$ref": "#/backend/entities/DailyHealthLog"
+          },
+          "description": "Tracks daily achievements for healthy routines like protein intake and water consumption. Owned by the user whose ID matches {userId}.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "Unique identifier of the user who owns this daily health log."
+            },
+            {
+              "name": "logId",
+              "description": "Unique identifier for the daily health log entry (e.g., YYYY-MM-DD)."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to be secure, scalable, and debuggable, adhering to the core design principles and strategy mandates. \n\n**Authorization Independence (CRITICAL) and Denormalization Strategy (A):**\n-   **User-Owned Data:** For entities like `UserProfile`, `UserWorkoutPlan`, `ExercisePerformanceLog`, `BodyMeasurementLog`, and `DailyHealthLog`, ownership is established implicitly by nesting them directly under `/users/{userId}/`. This path-based ownership means the `userId` is available in the `request.path` in security rules, eliminating the need for `get()` calls to determine ownership from a parent document. Authorization rules simply check `request.auth.uid == userId`.\n-   **Deeply Nested User Data (`PlannedWorkoutDay`, `PlannedExercise`):** To maintain Authorization Independence for `PlannedWorkoutDay` (nested under `UserWorkoutPlan`) and `PlannedExercise` (nested under `PlannedWorkoutDay`), the `userId` is explicitly denormalized and stored within each document. This ensures that a rule applied to a `planned_day` or `planned_exercise` document can directly verify ownership (`resource.data.userId == request.auth.uid`) without performing a `get()` operation on its parent `workout_plan` or `planned_day` document. This is critical for robust and atomic security rules, as it prevents rule failures during batch writes or transactions where parent documents might not yet exist or be in a consistent state.\n-   **WeeklyWorkoutStatus:** This entity encapsulates `DayStatus` and `ExerciseStatus` as embedded arrays of objects. This embedding means the status details are updated atomically with the `WeeklyWorkoutStatus` document, and no separate `get()` calls are needed for checking individual day or exercise completion status within security rules.\n\n**Structural Segregation (B) for Homogeneous Security Posture:**\n-   **Exercise Entity:** The `Exercise` entity is segregated into two distinct collections:\n    -   `/exercises`: This collection stores pre-loaded exercises. It has a homogeneous security posture, allowing all authenticated users to read and list its contents, while write access is restricted to administrators (not explicitly modeled here, but enabled by structure). This eliminates the need for complex conditional logic (`if isPreloaded == true`) within security rules and ensures QAPs for public lists.\n    -   `/users/{userId}/custom_exercises`: This subcollection stores exercises created by a specific user. Its security posture is private, allowing only the `userId` owner to create, read, update, or delete their custom exercises. This clear separation simplifies rules and prevents data leakage.\n\n**Querying and Authorization Patterns (QAPs - Rules are not Filters):**\n-   The hierarchical structure, with all user-specific data nested under `/users/{userId}/`, naturally supports secure `list` queries. When a user requests data from `/users/{request.auth.uid}/...`, Firestore's security rules can directly compare the path's `userId` wildcard with `request.auth.uid`, allowing the query to proceed without needing to filter results client-side or perform additional security checks per document.\n-   The denormalized `userId` in `PlannedWorkoutDay` and `PlannedExercise` documents means that `list` operations on these subcollections can also enforce ownership directly within the rules, ensuring that users can only retrieve documents belonging to them without `get()` calls or filtering.\n-   The dedicated `/exercises` collection for pre-loaded exercises allows for efficient and secure listing of public data for all users. No filtering is required, as all documents in this collection are intended to be publicly readable (or read-only for all authenticated users).\n\n**Clarity of Intent and Debuggability (D.1, D.2, D.3):**\n-   All collections and subcollections use descriptive, plural names (e.g., `users`, `workout_plans`). Wildcards are semantically clear (e.g., `{userId}`, `{planId}`).\n-   The explicit denormalization of `userId` in subcollections makes the ownership structure immediately clear in the data itself, simplifying rule writing and debugging.\n-   The embedding of `DayStatus` and `ExerciseStatus` within `WeeklyWorkoutStatus` promotes atomic updates and simplifies state management for weekly workout completion.\n\nThis design leverages Firestore's capabilities for hierarchical data while proactively addressing common security and scalability challenges through strategic denormalization and structural segregation, leading to simple, robust, and easily debuggable security rules and efficient client-side queries."
   }
 }
