@@ -15,8 +15,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, addDoc, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc, query, where } from 'firebase/firestore';
 
 const MILITARY_FOOD_DB = [
   { id: '1', name: 'Arroz Branco', portion: '1 escumadeira (150g)', calories: 190, protein: 4 },
@@ -74,25 +74,25 @@ export default function RoutinePage() {
 
   const handleAddFood = (slot: string, food: any) => {
     if (!db || !user) return;
-    addDoc(collection(db, 'users', user.uid, 'meals'), {
+    addDocumentNonBlocking(collection(db, 'users', user.uid, 'meals'), {
       ...food,
       slot,
       date: todayStr,
-      createdAt: serverTimestamp()
+      createdAt: new Date().toISOString()
     });
   };
 
   const handleRemoveFood = (id: string) => {
     if (!db || !user) return;
-    deleteDoc(doc(db, 'users', user.uid, 'meals', id));
+    deleteDocumentNonBlocking(doc(db, 'users', user.uid, 'meals', id));
   };
 
   const handleIncrementWater = () => {
     if (!db || !user) return;
-    addDoc(collection(db, 'users', user.uid, 'water'), {
+    addDocumentNonBlocking(collection(db, 'users', user.uid, 'water'), {
       date: todayStr,
       amount: 1,
-      createdAt: serverTimestamp()
+      createdAt: new Date().toISOString()
     });
   };
 
@@ -111,51 +111,51 @@ export default function RoutinePage() {
             <Utensils className="text-primary w-6 h-6" /> Diário do Rancho
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {mealSlots.map((slot) => {
               const items = meals.filter(m => m.slot === slot.key);
               return (
-                <Card key={slot.key} className="bg-card/50 border-white/10 overflow-hidden group hover:border-primary/30 transition-all">
+                <Card key={slot.key} className="bg-card/50 border-white/10 overflow-hidden group hover:border-primary/30 transition-all rounded-3xl">
                   <CardHeader className="p-4 bg-white/5 flex flex-row items-center justify-between space-y-0">
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/20 p-2 rounded-lg text-primary"><slot.icon className="w-5 h-5" /></div>
                       <div>
-                        <CardTitle className="text-sm font-bold text-white uppercase">{slot.label}</CardTitle>
-                        <CardDescription className="text-[10px] text-primary/80 font-bold">{slot.time}</CardDescription>
+                        <CardTitle className="text-sm font-bold text-white uppercase italic">{slot.label}</CardTitle>
+                        <CardDescription className="text-[10px] text-primary/80 font-black italic">{slot.time}</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 space-y-4">
                     <div className="space-y-2 min-h-[80px]">
                       {items.map((food) => (
-                        <div key={food.id} className="flex items-center justify-between text-[11px] bg-white/5 p-2 rounded-lg border border-white/5">
-                          <span className="text-zinc-300 truncate mr-2">{food.name}</span>
+                        <div key={food.id} className="flex items-center justify-between text-[11px] bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors">
+                          <span className="text-zinc-300 truncate mr-2 font-bold uppercase">{food.name}</span>
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-primary font-bold">{food.calories}kcal</span>
-                            <button onClick={() => handleRemoveFood(food.id)} className="text-zinc-500 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                            <span className="text-primary font-black italic">{food.calories}kcal</span>
+                            <button onClick={() => handleRemoveFood(food.id)} className="text-zinc-500 hover:text-red-500 transition-colors"><Trash2 className="w-3 h-3" /></button>
                           </div>
                         </div>
                       ))}
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="w-full h-10 bg-secondary hover:bg-white/10 text-white border-white/10 border text-[11px] font-bold uppercase" onClick={() => setActiveSlot(slot.key)}>
+                        <Button className="w-full h-10 bg-secondary hover:bg-white/10 text-white border-white/10 border text-[11px] font-black uppercase italic rounded-xl" onClick={() => setActiveSlot(slot.key)}>
                           <PlusCircle className="mr-2 w-4 h-4" /> Adicionar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md">
-                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase">Cardápio do Rancho</DialogTitle></DialogHeader>
+                      <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md rounded-3xl">
+                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio do Rancho</DialogTitle></DialogHeader>
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid gap-2">
                             {MILITARY_FOOD_DB.map((food) => (
-                              <button key={food.id} onClick={() => activeSlot && handleAddFood(activeSlot, food)} className="flex items-center justify-between p-4 bg-white/5 hover:bg-primary/20 rounded-xl transition-colors text-left group">
+                              <button key={food.id} onClick={() => activeSlot && handleAddFood(activeSlot, food)} className="flex items-center justify-between p-4 bg-white/5 hover:bg-primary/20 rounded-2xl transition-all text-left group border border-white/5">
                                 <div className="space-y-1">
-                                  <p className="font-bold text-sm text-white group-hover:text-primary transition-colors">{food.name}</p>
-                                  <p className="text-[10px] text-muted-foreground italic">{food.portion}</p>
+                                  <p className="font-bold text-sm text-white group-hover:text-primary transition-colors uppercase italic">{food.name}</p>
+                                  <p className="text-[10px] text-muted-foreground italic font-medium">{food.portion}</p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-xs font-black text-primary">{food.calories} KCAL</p>
-                                  <p className="text-[10px] text-accent font-bold">{food.protein}g PROT</p>
+                                  <p className="text-xs font-black text-primary italic leading-none">{food.calories} KCAL</p>
+                                  <p className="text-[10px] text-accent font-black uppercase mt-1">{food.protein}g PROT</p>
                                 </div>
                               </button>
                             ))}
@@ -169,7 +169,7 @@ export default function RoutinePage() {
             })}
           </div>
 
-          <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl overflow-hidden relative">
+          <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl overflow-hidden relative rounded-3xl">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-2">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo do Rancho</h3>
@@ -195,13 +195,13 @@ export default function RoutinePage() {
             </CardHeader>
             <CardContent className="p-8 space-y-8 flex flex-col items-center">
               <div className="relative w-48 h-48 rounded-full border-8 border-white/5 flex items-center justify-center overflow-hidden">
-                <div className="absolute bottom-0 left-0 right-0 bg-accent/20 transition-all" style={{ height: `${Math.min(waterProgress, 100)}%` }} />
+                <div className="absolute bottom-0 left-0 right-0 bg-accent/20 transition-all duration-700 ease-out" style={{ height: `${Math.min(waterProgress, 100)}%` }} />
                 <div className="relative z-10 flex flex-col items-center">
                   <span className="text-7xl font-black text-accent font-headline italic leading-none">{waterCount}</span>
-                  <span className="text-xs font-bold text-accent/80 uppercase tracking-[0.2em]">Litros</span>
+                  <span className="text-xs font-bold text-accent/80 uppercase tracking-[0.2em] mt-1">Litros</span>
                 </div>
               </div>
-              <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic">REGISTRAR +1 LITRO</Button>
+              <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic uppercase">REGISTRAR +1 LITRO</Button>
             </CardContent>
           </Card>
 
@@ -210,10 +210,10 @@ export default function RoutinePage() {
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Zap className="w-7 h-7" /> Prontidão</CardTitle>
             </CardHeader>
             <CardContent className="p-8 space-y-6">
-              <div className="p-8 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center space-y-4">
-                <CheckCircle2 className={cn("w-12 h-12", totalProtein >= 150 ? "text-primary" : "text-muted-foreground")} />
+              <div className="p-8 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center space-y-4 group hover:bg-white/10 transition-colors">
+                <CheckCircle2 className={cn("w-12 h-12 transition-colors", totalProtein >= 150 ? "text-primary" : "text-muted-foreground")} />
                 <h3 className="text-2xl font-headline font-bold uppercase italic">Meta de Proteína</h3>
-                <p className="text-sm text-muted-foreground">Progresso: {totalProtein}g de 150g (estimado)</p>
+                <p className="text-sm text-muted-foreground font-bold uppercase italic tracking-tighter">Progresso: {totalProtein}g de 150g (estimado)</p>
               </div>
             </CardContent>
           </Card>

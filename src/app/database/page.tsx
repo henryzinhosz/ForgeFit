@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -12,8 +13,8 @@ import { Search, Plus, Info, LogIn, Lock } from 'lucide-react';
 import { DayOfWeek } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { useFirestore, useUser, errorEmitter, FirestorePermissionError, useAuth, signInWithGoogle } from '@/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { useFirestore, useUser, useAuth, signInWithGoogle, addDocumentNonBlocking } from '@/firebase';
+import { collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -67,14 +68,7 @@ export default function DatabasePage() {
         createdAt: new Date().toISOString()
       };
 
-      addDoc(workoutRef, data).catch(async (err) => {
-        const permissionError = new FirestorePermissionError({
-          path: workoutRef.path,
-          operation: 'create',
-          requestResourceData: data,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      });
+      addDocumentNonBlocking(workoutRef, data);
 
       toast({
         title: "Treino Agendado!",
@@ -245,20 +239,20 @@ export default function DatabasePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Séries</Label>
-                    <Input value={sets} onChange={(e) => setSets(e.target.value)} placeholder="ex: 3" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl" />
+                    <Input value={sets} onChange={(e) => setSets(e.target.value)} placeholder="ex: 3" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl font-bold" />
                   </div>
                   <div className="grid gap-2">
                     <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Reps</Label>
-                    <Input value={reps} onChange={(e) => setReps(e.target.value)} placeholder="ex: 12" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl" />
+                    <Input value={reps} onChange={(e) => setReps(e.target.value)} placeholder="ex: 12" className="bg-white/5 border-white/10 h-14 rounded-xl text-center text-xl font-bold" />
                   </div>
                 </div>
                 <div className="grid gap-2">
                   <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Tempo / Descanso (opcional)</Label>
-                  <Input value={time} onChange={(e) => setTime(e.target.value)} placeholder="ex: 45s" className="bg-white/5 border-white/10 h-14 rounded-xl" />
+                  <Input value={time} onChange={(e) => setTime(e.target.value)} placeholder="ex: 45s" className="bg-white/5 border-white/10 h-14 rounded-xl font-bold" />
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 h-16 text-xl font-black rounded-2xl shadow-2xl">CONFIRMAR</Button>
+                <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 h-16 text-xl font-black rounded-2xl shadow-2xl uppercase italic">CONFIRMAR</Button>
               </DialogFooter>
             </>
           ) : (
@@ -269,12 +263,12 @@ export default function DatabasePage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">Acesso Restrito</h3>
-                <p className="text-muted-foreground text-sm">Para salvar seus treinos no Cloud Firestore, você precisa entrar com sua conta.</p>
+                <h3 className="text-xl font-bold uppercase italic">Acesso Restrito</h3>
+                <p className="text-muted-foreground text-sm uppercase">Para salvar seus treinos no Cloud Firestore, você precisa entrar com sua conta.</p>
               </div>
               <Button 
                 onClick={() => signInWithGoogle(auth)} 
-                className="w-full h-16 bg-white text-black hover:bg-white/90 font-black rounded-2xl text-lg flex items-center justify-center gap-3"
+                className="w-full h-16 bg-white text-black hover:bg-white/90 font-black rounded-2xl text-lg flex items-center justify-center gap-3 uppercase italic"
               >
                 <LogIn className="w-6 h-6" /> ENTRAR COM GOOGLE
               </Button>

@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Droplets, Zap, CheckCircle2, ChevronRight, Info } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
 
 const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -60,10 +60,10 @@ export default function Home() {
   const handleIncrementWater = () => {
     if (!db || !user || !currentDate) return;
     const waterRef = collection(db, 'users', user.uid, 'water');
-    addDoc(waterRef, {
+    addDocumentNonBlocking(waterRef, {
       date: currentDate.str,
       amount: 1,
-      createdAt: serverTimestamp()
+      createdAt: new Date().toISOString()
     });
   };
 
@@ -80,7 +80,7 @@ export default function Home() {
         </section>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl">
+          <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
                 <CardTitle className="text-2xl font-headline uppercase italic">Sessão de Hoje</CardTitle>
@@ -96,18 +96,18 @@ export default function Home() {
               <div className="space-y-3">
                 {todaysExercises.length > 0 ? (
                   todaysExercises.map((ex) => (
-                    <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className={cn("w-2 h-2 rounded-full", ex.completed ? "bg-green-500" : "bg-primary")} />
-                        <span className={cn("font-bold text-sm uppercase", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
+                        <div className={cn("w-2 h-2 rounded-full", ex.completed ? "bg-green-500" : "bg-primary animate-pulse")} />
+                        <span className={cn("font-bold text-sm uppercase italic", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
                       </div>
-                      <span className="text-xs font-black text-primary/80 italic">{ex.sets}x{ex.reps}{ex.time && ` | ${ex.time}`}</span>
+                      <span className="text-xs font-black text-primary/80 italic tracking-tighter">{ex.sets}x{ex.reps}{ex.time && ` | ${ex.time}`}</span>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground italic mb-6">Nada agendado para este dia.</p>
-                    <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase">
+                  <div className="text-center py-12 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                    <p className="text-muted-foreground italic mb-6 uppercase font-bold tracking-widest">Nada agendado para este dia.</p>
+                    <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase italic">
                       <Link href="/planner">Ir para o Planejador</Link>
                     </Button>
                   </div>
@@ -141,7 +141,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl">
+            <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
                   <Info className="w-5 h-5" /> Coach IA
@@ -158,7 +158,7 @@ export default function Home() {
         </div>
 
         <div className="bg-secondary/20 rounded-2xl p-6 flex items-center gap-6 border border-white/10 backdrop-blur-sm">
-          <div className="bg-primary/20 p-3 rounded-2xl text-primary animate-glow">
+          <div className="bg-primary/20 p-3 rounded-2xl text-primary animate-glow shrink-0">
             <Zap className="w-6 h-6" />
           </div>
           <div className="space-y-1">

@@ -25,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit, where } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 
 export default function ProgressPage() {
   const { user } = useUser();
@@ -74,11 +74,11 @@ export default function ProgressPage() {
 
   const handleAddWeight = () => {
     if (weightInput && db && user) {
-      addDoc(collection(db, 'users', user.uid, 'metrics'), {
+      addDocumentNonBlocking(collection(db, 'users', user.uid, 'metrics'), {
         type: 'weight',
         value: parseFloat(weightInput),
         date: new Date().toISOString(),
-        createdAt: serverTimestamp()
+        createdAt: new Date().toISOString()
       });
       setWeightInput('');
     }
@@ -86,12 +86,12 @@ export default function ProgressPage() {
 
   const handleAddLoad = () => {
     if (loadInput && db && user) {
-      addDoc(collection(db, 'users', user.uid, 'metrics'), {
+      addDocumentNonBlocking(collection(db, 'users', user.uid, 'metrics'), {
         type: 'maxLoad',
         exerciseName: selectedEx,
         value: parseFloat(loadInput),
         date: new Date().toISOString(),
-        createdAt: serverTimestamp()
+        createdAt: new Date().toISOString()
       });
       setLoadInput('');
     }
@@ -138,12 +138,12 @@ export default function ProgressPage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-muted-foreground italic">Aguardando dados...</div>
+                  <div className="h-full flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-muted-foreground italic uppercase font-bold text-xs">Aguardando dados...</div>
                 )}
               </div>
               <div className="flex gap-2">
-                <Input type="number" placeholder="Peso atual (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white" />
-                <Button onClick={handleAddWeight} className="h-12 px-8 bg-primary text-white font-bold rounded-xl shadow-[0_0_15px_rgba(255,0,0,0.3)]">REGISTRAR</Button>
+                <Input type="number" placeholder="Peso atual (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
+                <Button onClick={handleAddWeight} className="h-12 px-8 bg-primary text-white font-black rounded-xl shadow-[0_0_15px_rgba(255,0,0,0.3)] uppercase italic">REGISTRAR</Button>
               </div>
             </CardContent>
           </Card>
@@ -156,7 +156,7 @@ export default function ProgressPage() {
                 </CardTitle>
               </div>
               <Select value={selectedEx} onValueChange={setSelectedEx}>
-                <SelectTrigger className="w-[160px] rounded-full bg-white/5 border-white/10 text-white h-10">
+                <SelectTrigger className="w-[160px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
                   <SelectValue placeholder="Exercício" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-900 border-white/10 text-white">
@@ -182,12 +182,12 @@ export default function ProgressPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-muted-foreground italic">Registre sua carga em {selectedEx}</div>
+                  <div className="h-full flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-muted-foreground italic uppercase font-bold text-xs">Registre sua carga em {selectedEx}</div>
                 )}
               </div>
               <div className="flex gap-2">
-                <Input type="number" placeholder="Carga máx (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white" />
-                <Button onClick={handleAddLoad} className="h-12 px-8 bg-accent text-white font-bold rounded-xl shadow-[0_0_15px_rgba(255,165,0,0.3)]">NOVO PR</Button>
+                <Input type="number" placeholder="Carga máx (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
+                <Button onClick={handleAddLoad} className="h-12 px-8 bg-accent text-white font-black rounded-xl shadow-[0_0_15px_rgba(255,165,0,0.3)] uppercase italic">NOVO PR</Button>
               </div>
             </CardContent>
           </Card>
@@ -197,14 +197,14 @@ export default function ProgressPage() {
           <div className="absolute top-0 right-0 p-8 opacity-5"><TrendingUp className="w-48 h-48 text-primary" /></div>
           <CardHeader>
             <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório Analítico</CardTitle>
-            <CardDescription className="text-muted-foreground">Insights reais baseados no seu progresso no banco de dados.</CardDescription>
+            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights reais baseados no seu progresso no banco de dados.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
             <div className="space-y-4">
-              <h4 className="font-bold text-primary flex items-center gap-2 uppercase tracking-tighter"><CheckCircle2 className="w-5 h-5" /> Tendências Atuais</h4>
+              <h4 className="font-black text-primary flex items-center gap-2 uppercase tracking-tighter italic"><CheckCircle2 className="w-5 h-5" /> Tendências Atuais</h4>
               <div className="space-y-3">
                 {performanceInsights.map((insight, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-sm text-zinc-300 leading-relaxed">{insight}</div>
+                  <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-sm text-zinc-300 leading-relaxed font-bold italic">"{insight}"</div>
                 ))}
               </div>
             </div>

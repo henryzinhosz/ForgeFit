@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trash2, Pencil, Plus, Loader2, Calendar } from 'lucide-react';
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +31,6 @@ export default function PlannerPage() {
   const { toast } = useToast();
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
   
-  // Estados para Edição
   const [editingExercise, setEditingExercise] = useState<any | null>(null);
   const [editSets, setEditSets] = useState('');
   const [editReps, setEditReps] = useState('');
@@ -48,13 +47,13 @@ export default function PlannerPage() {
   const toggleExercise = (workoutId: string, currentStatus: boolean) => {
     if (!db || !user) return;
     const docRef = doc(db, 'users', user.uid, 'workouts', workoutId);
-    updateDoc(docRef, { completed: !currentStatus });
+    updateDocumentNonBlocking(docRef, { completed: !currentStatus });
   };
 
   const removeExercise = (workoutId: string) => {
     if (!db || !user) return;
     const docRef = doc(db, 'users', user.uid, 'workouts', workoutId);
-    deleteDoc(docRef);
+    deleteDocumentNonBlocking(docRef);
     toast({
       title: "Exercício removido",
       description: "O item foi excluído da sua agenda.",
@@ -72,7 +71,7 @@ export default function PlannerPage() {
     if (!db || !user || !editingExercise) return;
     const docRef = doc(db, 'users', user.uid, 'workouts', editingExercise.id);
     
-    updateDoc(docRef, {
+    updateDocumentNonBlocking(docRef, {
       sets: editSets,
       reps: editReps,
       time: editTime
@@ -196,7 +195,7 @@ export default function PlannerPage() {
                           <h3 className="text-xl font-headline font-bold uppercase italic">Dia de Descanso?</h3>
                           <p className="text-muted-foreground max-w-xs mx-auto text-sm uppercase font-medium">Nenhum exercício agendado para {day.label.toLowerCase()}.</p>
                         </div>
-                        <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase">
+                        <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase italic">
                           <Link href="/database">Explorar Exercícios</Link>
                         </Button>
                       </div>
@@ -208,7 +207,6 @@ export default function PlannerPage() {
           )}
         </Tabs>
 
-        {/* Modal de Edição */}
         <Dialog open={!!editingExercise} onOpenChange={(open) => !open && setEditingExercise(null)}>
           <DialogContent className="sm:max-w-[425px] bg-card border-white/10 text-white rounded-3xl">
             <DialogHeader className="text-left">
