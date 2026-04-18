@@ -68,6 +68,12 @@
       "imageHint": "Sprint Running"
     },
     {
+      "id": "corrida-tfm-gif",
+      "description": "GIF de Corrida TFM",
+      "imageUrl": "https://i.pinimg.com/originals/d8/b7/b7/d8b7b7d9811d6de7495a59bdc0c082ad.gif",
+      "imageHint": "Running TFM"
+    },
+    {
       "id": "ciclismo-gif",
       "description": "GIF de Ciclismo Operacional",
       "imageUrl": "https://i.pinimg.com/originals/4d/d0/63/4dd0633d430ee5d98f9a630685a464a6.gif",

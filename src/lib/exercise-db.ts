@@ -23,7 +23,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '28', title: 'Combo Força Superior', category: 'Calistenia', instructions: 'Realize 5 descidas lentas na barra (segure o topo e desça controlando por 5 segundos). Sem descanso, faça o máximo de flexões que conseguir. Repita o ciclo por 4 séries.', imageId: 'flexao-gif' },
   
   // Cardio
-  { id: '41', title: 'Corrida TFM', category: 'Cardio', instructions: 'Trote contínuo mantendo a cadência e respiração controlada. Foco na resistência aeróbica.', imageId: 'corrida-img' },
+  { id: '41', title: 'Corrida TFM', category: 'Cardio', instructions: 'Trote contínuo mantendo a cadência e respiração controlada. Foco na resistência aeróbica.', imageId: 'corrida-tfm-gif' },
   { id: '42', title: 'Ciclismo Operacional', category: 'Cardio', instructions: 'Pedalagem em intensidade moderada/alta. Excelente para fortalecimento de membros inferiores e fôlego.', imageId: 'ciclismo-gif' },
   { id: '43', title: 'Corrida de Velocidade', category: 'Cardio', instructions: 'Sprints de curta distância em esforço máximo para ganho de potência explosiva.', imageId: 'corrida-img' }
 ];
