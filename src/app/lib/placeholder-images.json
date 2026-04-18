@@ -3,57 +3,57 @@
   "placeholderImages": [
     {
       "id": "musculacao-peito",
-      "description": "Atleta treinando peitoral em academia moderna",
-      "imageUrl": "https://picsum.photos/seed/chest-workout/800/600",
-      "imageHint": "gym chest"
+      "description": "Ilustração 3D de exercício para o peitoral mostrando anatomia muscular",
+      "imageUrl": "https://picsum.photos/seed/chest-anatomy/800/600",
+      "imageHint": "chest anatomy"
     },
     {
       "id": "musculacao-costas",
-      "description": "Exercício de puxada para costas em máquina",
-      "imageUrl": "https://picsum.photos/seed/back-workout/800/600",
-      "imageHint": "gym back"
+      "description": "Ilustração 3D de exercício para as costas mostrando anatomia muscular",
+      "imageUrl": "https://picsum.photos/seed/back-anatomy/800/600",
+      "imageHint": "back anatomy"
     },
     {
       "id": "musculacao-pernas",
-      "description": "Treino de pernas com pesos livres",
-      "imageUrl": "https://picsum.photos/seed/legs-workout/800/600",
-      "imageHint": "gym legs"
+      "description": "Ilustração 3D de exercício para pernas mostrando anatomia muscular",
+      "imageUrl": "https://picsum.photos/seed/legs-anatomy/800/600",
+      "imageHint": "leg anatomy"
     },
     {
       "id": "musculacao-ombros",
-      "description": "Elevação lateral com halteres",
-      "imageUrl": "https://picsum.photos/seed/shoulder-workout/800/600",
-      "imageHint": "gym shoulder"
+      "description": "Ilustração 3D de exercício para ombros mostrando anatomia muscular",
+      "imageUrl": "https://picsum.photos/seed/shoulder-anatomy/800/600",
+      "imageHint": "shoulder anatomy"
     },
     {
       "id": "musculacao-bracos",
-      "description": "Rosca bíceps com barra",
-      "imageUrl": "https://picsum.photos/seed/arms-workout/800/600",
-      "imageHint": "gym arms"
+      "description": "Ilustração 3D de exercício para braços mostrando anatomia muscular",
+      "imageUrl": "https://picsum.photos/seed/arms-anatomy/800/600",
+      "imageHint": "arm anatomy"
     },
     {
       "id": "calistenia-geral",
-      "description": "Exercício de calistenia ao ar livre",
-      "imageUrl": "https://picsum.photos/seed/calisthenics-pro/800/600",
-      "imageHint": "calisthenics bar"
+      "description": "Ilustração 3D de exercício de calistenia mostrando anatomia muscular",
+      "imageUrl": "https://picsum.photos/seed/bodyweight-anatomy/800/600",
+      "imageHint": "fitness anatomy"
     },
     {
       "id": "cardio-corrida",
-      "description": "Pessoa correndo na esteira ou pista",
-      "imageUrl": "https://picsum.photos/seed/running-pro/800/600",
-      "imageHint": "running gym"
+      "description": "Ilustração 3D de anatomia humana durante corrida",
+      "imageUrl": "https://picsum.photos/seed/running-anatomy/800/600",
+      "imageHint": "running anatomy"
     },
     {
       "id": "cardio-ciclismo",
-      "description": "Atleta pedalando em bicicleta de spinning",
-      "imageUrl": "https://picsum.photos/seed/cycling-pro/800/600",
-      "imageHint": "cycling gym"
+      "description": "Ilustração 3D de anatomia humana durante ciclismo",
+      "imageUrl": "https://picsum.photos/seed/cycling-anatomy/800/600",
+      "imageHint": "cycling anatomy"
     },
     {
       "id": "abs-workout",
-      "description": "Exercício abdominal no colchonete",
-      "imageUrl": "https://picsum.photos/seed/abs-workout/800/600",
-      "imageHint": "abs exercise"
+      "description": "Ilustração 3D de exercício abdominal mostrando anatomia muscular",
+      "imageUrl": "https://picsum.photos/seed/abs-anatomy/800/600",
+      "imageHint": "abs anatomy"
     }
   ]
 }
