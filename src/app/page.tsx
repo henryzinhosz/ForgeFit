@@ -45,6 +45,7 @@ export default function Home() {
 
   const [weightInput, setWeightInput] = useState<string>('');
   const [heightInput, setHeightInput] = useState<string>('');
+  const [ageInput, setAgeInput] = useState<string>('');
   const [genderInput, setGenderInput] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -104,6 +105,7 @@ export default function Home() {
     setDocumentNonBlocking(profileRef, {
       weight: weightInput ? parseFloat(weightInput) : profile?.weight || 0,
       height: heightInput ? parseFloat(heightInput) : profile?.height || 0,
+      age: ageInput ? parseInt(ageInput) : profile?.age || 0,
       gender: genderInput || profile?.gender || "Masculino",
       updatedAt: new Date().toISOString()
     }, { merge: true });
@@ -114,6 +116,7 @@ export default function Home() {
     if (profile) {
       setWeightInput(profile.weight?.toString() || '');
       setHeightInput(profile.height?.toString() || '');
+      setAgeInput(profile.age?.toString() || '');
       setGenderInput(profile.gender || '');
     }
   }, [profile]);
@@ -125,7 +128,7 @@ export default function Home() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic">Bem-vindo de volta, Atleta!</h1>
+            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Bem-vindo de volta, Atleta!</h1>
             <p className="text-muted-foreground font-medium">
               Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>. Mantenha a constância!
             </p>
@@ -140,7 +143,7 @@ export default function Home() {
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Meu Perfil Militar</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Suas metas são calculadas com base nos seus dados biométricos.</DialogDescription>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Seus dados biométricos são usados para calcular metas dinâmicas.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -166,25 +169,37 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="uppercase font-black text-[10px] italic text-primary">Gênero</Label>
-                  <Select value={genderInput} onValueChange={setGenderInput}>
-                    <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl font-bold">
-                      <SelectValue placeholder="Selecione o Gênero" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card border-white/10 text-white">
-                      <SelectItem value="Masculino">Masculino</SelectItem>
-                      <SelectItem value="Feminino">Feminino</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] italic text-primary">Idade</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="Ex: 25" 
+                      value={ageInput} 
+                      onChange={(e) => setAgeInput(e.target.value)}
+                      className="h-12 bg-white/5 border-white/10 rounded-xl text-lg font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] italic text-primary">Gênero</Label>
+                    <Select value={genderInput} onValueChange={setGenderInput}>
+                      <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl font-bold">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-white/10 text-white">
+                        <SelectItem value="Masculino">Masculino</SelectItem>
+                        <SelectItem value="Feminino">Feminino</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
-                  Usamos esses dados para calcular metas precisas de hidratação (50ml/kg), proteína (2g/kg) e futuramente seu IMC e Taxa Metabólica.
+                  Calculamos hidratação (50ml/kg) e proteína (2g/kg). Alterar o peso aqui ou na Evolução atualizará suas metas em todo o app.
                 </p>
               </div>
               <DialogFooter>
-                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">Salvar Dados</Button>
+                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">Salvar Perfil</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -194,7 +209,7 @@ export default function Home() {
           <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
-                <CardTitle className="text-2xl font-headline uppercase italic">Sessão de Hoje</CardTitle>
+                <CardTitle className="text-2xl font-headline uppercase italic text-white">Sessão de Hoje</CardTitle>
                 <CardDescription className="font-bold text-muted-foreground">
                   {totalToday > 0 ? `${completedToday} de ${totalToday} exercícios concluídos` : 'Nenhum exercício planejado para hoje.'}
                 </CardDescription>
@@ -210,7 +225,7 @@ export default function Home() {
                     <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                       <div className="flex items-center gap-3">
                         <div className={cn("w-2 h-2 rounded-full", ex.completed ? "bg-green-500" : "bg-primary animate-pulse")} />
-                        <span className={cn("font-bold text-sm uppercase italic", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
+                        <span className={cn("font-bold text-sm uppercase italic text-white", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
                       </div>
                       <span className="text-xs font-black text-primary/80 italic tracking-tighter">{ex.sets}x{ex.reps}{ex.time && ` | ${ex.time}`}</span>
                     </div>
@@ -239,7 +254,7 @@ export default function Home() {
                 <Droplets className="w-20 h-20 text-accent" />
               </div>
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-headline uppercase italic">Hidratação</CardTitle>
+                <CardTitle className="text-xl font-headline uppercase italic text-white">Hidratação</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-end gap-2">
@@ -266,12 +281,12 @@ export default function Home() {
                     </p>
                     <div className="bg-white/20 p-3 rounded-xl flex justify-between items-center">
                       <span className="text-[10px] font-black uppercase italic">Peso: {userWeight}kg</span>
-                      <span className="text-[10px] font-black uppercase italic">Altura: {profile?.height || '--'}cm</span>
+                      <span className="text-[10px] font-black uppercase italic">Idade: {profile?.age || '--'}</span>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Defina seus dados biométricos para calcular suas metas nutricionais ideais.</p>
+                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Defina seus dados para calcular metas automáticas.</p>
                     <Button onClick={() => setIsSettingsOpen(true)} variant="secondary" className="w-full h-10 font-black bg-white text-black hover:bg-white/90 rounded-2xl uppercase italic text-[10px]">Configurar Agora</Button>
                   </>
                 )}
@@ -286,7 +301,7 @@ export default function Home() {
           </div>
           <div className="space-y-1">
             <p className="font-black text-primary uppercase italic text-sm tracking-wider">Status: Operacional</p>
-            <p className="text-xs text-muted-foreground font-bold uppercase">Todos os dados biométricos e de rotina são sincronizados via Cloud Firestore.</p>
+            <p className="text-xs text-muted-foreground font-bold uppercase">Sincronização biométrica ativa via Cloud Firestore.</p>
           </div>
         </div>
       </main>

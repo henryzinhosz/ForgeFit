@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle, Scale } from 'lucide-react';
+import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle, Scale, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -69,6 +69,7 @@ export default function RoutinePage() {
   
   const userWeight = profile?.weight || 0;
   const userHeight = profile?.height || 0;
+  const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
   
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
@@ -121,7 +122,7 @@ export default function RoutinePage() {
         </header>
 
         {/* Info Biográfica */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
              <div className="bg-primary/20 p-3 rounded-xl text-primary"><Scale className="w-5 h-5" /></div>
              <div>
@@ -137,7 +138,14 @@ export default function RoutinePage() {
              </div>
           </Card>
           <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
-             <div className="bg-blue-500/20 p-3 rounded-xl text-blue-500"><Zap className="w-5 h-5" /></div>
+             <div className="bg-blue-500/20 p-3 rounded-xl text-blue-500"><Calendar className="w-5 h-5" /></div>
+             <div>
+               <p className="text-[10px] font-black uppercase text-muted-foreground italic">Idade</p>
+               <p className="text-xl font-black text-white italic">{userAge || '--'} ANOS</p>
+             </div>
+          </Card>
+          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl flex items-center gap-4">
+             <div className="bg-zinc-500/20 p-3 rounded-xl text-white"><Zap className="w-5 h-5" /></div>
              <div>
                <p className="text-[10px] font-black uppercase text-muted-foreground italic">Gênero</p>
                <p className="text-xl font-black text-white italic uppercase tracking-tighter">{userGender}</p>
@@ -147,7 +155,7 @@ export default function RoutinePage() {
 
         <section className="space-y-6">
           <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2">
-            <Utensils className="text-primary w-6 h-6" /> Refeições Do Dia
+            <Utensils className="text-primary w-6 h-6" /> Alimentação Do Dia
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">

@@ -25,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
-import { collection, query, orderBy, limit, where } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
 
 export default function ProgressPage() {
   const { user } = useUser();
@@ -45,8 +45,8 @@ export default function ProgressPage() {
     return query(collection(db, 'users', user.uid, 'metrics'), where('type', '==', 'maxLoad'), where('exerciseName', '==', selectedEx), orderBy('date', 'asc'), limit(15));
   }, [db, user, selectedEx]);
 
-  const { data: rawWeights, loading: loadingWeight } = useCollection(weightQuery);
-  const { data: rawLoads, loading: loadingLoad } = useCollection(loadQuery);
+  const { data: rawWeights, isLoading: loadingWeight } = useCollection(weightQuery);
+  const { data: rawLoads, isLoading: loadingLoad } = useCollection(loadQuery);
 
   const weights = rawWeights || [];
   const loads = rawLoads || [];
@@ -74,12 +74,24 @@ export default function ProgressPage() {
 
   const handleAddWeight = () => {
     if (weightInput && db && user) {
-      addDocumentNonBlocking(collection(db, 'users', user.uid, 'metrics'), {
+      const weightValue = parseFloat(weightInput);
+      const metricsRef = collection(db, 'users', user.uid, 'metrics');
+      const profileRef = doc(db, 'users', user.uid);
+
+      // Registrar histórico de peso
+      addDocumentNonBlocking(metricsRef, {
         type: 'weight',
-        value: parseFloat(weightInput),
+        value: weightValue,
         date: new Date().toISOString(),
         createdAt: new Date().toISOString()
       });
+
+      // Sincronizar peso no perfil global para atualizar metas automáticas (água/proteína)
+      setDocumentNonBlocking(profileRef, {
+        weight: weightValue,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+
       setWeightInput('');
     }
   };
@@ -104,7 +116,7 @@ export default function ProgressPage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2">
           <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Análise de Performance</h1>
-          <p className="text-muted-foreground font-medium">Dados reais sincronizados via Cloud Firestore.</p>
+          <p className="text-muted-foreground font-medium">Sincronização biométrica em tempo real via Cloud Firestore.</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -114,7 +126,7 @@ export default function ProgressPage() {
                 <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
                   <Scale className="w-6 h-6" /> Peso Corporal
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">Monitoramento de massa</CardDescription>
+                <CardDescription className="text-muted-foreground">O peso aqui atualiza suas metas automaticamente.</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -197,7 +209,7 @@ export default function ProgressPage() {
           <div className="absolute top-0 right-0 p-8 opacity-5"><TrendingUp className="w-48 h-48 text-primary" /></div>
           <CardHeader>
             <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório Analítico</CardTitle>
-            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights reais baseados no seu progresso no banco de dados.</CardDescription>
+            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights baseados no histórico de dados sincronizados.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
             <div className="space-y-4">
