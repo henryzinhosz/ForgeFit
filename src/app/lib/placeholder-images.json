@@ -102,6 +102,12 @@
       "description": "GIF de Flexão Aberta",
       "imageUrl": "https://www.hipertrofia.org/blog/wp-content/uploads/2023/11/wide-hand-push-up.gif",
       "imageHint": "Wide Pushup"
+    },
+    {
+      "id": "abdominal-supra-gif",
+      "description": "GIF de Abdominal Supra",
+      "imageUrl": "https://treinototal.com.br/wp-content/uploads/2024/12/abdominal-no-solo-crunch.gif",
+      "imageHint": "Abdominal Crunch"
     }
   ]
 }

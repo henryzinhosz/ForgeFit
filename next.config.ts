@@ -94,6 +94,12 @@ const nextConfig: NextConfig = {
         hostname: 'www.hipertrofia.org',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'treinototal.com.br',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
