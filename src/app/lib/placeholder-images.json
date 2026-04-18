@@ -3,15 +3,15 @@
   "placeholderImages": [
     {
       "id": "app-logo-neon",
-      "description": "Logotipo ForgeFit estilo academia neon vermelha",
-      "imageUrl": "https://picsum.photos/seed/gym-neon-forge/200/200",
-      "imageHint": "Neon Gym"
+      "description": "Logotipo ForgeFit enviado pelo usuário",
+      "imageUrl": "https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg",
+      "imageHint": "ForgeFit Logo"
     },
     {
-      "id": "flexao-anatomia",
-      "description": "Ilustração 3D da anatomia muscular na flexão de braços",
-      "imageUrl": "https://picsum.photos/seed/pushup-anatomy-pro/800/600",
-      "imageHint": "Muscle Anatomy"
+      "id": "flexao-gif",
+      "description": "GIF de Flexão de braço enviado pelo usuário",
+      "imageUrl": "https://i.pinimg.com/originals/ca/e0/9e/cae09e7705b846f109b1f342707c9379.gif",
+      "imageHint": "Pushup Exercise"
     },
     {
       "id": "musculacao-peito",

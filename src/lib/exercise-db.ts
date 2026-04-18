@@ -18,7 +18,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '7', title: 'Tríceps Corda', category: 'Musculação', instructions: 'Na polia alta, estenda os braços para baixo separando as pontas da corda.', imageId: 'musculacao-bracos' },
   
   // Calistenia
-  { id: '21', title: 'Flexão de Braços', category: 'Calistenia', instructions: 'Corpo reto, desça o peito até o chão e empurre de volta.', imageId: 'flexao-anatomia' },
+  { id: '21', title: 'Flexão de Braços', category: 'Calistenia', instructions: 'Corpo reto, desça o peito até o chão e empurre de volta.', imageId: 'flexao-gif' },
   { id: '25', title: 'Prancha', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'abs-workout' },
   { id: '26', title: 'Barra Fixa', category: 'Calistenia', instructions: 'Segure a barra com as mãos em pronação e puxe o corpo até o queixo ultrapassar a barra.', imageId: 'musculacao-costas' },
   { id: '27', title: 'Abdominal Remador', category: 'Calistenia', instructions: 'Deitado em decúbito dorsal, braços estendidos atrás da cabeça. Flexione o tronco e os joelhos simultaneamente, abraçando as pernas.', imageId: 'abs-workout' },
