@@ -18,18 +18,18 @@ service cloud.firestore {
 
     /**
      * SILO PRIVADO DO USUÁRIO
-     * Regra direta e recursiva: se o caminho começa com /users/{userId},
-     * e o UID do usuário logado for igual a esse userId, ele tem acesso total.
-     */
-    match /users/{userId}/{allPaths=**} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
-    }
-
-    /**
-     * Documento de perfil do usuário (raiz do silo)
+     * Estrutura aninhada para garantir que tanto o documento do usuário
+     * quanto todas as suas subcoleções (workouts, metrics, water, meals)
+     * sejam acessíveis apenas pelo proprietário.
      */
     match /users/{userId} {
+      // Permite acesso ao documento raiz do usuário
       allow read, write: if isSignedIn() && request.auth.uid == userId;
+      
+      // Permite acesso recursivo a todas as subcoleções e documentos internos
+      match /{allPaths=**} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
     }
 
     /**
@@ -39,5 +39,7 @@ service cloud.firestore {
       allow read, write: if isSignedIn() && resource.data.creatorUserId == request.auth.uid;
       allow create: if isSignedIn() && request.resource.data.creatorUserId == request.auth.uid;
     }
+    
+    // Deploy trigger: Atualização das regras para corrigir erro de listagem no silo do usuário.
   }
 }
