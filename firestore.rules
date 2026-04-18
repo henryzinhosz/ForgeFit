@@ -9,13 +9,8 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
     /**
-     * EXERCÍCIOS GLOBAIS (BANCO DE DADOS)
-     * Todos os usuários logados podem ler o banco de dados de exercícios padrão.
+     * EXERCÍCIOS GLOBAIS
      */
     match /exercises/{exerciseId} {
       allow read: if isSignedIn();
@@ -23,19 +18,22 @@ service cloud.firestore {
 
     /**
      * SILO PRIVADO DO USUÁRIO
-     * Esta regra garante acesso total (leitura e escrita) ao documento do usuário
-     * e a QUALQUER subcoleção aninhada (workouts, metrics, water, meals, etc).
+     * Regra direta e recursiva: se o caminho começa com /users/{userId},
+     * e o UID do usuário logado for igual a esse userId, ele tem acesso total.
      */
-    match /users/{userId} {
-      allow read, write: if isOwner(userId);
-      
-      match /{allPaths=**} {
-        allow read, write: if isOwner(userId);
-      }
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * EXERCÍCIOS PERSONALIZADOS (Legado/Compatibilidade)
+     * Documento de perfil do usuário (raiz do silo)
+     */
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * COMPATIBILIDADE: Exercícios personalizados legados
      */
     match /custom_exercises/{exerciseId} {
       allow read, write: if isSignedIn() && resource.data.creatorUserId == request.auth.uid;
