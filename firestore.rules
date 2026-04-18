@@ -4,13 +4,19 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * REGRAS DE SILO DO USUÁRIO (Refatoradas)
-     * Utilizamos o padrão recursivo {allPaths=**} para garantir que o proprietário
-     * tenha acesso total a qualquer documento ou subcoleção dentro do seu diretório.
+     * SILO DE DADOS DO USUÁRIO
+     * Regras explícitas para evitar erros de permissão em listagens (queries).
      */
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       
+      // Permissões explícitas para todas as subcoleções conhecidas
+      match /workouts/{id} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+      match /metrics/{id} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+      match /water/{id} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+      match /meals/{id} { allow read, write: if request.auth != null && request.auth.uid == userId; }
+      
+      // Catch-all para qualquer outra subcoleção futura
       match /{allPaths=**} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
