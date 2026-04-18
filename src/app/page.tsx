@@ -6,11 +6,22 @@ import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Droplets, Zap, CheckCircle2, ChevronRight, Info } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Droplets, Zap, CheckCircle2, ChevronRight, Info, Settings2, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { collection, query, where, doc } from 'firebase/firestore';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -25,6 +36,9 @@ export default function Home() {
     str: string;
   } | null>(null);
 
+  const [weightInput, setWeightInput] = useState<string>('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   useEffect(() => {
     const now = new Date();
     setCurrentDate({
@@ -33,6 +47,13 @@ export default function Home() {
       str: now.toISOString().split('T')[0]
     });
   }, []);
+
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(profileRef);
 
   const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user || !currentDate) return null;
@@ -55,7 +76,10 @@ export default function Home() {
   const progressPercent = totalToday > 0 ? (completedToday / totalToday) * 100 : 0;
   
   const currentWater = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  const waterGoal = 4;
+  
+  // Cálculo dinâmico: 50ml por kg. Se não tiver peso, padrão 4L.
+  const userWeight = profile?.weight || 0;
+  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
 
   const handleIncrementWater = () => {
     if (!db || !user || !currentDate) return;
@@ -67,16 +91,63 @@ export default function Home() {
     });
   };
 
+  const handleSaveProfile = () => {
+    if (!profileRef || !weightInput) return;
+    setDocumentNonBlocking(profileRef, {
+      weight: parseFloat(weightInput),
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    setIsSettingsOpen(false);
+  };
+
+  useEffect(() => {
+    if (profile?.weight) {
+      setWeightInput(profile.weight.toString());
+    }
+  }, [profile]);
+
   return (
     <div className="min-h-screen pb-24 md:pt-20 bg-background text-foreground">
       <Navigation />
       
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
-        <section className="space-y-2">
-          <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic">Bem-vindo de volta, Atleta!</h1>
-          <p className="text-muted-foreground font-medium">
-            Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>. Mantenha a constância!
-          </p>
+        <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic">Bem-vindo de volta, Atleta!</h1>
+            <p className="text-muted-foreground font-medium">
+              Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>. Mantenha a constância!
+            </p>
+          </div>
+          
+          <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="rounded-2xl border-white/10 hover:bg-white/5 h-12 gap-2 uppercase font-black italic">
+                <Settings2 className="w-5 h-5" /> Configurar Perfil
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-card border-white/10 text-white rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Meu Perfil</DialogTitle>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Suas metas são calculadas com base nos seus dados.</DialogDescription>
+              </DialogHeader>
+              <div className="py-6 space-y-6">
+                <div className="space-y-2">
+                  <Label className="uppercase font-black text-xs italic text-primary">Seu Peso Corporal (kg)</Label>
+                  <Input 
+                    type="number" 
+                    placeholder="Ex: 85" 
+                    value={weightInput} 
+                    onChange={(e) => setWeightInput(e.target.value)}
+                    className="h-14 bg-white/5 border-white/10 rounded-2xl text-xl font-bold"
+                  />
+                  <p className="text-[10px] text-muted-foreground uppercase font-medium">Usamos seu peso para calcular metas de água (50ml/kg) e proteína (2g/kg).</p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic">Salvar Alterações</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </section>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -133,7 +204,7 @@ export default function Home() {
               <CardContent className="space-y-6">
                 <div className="flex items-end gap-2">
                   <span className="text-5xl font-black text-accent italic leading-none">{currentWater}</span>
-                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {waterGoal} Litros</span>
+                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {waterGoal.toFixed(1)} Litros</span>
                 </div>
                 <Button onClick={handleIncrementWater} className="w-full h-14 bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 border-2 rounded-2xl font-black uppercase italic">
                   Adicionar 1 Litro <Droplets className="ml-2 w-5 h-5" />
@@ -144,14 +215,23 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <Info className="w-5 h-5" /> Coach IA
+                  <UserIcon className="w-5 h-5" /> Meta de Peso
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
-                <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Dúvidas sobre a execução? Use o assistente no planejador para refinar sua técnica.</p>
-                <Button asChild variant="secondary" className="w-full h-12 font-black bg-white text-black hover:bg-white/90 rounded-2xl uppercase italic">
-                  <Link href="/planner">Consultar IA</Link>
-                </Button>
+                {userWeight > 0 ? (
+                  <>
+                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Sua meta de proteína para {userWeight}kg é de {(userWeight * 2)}g por dia.</p>
+                    <div className="bg-white/20 p-3 rounded-xl">
+                      <p className="text-[10px] font-black uppercase italic">Proteína Diária: {(userWeight * 2)}g</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs font-bold opacity-90 leading-relaxed uppercase">Defina seu peso nas configurações para calcular suas metas nutricionais ideais.</p>
+                    <Button onClick={() => setIsSettingsOpen(true)} variant="secondary" className="w-full h-10 font-black bg-white text-black hover:bg-white/90 rounded-2xl uppercase italic text-[10px]">Configurar Agora</Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

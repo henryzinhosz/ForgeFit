@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -14,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, doc, query, where } from 'firebase/firestore';
 
 const MILITARY_FOOD_DB = [
@@ -41,6 +42,13 @@ export default function RoutinePage() {
   const todayStr = new Date().toISOString().split('T')[0];
   const [activeSlot, setActiveSlot] = useState<string | null>(null);
 
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(profileRef);
+
   const mealQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'users', user.uid, 'meals'), where('date', '==', todayStr));
@@ -58,7 +66,12 @@ export default function RoutinePage() {
   const waterLogs = rawWater || [];
 
   const waterCount = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  const waterGoal = 4;
+  
+  // Cálculo dinâmico de metas
+  const userWeight = profile?.weight || 0;
+  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
+  const proteinGoal = userWeight > 0 ? (userWeight * 2) : 150;
+  
   const waterProgress = (waterCount / waterGoal) * 100;
 
   const totalCalories = meals.reduce((acc, curr) => acc + (curr.calories || 0), 0);
@@ -102,7 +115,7 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium">Anote sua rotina alimentar e tenha uma média aproximada de Calorias e Proteínas.</p>
+          <p className="text-muted-foreground font-medium">Anote sua rotina alimentar e tenha uma média aproximada de calorias e proteínas.</p>
         </header>
 
         <section className="space-y-6">
@@ -171,6 +184,9 @@ export default function RoutinePage() {
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-2">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo</h3>
+                {userWeight > 0 && (
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Meta baseada em {userWeight}kg: {proteinGoal}g de proteína.</p>
+                )}
               </div>
               <div className="flex gap-12">
                 <div className="text-center space-y-1">
@@ -199,7 +215,10 @@ export default function RoutinePage() {
                   <span className="text-xs font-bold text-accent/80 uppercase tracking-[0.2em] mt-1">Litros</span>
                 </div>
               </div>
-              <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic uppercase">REGISTRAR +1 LITRO</Button>
+              <div className="text-center">
+                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta: {waterGoal.toFixed(1)} Litros</p>
+                <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -209,9 +228,11 @@ export default function RoutinePage() {
             </CardHeader>
             <CardContent className="p-8 space-y-6">
               <div className="p-8 rounded-3xl bg-white/5 border border-white/5 flex flex-col items-center text-center space-y-4 group hover:bg-white/10 transition-colors">
-                <CheckCircle2 className={cn("w-12 h-12 transition-colors", totalProtein >= 150 ? "text-primary" : "text-muted-foreground")} />
+                <CheckCircle2 className={cn("w-12 h-12 transition-colors", totalProtein >= proteinGoal ? "text-primary" : "text-muted-foreground")} />
                 <h3 className="text-2xl font-headline font-bold uppercase italic">Meta de Proteína</h3>
-                <p className="text-sm text-muted-foreground font-bold uppercase italic tracking-tighter">Progresso: {totalProtein}g de 150g (estimado)</p>
+                <p className="text-sm text-muted-foreground font-bold uppercase italic tracking-tighter">
+                  Progresso: {totalProtein}g de {proteinGoal}g {userWeight > 0 ? `(pelo peso: ${userWeight}kg)` : '(estimado)'}
+                </p>
               </div>
             </CardContent>
           </Card>
