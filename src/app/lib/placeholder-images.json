@@ -114,6 +114,12 @@
       "description": "GIF de Sprint em tiros",
       "imageUrl": "https://fitnessprogramer.com/wp-content/uploads/2021/07/Run.gif",
       "imageHint": "Sprint Running"
+    },
+    {
+      "id": "pendurar-barra-gif",
+      "description": "GIF de Pendurar na barra fixa",
+      "imageUrl": "https://www.hipertrofia.org/blog/wp-content/uploads/2023/10/band-assisted-pullup.gif",
+      "imageHint": "Hanging bar"
     }
   ]
 }
