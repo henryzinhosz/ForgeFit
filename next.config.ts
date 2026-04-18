@@ -106,6 +106,12 @@ const nextConfig: NextConfig = {
         hostname: 'fitnessprogramer.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'static.wixstatic.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
