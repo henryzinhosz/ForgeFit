@@ -19,8 +19,9 @@ export const EXERCISE_DATABASE: Exercise[] = [
   
   // Calistenia
   { id: '21', title: 'Flexão de Braços', category: 'Calistenia', instructions: 'Corpo reto, desça o peito até o chão e empurre de volta.', imageId: 'flexao-anatomia' },
-  { id: '25', title: 'Prancha Abdominal', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'abs-workout' },
+  { id: '25', title: 'Prancha', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'abs-workout' },
   { id: '26', title: 'Barra Fixa', category: 'Calistenia', instructions: 'Segure a barra com as mãos em pronação e puxe o corpo até o queixo ultrapassar a barra.', imageId: 'musculacao-costas' },
+  { id: '27', title: 'Abdominal Remador', category: 'Calistenia', instructions: 'Deitado em decúbito dorsal, braços estendidos atrás da cabeça. Flexione o tronco e os joelhos simultaneamente, abraçando as pernas.', imageId: 'abs-workout' },
   
   // Cardio
   { id: '41', title: 'Corrida TFM', category: 'Cardio', instructions: 'Trote contínuo mantendo a cadência e respiração controlada. Foco na resistência aeróbica.', imageId: 'cardio-corrida' },
