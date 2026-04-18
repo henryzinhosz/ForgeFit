@@ -6,7 +6,6 @@ import { Navigation } from '@/components/Navigation';
 import { useForgeStore, MealSlot, FoodItem } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Droplets, CheckCircle2, RefreshCw, Zap, Info, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -195,7 +194,7 @@ export default function RoutinePage() {
                   <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic">
                     <Droplets className="w-7 h-7" /> Hidratação
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground">Meta Operacional: {waterGoal} canecas</CardDescription>
+                  <CardDescription className="text-muted-foreground">Meta Operacional: {waterGoal} Litros</CardDescription>
                 </div>
                 <Button variant="ghost" size="icon" onClick={resetWater} className="text-muted-foreground hover:bg-white/5">
                   <RefreshCw className="w-4 h-4" />
@@ -210,11 +209,11 @@ export default function RoutinePage() {
                 />
                 <div className="relative z-10 flex flex-col items-center">
                   <span className="text-7xl font-black text-accent font-headline italic leading-none">{waterCount}</span>
-                  <span className="text-xs font-bold text-accent/80 uppercase tracking-[0.2em]">Canecas</span>
+                  <span className="text-xs font-bold text-accent/80 uppercase tracking-[0.2em]">Litros</span>
                 </div>
               </div>
               <Button onClick={incrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic">
-                REGISTRAR CONSUMO
+                REGISTRAR +1 LITRO
               </Button>
             </CardContent>
           </Card>

@@ -78,7 +78,7 @@ export const useForgeStore = create<ForgeStore>()(
         Sunday: [],
       },
       waterCount: 0,
-      waterGoal: 8,
+      waterGoal: 4, // Meta padrão de 4 litros para militares em atividade
       proteinGoalReached: false,
       metrics: {
         weight: [],

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -94,10 +95,10 @@ export default function Home() {
               <CardContent className="space-y-4">
                 <div className="flex items-end gap-1">
                   <span className="text-4xl font-bold text-accent">{waterCount}</span>
-                  <span className="text-muted-foreground mb-1">/ {waterGoal} copos</span>
+                  <span className="text-muted-foreground mb-1">/ {waterGoal} litros</span>
                 </div>
                 <Button onClick={incrementWater} className="w-full bg-accent/10 text-accent hover:bg-accent/20 border-accent/20">
-                  Adicionar Copo <Droplets className="ml-2 w-4 h-4" />
+                  Adicionar 1 Litro <Droplets className="ml-2 w-4 h-4" />
                 </Button>
               </CardContent>
             </Card>
