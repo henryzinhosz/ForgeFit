@@ -1,16 +1,16 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { useForgeStore, DayOfWeek } from '@/lib/store';
+import { DayOfWeek } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trash2, Sparkles, Plus, Loader2, Calendar } from 'lucide-react';
 import { aiAssistWorkoutInstructions } from '@/ai/flows/ai-assist-workout-instructions';
-import { useCollection, useFirestore, useUser } from '@/firebase';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
   Dialog,
@@ -29,12 +29,13 @@ export default function PlannerPage() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
 
-  const workoutsQuery = useMemo(() => {
+  const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return collection(db, 'users', user.uid, 'workouts');
   }, [db, user]);
 
-  const { data: workouts = [], loading } = useCollection(workoutsQuery);
+  const { data: rawWorkouts, loading } = useCollection(workoutsQuery);
+  const workouts = rawWorkouts || [];
 
   const handleAiRefine = async (exercise: any) => {
     setIsAiLoading(true);
@@ -73,8 +74,6 @@ export default function PlannerPage() {
     { key: 'Saturday', label: 'Sábado' },
     { key: 'Sunday', label: 'Domingo' }
   ];
-
-  const filteredWorkouts = workouts.filter(w => w.day === selectedDay);
 
   return (
     <div className="min-h-screen pb-24 md:pt-20 bg-background">

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Droplets, Zap, CheckCircle2, ChevronRight, Info } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { useCollection, useFirestore, useUser } from '@/firebase';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -19,7 +19,6 @@ export default function Home() {
   const { user } = useUser();
   const db = useFirestore();
   
-  // Estado para evitar erros de hidratação (SSR vs Client mismatch)
   const [currentDate, setCurrentDate] = useState<{
     index: number;
     key: string;
@@ -35,18 +34,21 @@ export default function Home() {
     });
   }, []);
 
-  const workoutsQuery = useMemo(() => {
+  const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user || !currentDate) return null;
     return query(collection(db, 'users', user.uid, 'workouts'), where('day', '==', currentDate.key));
   }, [db, user, currentDate]);
 
-  const waterQuery = useMemo(() => {
+  const waterQuery = useMemoFirebase(() => {
     if (!db || !user || !currentDate) return null;
     return query(collection(db, 'users', user.uid, 'water'), where('date', '==', currentDate.str));
   }, [db, user, currentDate]);
 
-  const { data: todaysExercises = [] } = useCollection(workoutsQuery);
-  const { data: waterLogs = [] } = useCollection(waterQuery);
+  const { data: rawExercises } = useCollection(workoutsQuery);
+  const { data: rawWater } = useCollection(waterQuery);
+
+  const todaysExercises = rawExercises || [];
+  const waterLogs = rawWater || [];
 
   const completedToday = todaysExercises.filter(ex => ex.completed).length;
   const totalToday = todaysExercises.length;

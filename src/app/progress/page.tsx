@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, CheckCircle2, Loader2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -25,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCollection, useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, where } from 'firebase/firestore';
 
 export default function ProgressPage() {
   const { user } = useUser();
@@ -35,18 +35,21 @@ export default function ProgressPage() {
   const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
 
-  const weightQuery = useMemo(() => {
+  const weightQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'users', user.uid, 'metrics'), where('type', '==', 'weight'), orderBy('date', 'asc'), limit(15));
   }, [db, user]);
 
-  const loadQuery = useMemo(() => {
+  const loadQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'users', user.uid, 'metrics'), where('type', '==', 'maxLoad'), where('exerciseName', '==', selectedEx), orderBy('date', 'asc'), limit(15));
   }, [db, user, selectedEx]);
 
-  const { data: weights = [], loading: loadingWeight } = useCollection(weightQuery);
-  const { data: loads = [], loading: loadingLoad } = useCollection(loadQuery);
+  const { data: rawWeights, loading: loadingWeight } = useCollection(weightQuery);
+  const { data: rawLoads, loading: loadingLoad } = useCollection(loadQuery);
+
+  const weights = rawWeights || [];
+  const loads = rawLoads || [];
 
   const formattedWeights = weights.map(w => ({
     ...w,
@@ -58,19 +61,16 @@ export default function ProgressPage() {
     label: new Date(l.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
   }));
 
-  const performanceInsights = useMemo(() => {
-    const insights: string[] = [];
-    if (formattedLoads.length >= 2) {
-      const latest = formattedLoads[formattedLoads.length - 1].value;
-      const previous = formattedLoads[formattedLoads.length - 2].value;
-      const diff = latest - previous;
-      if (diff > 0) insights.push(`Evolução de Força: Recorde no ${selectedEx} aumentou ${diff}kg. Excelente!`);
-      else if (diff < 0) insights.push(`Alerta: Redução de carga no ${selectedEx}. Verifique descanso.`);
-    } else {
-      insights.push(`Inicie o registro de cargas para ver sua análise.`);
-    }
-    return insights;
-  }, [formattedLoads, selectedEx]);
+  const performanceInsights = (formattedLoads.length >= 2) 
+    ? [(() => {
+        const latest = formattedLoads[formattedLoads.length - 1].value;
+        const previous = formattedLoads[formattedLoads.length - 2].value;
+        const diff = latest - previous;
+        if (diff > 0) return `Evolução de Força: Recorde no ${selectedEx} aumentou ${diff}kg. Excelente!`;
+        if (diff < 0) return `Alerta: Redução de carga no ${selectedEx}. Verifique descanso.`;
+        return `Estabilidade: Carga mantida no ${selectedEx}.`;
+      })()]
+    : ["Inicie o registro de cargas para ver sua análise."];
 
   const handleAddWeight = () => {
     if (weightInput && db && user) {
@@ -108,7 +108,6 @@ export default function ProgressPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Peso Corporal */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div className="space-y-1">
@@ -149,7 +148,6 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
 
-          {/* Cargas Máximas */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div className="space-y-1">

@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, CheckCircle2, RefreshCw, Zap, Info, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle, Loader2 } from 'lucide-react';
+import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useCollection, useFirestore, useUser } from '@/firebase';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
 
 const MILITARY_FOOD_DB = [
@@ -42,18 +42,21 @@ export default function RoutinePage() {
   const todayStr = new Date().toISOString().split('T')[0];
   const [activeSlot, setActiveSlot] = useState<string | null>(null);
 
-  const mealQuery = useMemo(() => {
+  const mealQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'users', user.uid, 'meals'), where('date', '==', todayStr));
   }, [db, user, todayStr]);
 
-  const waterQuery = useMemo(() => {
+  const waterQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(collection(db, 'users', user.uid, 'water'), where('date', '==', todayStr));
   }, [db, user, todayStr]);
 
-  const { data: meals = [], loading: loadingMeals } = useCollection(mealQuery);
-  const { data: waterLogs = [], loading: loadingWater } = useCollection(waterQuery);
+  const { data: rawMeals } = useCollection(mealQuery);
+  const { data: rawWater } = useCollection(waterQuery);
+
+  const meals = rawMeals || [];
+  const waterLogs = rawWater || [];
 
   const waterCount = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
   const waterGoal = 4;
