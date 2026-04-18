@@ -7,61 +7,47 @@
   :root {
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 4%;
+    --card: 0 0% 3%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 4%;
+    --popover: 0 0% 3%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 100% 50%; /* Vermelho Vibrante */
+    --primary: 0 100% 50%; /* Vermelho Puro */
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 10%;
+    --secondary: 0 0% 8%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 12%;
+    --muted: 0 0% 10%;
     --muted-foreground: 0 0% 60%;
-    --accent: 25 100% 50%; /* Laranja Energético */
+    --accent: 25 100% 50%; /* Laranja Fogo */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
     --ring: 0 100% 50%;
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 }
 
 @layer base {
   * {
     @apply border-border outline-none;
-    -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-background text-foreground overflow-x-hidden selection:bg-primary/30;
-    overscroll-behavior-y: none;
+    @apply bg-black text-foreground antialiased font-body;
+    background-image: 
+      radial-gradient(circle at 50% -20%, hsla(var(--primary), 0.15), transparent),
+      radial-gradient(circle at 0% 100%, hsla(var(--accent), 0.1), transparent);
+    background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold tracking-tight;
+    @apply font-headline font-bold tracking-tight uppercase;
   }
 }
 
-@layer utilities {
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .glass-card {
-    @apply bg-card/60 backdrop-blur-lg border-white/5;
-  }
+.glass-card {
+  @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] shadow-2xl;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
+.neon-border {
+  @apply border-primary/30 shadow-[0_0_15px_rgba(255,0,0,0.1)];
 }
