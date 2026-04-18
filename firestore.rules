@@ -9,6 +9,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
     /**
      * EXERCÍCIOS GLOBAIS
      */
@@ -18,28 +22,32 @@ service cloud.firestore {
 
     /**
      * SILO PRIVADO DO USUÁRIO
-     * Estrutura aninhada para garantir que tanto o documento do usuário
-     * quanto todas as suas subcoleções (workouts, metrics, water, meals)
-     * sejam acessíveis apenas pelo proprietário.
+     * Estrutura explícita para garantir que subcoleções como 'metrics'
+     * permitam operações de listagem e leitura sem bloqueios.
      */
     match /users/{userId} {
-      // Permite acesso ao documento raiz do usuário
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      // Permite acesso ao documento raiz do perfil
+      allow read, write: if isOwner(userId);
       
-      // Permite acesso recursivo a todas as subcoleções e documentos internos
+      // Permite acesso a qualquer documento em qualquer subcoleção (workouts, metrics, water, meals)
+      match /{collectionName}/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // Garantia recursiva para caminhos mais profundos
       match /{allPaths=**} {
-        allow read, write: if isSignedIn() && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
     }
 
     /**
-     * COMPATIBILIDADE: Exercícios personalizados legados
+     * COMPATIBILIDADE: Exercícios personalizados
      */
     match /custom_exercises/{exerciseId} {
-      allow read, write: if isSignedIn() && resource.data.creatorUserId == request.auth.uid;
+      allow read, write: if isSignedIn() && (resource == null || resource.data.creatorUserId == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.creatorUserId == request.auth.uid;
     }
     
-    // Deploy trigger: Atualização das regras para corrigir erro de listagem no silo do usuário.
+    // Deploy trigger: Ajuste final de granularidade para resolver erro de listagem em /metrics.
   }
 }
