@@ -7,7 +7,7 @@
   :root {
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 3%;
+    --card: 0 0% 4%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3%;
     --popover-foreground: 0 0% 98%;
@@ -21,10 +21,10 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 0 100% 50%;
-    --radius: 1rem;
+    --radius: 1.25rem;
   }
 }
 
@@ -35,8 +35,8 @@
   body {
     @apply bg-black text-foreground antialiased font-body;
     background-image: 
-      radial-gradient(circle at 50% -20%, hsla(var(--primary), 0.15), transparent),
-      radial-gradient(circle at 0% 100%, hsla(var(--accent), 0.1), transparent);
+      radial-gradient(circle at 50% -20%, hsla(var(--primary), 0.2), transparent),
+      radial-gradient(circle at 0% 100%, hsla(var(--accent), 0.15), transparent);
     background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -45,9 +45,26 @@
 }
 
 .glass-card {
-  @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] shadow-2xl;
+  @apply bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] shadow-2xl;
 }
 
-.neon-border {
-  @apply border-primary/30 shadow-[0_0_15px_rgba(255,0,0,0.1)];
+.neon-red {
+  box-shadow: 0 0 20px hsla(var(--primary), 0.3);
+}
+
+.neon-orange {
+  box-shadow: 0 0 20px hsla(var(--accent), 0.3);
+}
+
+.animate-glow {
+  animation: glow 3s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    filter: drop-shadow(0 0 2px hsla(var(--primary), 0.5));
+  }
+  to {
+    filter: drop-shadow(0 0 10px hsla(var(--primary), 0.8));
+  }
 }
