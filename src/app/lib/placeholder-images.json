@@ -1,0 +1,59 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "musculacao-peito",
+      "description": "Atleta treinando peitoral em academia moderna",
+      "imageUrl": "https://picsum.photos/seed/chest-workout/800/600",
+      "imageHint": "gym chest"
+    },
+    {
+      "id": "musculacao-costas",
+      "description": "Exercício de puxada para costas em máquina",
+      "imageUrl": "https://picsum.photos/seed/back-workout/800/600",
+      "imageHint": "gym back"
+    },
+    {
+      "id": "musculacao-pernas",
+      "description": "Treino de pernas com pesos livres",
+      "imageUrl": "https://picsum.photos/seed/legs-workout/800/600",
+      "imageHint": "gym legs"
+    },
+    {
+      "id": "musculacao-ombros",
+      "description": "Elevação lateral com halteres",
+      "imageUrl": "https://picsum.photos/seed/shoulder-workout/800/600",
+      "imageHint": "gym shoulder"
+    },
+    {
+      "id": "musculacao-bracos",
+      "description": "Rosca bíceps com barra",
+      "imageUrl": "https://picsum.photos/seed/arms-workout/800/600",
+      "imageHint": "gym arms"
+    },
+    {
+      "id": "calistenia-geral",
+      "description": "Exercício de calistenia ao ar livre",
+      "imageUrl": "https://picsum.photos/seed/calisthenics-pro/800/600",
+      "imageHint": "calisthenics bar"
+    },
+    {
+      "id": "cardio-corrida",
+      "description": "Pessoa correndo na esteira ou pista",
+      "imageUrl": "https://picsum.photos/seed/running-pro/800/600",
+      "imageHint": "running gym"
+    },
+    {
+      "id": "cardio-ciclismo",
+      "description": "Atleta pedalando em bicicleta de spinning",
+      "imageUrl": "https://picsum.photos/seed/cycling-pro/800/600",
+      "imageHint": "cycling gym"
+    },
+    {
+      "id": "abs-workout",
+      "description": "Exercício abdominal no colchonete",
+      "imageUrl": "https://picsum.photos/seed/abs-workout/800/600",
+      "imageHint": "abs exercise"
+    }
+  ]
+}
