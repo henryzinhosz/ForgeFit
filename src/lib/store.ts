@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -23,6 +24,16 @@ export interface MetricEntry {
   label: string;
 }
 
+export interface FoodItem {
+  id: string;
+  name: string;
+  portion: string;
+  calories: number;
+  protein: number;
+}
+
+export type MealSlot = 'café' | 'almoço' | 'janta' | 'ceia';
+
 export interface ForgeStore {
   weeklyPlan: WeeklyPlan;
   waterCount: number;
@@ -33,6 +44,8 @@ export interface ForgeStore {
     maxLoad: { [exercise: string]: MetricEntry[] };
     distance: MetricEntry[];
   };
+  // Nutrição
+  loggedMeals: { [key in MealSlot]: FoodItem[] };
   
   addExerciseToDay: (day: DayOfWeek, exercise: Partial<PlannedExercise>) => void;
   toggleExercise: (day: DayOfWeek, exerciseId: string) => void;
@@ -45,6 +58,11 @@ export interface ForgeStore {
   
   addMetric: (type: 'weight' | 'distance', value: number) => void;
   addMaxLoad: (exercise: string, value: number) => void;
+
+  // Ações de Nutrição
+  addFoodToMeal: (slot: MealSlot, food: FoodItem) => void;
+  removeFoodFromMeal: (slot: MealSlot, foodId: string) => void;
+  clearDailyMeals: () => void;
 }
 
 export const useForgeStore = create<ForgeStore>()(
@@ -66,6 +84,12 @@ export const useForgeStore = create<ForgeStore>()(
         weight: [],
         maxLoad: {},
         distance: [],
+      },
+      loggedMeals: {
+        café: [],
+        almoço: [],
+        janta: [],
+        ceia: [],
       },
 
       addExerciseToDay: (day, exercise) => set((state) => ({
@@ -108,6 +132,7 @@ export const useForgeStore = create<ForgeStore>()(
           weeklyPlan: resetPlan,
           waterCount: 0,
           proteinGoalReached: false,
+          loggedMeals: { café: [], almoço: [], janta: [], ceia: [] }
         };
       }),
 
@@ -141,6 +166,24 @@ export const useForgeStore = create<ForgeStore>()(
             }
           }
         };
+      }),
+
+      addFoodToMeal: (slot, food) => set((state) => ({
+        loggedMeals: {
+          ...state.loggedMeals,
+          [slot]: [...state.loggedMeals[slot], { ...food, id: Math.random().toString(36).substring(2, 9) }]
+        }
+      })),
+
+      removeFoodFromMeal: (slot, foodId) => set((state) => ({
+        loggedMeals: {
+          ...state.loggedMeals,
+          [slot]: state.loggedMeals[slot].filter(f => f.id !== foodId)
+        }
+      })),
+
+      clearDailyMeals: () => set({
+        loggedMeals: { café: [], almoço: [], janta: [], ceia: [] }
       }),
     }),
     {
