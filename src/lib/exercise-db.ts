@@ -22,6 +22,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '25', title: 'Prancha', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'abs-workout' },
   { id: '26', title: 'Barra Fixa', category: 'Calistenia', instructions: 'Segure a barra com as mãos em pronação e puxe o corpo até o queixo ultrapassar a barra.', imageId: 'musculacao-costas' },
   { id: '27', title: 'Abdominal Remador', category: 'Calistenia', instructions: 'Deitado em decúbito dorsal, braços estendidos atrás da cabeça. Flexione o tronco e os joelhos simultaneamente, abraçando as pernas.', imageId: 'abs-workout' },
+  { id: '28', title: 'Combo Força Superior', category: 'Calistenia', instructions: 'Realize 5 descidas lentas na barra (segure o topo e desça controlando por 5 segundos). Sem descanso, faça o máximo de flexões que conseguir. Repita o ciclo por 4 séries.', imageId: 'calistenia-geral' },
   
   // Cardio
   { id: '41', title: 'Corrida TFM', category: 'Cardio', instructions: 'Trote contínuo mantendo a cadência e respiração controlada. Foco na resistência aeróbica.', imageId: 'cardio-corrida' },
