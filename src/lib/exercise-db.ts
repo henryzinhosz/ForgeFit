@@ -29,5 +29,6 @@ export const EXERCISE_DATABASE: Exercise[] = [
   // Cardio
   { id: '41', title: 'Corrida Alternada', category: 'Cardio', instructions: 'Corrida alternada em trote leve em cadencia com tiros curtos de alta respiração', imageId: 'corrida-tfm-gif' },
   { id: '42', title: 'Ciclismo', category: 'Cardio', instructions: 'Pedalagem em intensidade moderada/alta. Excelente para fortalecimento de membros inferiores e fôlego.', imageId: 'ciclismo-gif' },
-  { id: '43', title: 'Corrida', category: 'Cardio', instructions: 'Corrida com cadencia continua, focada em tempo e distancia', imageId: 'corrida-img' }
+  { id: '43', title: 'Corrida', category: 'Cardio', instructions: 'Corrida com cadencia continua, focada em tempo e distancia', imageId: 'corrida-img' },
+  { id: '44', title: 'Sprint em tiros', category: 'Cardio', instructions: 'Corra o mais rapido que conseguir durante um periodo de tempo ou distancia', imageId: 'sprint-tiros-gif' }
 ];

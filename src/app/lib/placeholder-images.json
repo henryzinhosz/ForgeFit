@@ -108,6 +108,12 @@
       "description": "GIF de Abdominal Supra",
       "imageUrl": "https://treinototal.com.br/wp-content/uploads/2024/12/abdominal-no-solo-crunch.gif",
       "imageHint": "Abdominal Crunch"
+    },
+    {
+      "id": "sprint-tiros-gif",
+      "description": "GIF de Sprint em tiros",
+      "imageUrl": "https://fitnessprogramer.com/wp-content/uploads/2021/07/Run.gif",
+      "imageHint": "Sprint Running"
     }
   ]
 }

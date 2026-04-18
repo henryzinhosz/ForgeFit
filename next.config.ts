@@ -100,6 +100,12 @@ const nextConfig: NextConfig = {
         hostname: 'treinototal.com.br',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fitnessprogramer.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
