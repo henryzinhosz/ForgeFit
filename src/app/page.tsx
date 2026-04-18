@@ -212,7 +212,7 @@ export default function Home() {
 
                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                   <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
-                    Sugestões Oficiais: Hidratação (50ml/kg), Proteína (2g/kg) e Calorias via Mifflin-St Jeor. Sincronizado automaticamente.
+                    Sugestões Oficiais: Hidratação (50ml/kg), Proteína (2g/kg) e Calorias via Mifflin-St Jeor. Sincronizado automaticamente com Cloud Firestore.
                   </p>
                 </div>
               </div>
