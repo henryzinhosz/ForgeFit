@@ -132,6 +132,12 @@
       "description": "GIF de Elevação de perna",
       "imageUrl": "https://i.pinimg.com/originals/e7/c1/e5/e7c1e5cdd690a2e5bcd108f57e38e5bd.gif",
       "imageHint": "Leg Raise"
+    },
+    {
+      "id": "simulado-taf-img",
+      "description": "Imagem Simulado TAF",
+      "imageUrl": "https://i.pinimg.com/1200x/c8/8d/77/c88d7761afe655c9149687e7da364615.jpg",
+      "imageHint": "TAF Training"
     }
   ]
 }
