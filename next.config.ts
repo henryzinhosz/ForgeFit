@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true, // Necessário para GIFs e para evitar processamento pesado em imagens externas
     remotePatterns: [
       {
         protocol: 'https',
