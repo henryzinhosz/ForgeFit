@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -90,13 +89,13 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  // Cálculos Oficiais de Saúde
+  // Cálculos Médicos Oficiais
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
-      // Equação de Mifflin-St Jeor (Padrão Ouro Médico)
+      // Equação de Mifflin-St Jeor
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
@@ -160,7 +159,7 @@ export default function Home() {
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Dados Biométricos</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Seus dados para cálculos de saúde e performance.</DialogDescription>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Seus dados para cálculos de saúde e performance oficiais.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -213,7 +212,7 @@ export default function Home() {
 
                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                   <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
-                    Metas Médicas: Hidratação (50ml/kg), Proteína (2g/kg) e Calorias via Mifflin-St Jeor. Sincronizado com seu histórico de evolução.
+                    Sugestões Oficiais: Hidratação (50ml/kg), Proteína (2g/kg) e Calorias via Mifflin-St Jeor. Sincronizado automaticamente.
                   </p>
                 </div>
               </div>
@@ -267,7 +266,7 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <UserIcon className="w-5 h-5" /> Resumo Bio
+                  <UserIcon className="w-5 h-5" /> Resumo Biométrico
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">

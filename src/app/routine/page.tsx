@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -128,7 +127,7 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium text-sm">Anote sua rotina e acompanhe suas Calorias e Proteínas.</p>
+          <p className="text-muted-foreground font-medium text-sm">Anote sua rotina e acompanhe suas Calorias e Proteínas oficiais.</p>
         </header>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -213,9 +212,9 @@ export default function RoutinePage() {
           <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl rounded-3xl overflow-hidden">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-3">
-                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo</h3>
+                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
                 <div className="space-y-1">
-                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões Médicas:</p>
+                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões Médicas (Mifflin-St Jeor):</p>
                    <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>
                    <p className="text-sm text-accent font-black uppercase italic">Meta Proteica: {proteinGoal}g</p>
                 </div>
@@ -248,7 +247,7 @@ export default function RoutinePage() {
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária: {waterGoal.toFixed(1)}L</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária Oficial: {waterGoal.toFixed(1)}L</p>
                 <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
               </div>
             </CardContent>
@@ -256,14 +255,14 @@ export default function RoutinePage() {
 
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="bg-white/5 pb-6 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Prontidão Calórica</CardTitle>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Aporte Calórico</CardTitle>
             </CardHeader>
             <CardContent className="p-8">
               <div className="p-8 rounded-3xl bg-white/5 border border-white/5 text-center space-y-4">
                 <Flame className={cn("w-12 h-12 mx-auto", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
-                <h3 className="text-xl font-headline font-bold uppercase italic">Aporte Diário</h3>
+                <h3 className="text-xl font-headline font-bold uppercase italic">Balanço do Dia</h3>
                 <p className="text-sm text-muted-foreground font-bold">
-                  {totalCalories} kcal de {calorieGoal} kcal sugeridas.
+                  Consumido: {totalCalories} kcal de {calorieGoal} kcal recomendadas.
                 </p>
               </div>
             </CardContent>

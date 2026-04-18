@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -86,7 +85,7 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
-      // Sincronizar peso no perfil global para atualizar metas automáticas (água/proteína)
+      // Sincronizar peso no perfil global para atualizar metas automáticas (água/proteína/calorias)
       setDocumentNonBlocking(profileRef, {
         weight: weightValue,
         updatedAt: new Date().toISOString()
@@ -126,7 +125,7 @@ export default function ProgressPage() {
                 <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
                   <Scale className="w-6 h-6" /> Peso Corporal
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">O peso aqui atualiza suas metas automaticamente.</CardDescription>
+                <CardDescription className="text-muted-foreground">O peso aqui atualiza suas metas e seu perfil automaticamente.</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -209,7 +208,7 @@ export default function ProgressPage() {
           <div className="absolute top-0 right-0 p-8 opacity-5"><TrendingUp className="w-48 h-48 text-primary" /></div>
           <CardHeader>
             <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório Analítico</CardTitle>
-            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights baseados no histórico de dados sincronizados.</CardDescription>
+            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights baseados no histórico de dados sincronizados em tempo real.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
             <div className="space-y-4">
