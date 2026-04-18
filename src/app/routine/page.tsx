@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, CheckCircle2, Zap, Utensils, Coffee, Sun, Moon, Clock, Trash2, PlusCircle, Scale, Calendar, Flame } from 'lucide-react';
+import { Droplets, Utensils, Coffee, Sun, Moon, Clock, Trash2, Flame, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -128,7 +128,7 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium text-sm">Anote sua rotina alimentar e tenha uma média aproximada de Calorias e Proteínas.</p>
+          <p className="text-muted-foreground font-medium text-sm">Anote sua rotina e acompanhe suas Calorias e Proteínas.</p>
         </header>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -159,7 +159,7 @@ export default function RoutinePage() {
             {mealSlots.map((slot) => {
               const items = meals.filter(m => m.slot === slot.key);
               return (
-                <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden group hover:border-primary/30 transition-all">
+                <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden">
                   <CardHeader className="p-4 bg-white/5 flex flex-row items-center justify-between space-y-0">
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/20 p-2 rounded-lg text-primary"><slot.icon className="w-5 h-5" /></div>
@@ -170,8 +170,8 @@ export default function RoutinePage() {
                     <div className="space-y-2 min-h-[60px]">
                       {items.map((food) => (
                         <div key={food.id} className="flex items-center justify-between text-[10px] bg-white/5 p-2 rounded-lg border border-white/5">
-                          <span className="text-zinc-300 truncate mr-2 font-bold uppercase">{food.name}</span>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-zinc-300 truncate font-bold uppercase">{food.name}</span>
+                          <div className="flex items-center gap-2">
                             <span className="text-primary font-black italic">{food.calories}kcal</span>
                             <button onClick={() => handleRemoveFood(food.id)} className="text-zinc-500 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                           </div>
@@ -185,7 +185,7 @@ export default function RoutinePage() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md rounded-3xl">
-                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio do Rancho</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio</DialogTitle></DialogHeader>
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid gap-2">
                             {MILITARY_FOOD_DB.map((food) => (
@@ -215,7 +215,7 @@ export default function RoutinePage() {
               <div className="space-y-3">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo</h3>
                 <div className="space-y-1">
-                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões baseadas no seu perfil:</p>
+                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões Médicas:</p>
                    <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>
                    <p className="text-sm text-accent font-black uppercase italic">Meta Proteica: {proteinGoal}g</p>
                 </div>
@@ -223,11 +223,11 @@ export default function RoutinePage() {
               <div className="flex gap-12">
                 <div className="text-center space-y-1">
                   <p className="text-4xl font-black text-primary italic leading-none">{totalCalories}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Kcal Consumidas</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Consumo (Kcal)</p>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-4xl font-black text-accent italic leading-none">{totalProtein}g</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Proteína Total</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Consumo (Prot)</p>
                 </div>
               </div>
             </CardContent>
@@ -249,21 +249,21 @@ export default function RoutinePage() {
               </div>
               <div className="text-center">
                 <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária: {waterGoal.toFixed(1)}L</p>
-                <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 shadow-[0_0_20px_rgba(255,165,0,0.3)] font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
+                <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="bg-white/5 pb-6 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Zap className="w-7 h-7" /> Prontidão Calórica</CardTitle>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Prontidão Calórica</CardTitle>
             </CardHeader>
             <CardContent className="p-8">
               <div className="p-8 rounded-3xl bg-white/5 border border-white/5 text-center space-y-4">
                 <Flame className={cn("w-12 h-12 mx-auto", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
                 <h3 className="text-xl font-headline font-bold uppercase italic">Aporte Diário</h3>
                 <p className="text-sm text-muted-foreground font-bold">
-                  {totalCalories} kcal de {calorieGoal} kcal recomendadas.
+                  {totalCalories} kcal de {calorieGoal} kcal sugeridas.
                 </p>
               </div>
             </CardContent>

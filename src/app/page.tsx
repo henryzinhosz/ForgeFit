@@ -6,9 +6,8 @@ import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Droplets, Zap, CheckCircle2, ChevronRight, Settings2, User as UserIcon, Flame } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, User as UserIcon, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
@@ -92,6 +91,7 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
+  // Cálculos Oficiais de Saúde
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
@@ -146,22 +146,22 @@ export default function Home() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Bem-vindo de volta, Atleta!</h1>
+            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Bem-vindo, Atleta!</h1>
             <p className="text-muted-foreground font-medium">
-              Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>. Mantenha a constância!
+              Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
             </p>
           </div>
           
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" className="rounded-2xl border-white/10 hover:bg-white/5 h-12 gap-2 uppercase font-black italic">
-                <Settings2 className="w-5 h-5" /> Perfil Militar
+                <Settings2 className="w-5 h-5" /> Configurar Perfil
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Dados Biométricos</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Suas metas de saúde são calculadas com base nestes dados.</DialogDescription>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Seus dados para cálculos de saúde e performance.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -214,7 +214,7 @@ export default function Home() {
 
                 <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
                   <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
-                    Cálculos Oficiais: Hidratação (50ml/kg), Proteína (2g/kg) e Calorias via Equação de Mifflin-St Jeor. O peso é sincronizado com seu histórico de evolução.
+                    Metas Médicas: Hidratação (50ml/kg), Proteína (2g/kg) e Calorias via Mifflin-St Jeor. Sincronizado com seu histórico de evolução.
                   </p>
                 </div>
               </div>
@@ -231,42 +231,26 @@ export default function Home() {
               <div className="space-y-1">
                 <CardTitle className="text-2xl font-headline uppercase italic text-white">Treino de Hoje</CardTitle>
                 <CardDescription className="font-bold text-muted-foreground">
-                  {totalToday > 0 ? `${completedToday} de ${totalToday} exercícios concluídos` : 'Nenhum exercício planejado para hoje.'}
+                  {totalToday > 0 ? `${completedToday} de ${totalToday} concluídos` : 'Nenhum exercício hoje.'}
                 </CardDescription>
               </div>
-              <CheckCircle2 className={cn("w-10 h-10 transition-colors", progressPercent === 100 ? "text-green-500" : "text-muted")} />
+              <CheckCircle2 className={cn("w-10 h-10", progressPercent === 100 ? "text-green-500" : "text-muted")} />
             </CardHeader>
             <CardContent className="space-y-6">
               <Progress value={progressPercent} className="h-4 bg-secondary" />
-              
               <div className="space-y-3">
-                {todaysExercises.length > 0 ? (
-                  todaysExercises.map((ex) => (
-                    <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className={cn("w-2 h-2 rounded-full", ex.completed ? "bg-green-500" : "bg-primary animate-pulse")} />
-                        <span className={cn("font-bold text-sm uppercase italic text-white", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
-                      </div>
-                      <span className="text-xs font-black text-primary/80 italic tracking-tighter">{ex.sets}x{ex.reps}{ex.time && ` | ${ex.time}`}</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                    <p className="text-muted-foreground italic mb-6 uppercase font-bold tracking-widest">Nada agendado para hoje.</p>
-                    <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase italic">
-                      <Link href="/planner">Montar Treino</Link>
-                    </Button>
+                {todaysExercises.map((ex) => (
+                  <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <span className={cn("font-bold text-sm uppercase italic text-white", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
+                    <span className="text-xs font-black text-primary/80 italic tracking-tighter">{ex.sets}x{ex.reps}</span>
                   </div>
-                )}
+                ))}
               </div>
             </CardContent>
           </Card>
 
           <div className="space-y-6">
-            <Card className="shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-4 opacity-5">
-                <Droplets className="w-20 h-20 text-accent" />
-              </div>
+            <Card className="shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl font-headline uppercase italic text-white">Hidratação</CardTitle>
               </CardHeader>
@@ -284,26 +268,22 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <UserIcon className="w-5 h-5" /> Resumo de Saúde
+                  <UserIcon className="w-5 h-5" /> Resumo Bio
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
-                {userWeight > 0 ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase">
-                      <CheckCircle2 className="w-4 h-4 text-white" /> Proteína: {proteinGoal}g/dia
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase">
-                      <Flame className="w-4 h-4 text-white" /> Calorias: {calorieGoal} kcal/dia
-                    </div>
-                    <div className="bg-white/20 p-3 rounded-xl flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase italic">{userWeight}kg | {userHeight}cm</span>
-                      <span className="text-[10px] font-black uppercase italic">{userAge} anos</span>
-                    </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase">
+                    <CheckCircle2 className="w-4 h-4" /> Proteína: {proteinGoal}g/dia
                   </div>
-                ) : (
-                  <Button onClick={() => setIsSettingsOpen(true)} variant="secondary" className="w-full h-10 font-black bg-white text-black hover:bg-white/90 rounded-2xl uppercase italic text-[10px]">Configurar Agora</Button>
-                )}
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase">
+                    <Flame className="w-4 h-4" /> Calorias: {calorieGoal} kcal/dia
+                  </div>
+                  <div className="bg-white/20 p-3 rounded-xl flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase italic">{userWeight}kg | {userHeight}cm</span>
+                    <span className="text-[10px] font-black uppercase italic">{userAge} anos</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
