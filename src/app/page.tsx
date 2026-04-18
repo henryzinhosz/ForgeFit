@@ -1,35 +1,56 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { useForgeStore, DayOfWeek } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Droplets, Zap, CheckCircle2, ChevronRight, Info } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useCollection, useFirestore, useUser } from '@/firebase';
+import { collection, query, where, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
-const DAYS: DayOfWeek[] = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
-  const { weeklyPlan, waterCount, waterGoal, proteinGoalReached, incrementWater, toggleProtein, resetWeeklyChecks } = useForgeStore();
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
+  const { user } = useUser();
+  const db = useFirestore();
   const todayIndex = new Date().getDay();
-  const dayKeys: DayOfWeek[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const todayKey = dayKeys[todayIndex];
-  const todaysExercises = weeklyPlan[todayKey] || [];
+  const todayKey = DAYS_EN[todayIndex];
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const workoutsQuery = useMemo(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'users', user.uid, 'workouts'), where('day', '==', todayKey));
+  }, [db, user, todayKey]);
+
+  const waterQuery = useMemo(() => {
+    if (!db || !user) return null;
+    return query(collection(db, 'users', user.uid, 'water'), where('date', '==', todayStr));
+  }, [db, user, todayStr]);
+
+  const { data: todaysExercises = [] } = useCollection(workoutsQuery);
+  const { data: waterLogs = [] } = useCollection(waterQuery);
+
   const completedToday = todaysExercises.filter(ex => ex.completed).length;
   const totalToday = todaysExercises.length;
   const progressPercent = totalToday > 0 ? (completedToday / totalToday) * 100 : 0;
+  
+  const currentWater = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  const waterGoal = 4;
+
+  const handleIncrementWater = () => {
+    if (!db || !user) return;
+    const waterRef = collection(db, 'users', user.uid, 'water');
+    addDoc(waterRef, {
+      date: todayStr,
+      amount: 1,
+      createdAt: serverTimestamp()
+    });
+  };
 
   return (
     <div className="min-h-screen pb-24 md:pt-20 bg-background text-foreground">
@@ -38,7 +59,7 @@ export default function Home() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <section className="space-y-2">
           <h1 className="text-4xl font-headline font-bold">Bem-vindo de volta, Atleta!</h1>
-          <p className="text-muted-foreground">Hoje é <span className="text-primary font-semibold">{DAYS[todayIndex]}</span>. Mantenha a constância!</p>
+          <p className="text-muted-foreground">Hoje é <span className="text-primary font-semibold">{DAYS_PT[todayIndex]}</span>. Mantenha a constância!</p>
         </section>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -76,11 +97,9 @@ export default function Home() {
                 )}
               </div>
               
-              {totalToday > 0 && (
-                <Button asChild className="w-full h-12 text-lg font-semibold shadow-lg bg-primary hover:bg-primary/90">
-                  <Link href="/planner">Abrir Planejador <ChevronRight className="ml-2 w-5 h-5" /></Link>
-                </Button>
-              )}
+              <Button asChild className="w-full h-12 text-lg font-semibold shadow-lg bg-primary hover:bg-primary/90">
+                <Link href="/planner">Abrir Planejador <ChevronRight className="ml-2 w-5 h-5" /></Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -94,35 +113,12 @@ export default function Home() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-end gap-1">
-                  <span className="text-4xl font-bold text-accent">{waterCount}</span>
+                  <span className="text-4xl font-bold text-accent">{currentWater}</span>
                   <span className="text-muted-foreground mb-1">/ {waterGoal} litros</span>
                 </div>
-                <Button onClick={incrementWater} className="w-full bg-accent/10 text-accent hover:bg-accent/20 border-accent/20">
+                <Button onClick={handleIncrementWater} className="w-full bg-accent/10 text-accent hover:bg-accent/20 border-accent/20">
                   Adicionar 1 Litro <Droplets className="ml-2 w-4 h-4" />
                 </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-xl border-border bg-card">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-headline">Nutrição</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Zap className={cn("w-5 h-5", proteinGoalReached ? "text-green-500" : "text-muted-foreground")} />
-                    <span className="font-medium">Meta de Proteína</span>
-                  </div>
-                  <Button 
-                    variant={proteinGoalReached ? "default" : "outline"}
-                    size="sm"
-                    onClick={toggleProtein}
-                    className={cn(proteinGoalReached ? "bg-green-600 hover:bg-green-700 border-none" : "border-muted text-muted-foreground")}
-                  >
-                    {proteinGoalReached ? "Alcançada!" : "Marcar como Alcançada"}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">Foque em bater seus macronutrientes para uma recuperação ideal.</p>
               </CardContent>
             </Card>
 
@@ -147,12 +143,9 @@ export default function Home() {
             <Zap className="w-5 h-5 text-primary" />
           </div>
           <div className="text-sm">
-            <p className="font-semibold text-primary">Dica Pro: Reset Semanal</p>
-            <p className="text-muted-foreground">O progresso reseta automaticamente toda segunda-feira às 00:00 para manter seu foco renovado!</p>
+            <p className="font-semibold text-primary">Dica Pro: Dados Reais</p>
+            <p className="text-muted-foreground">Agora todos os seus dados são salvos na nuvem do Google Firestore.</p>
           </div>
-          <Button variant="ghost" size="sm" className="ml-auto text-primary hover:bg-primary/10" onClick={resetWeeklyChecks}>
-            Reset Manual
-          </Button>
         </div>
       </main>
     </div>
