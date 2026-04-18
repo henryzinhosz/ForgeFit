@@ -72,9 +72,9 @@ export const useForgeStore = create<ForgeStore>()(
         weeklyPlan: {
           ...state.weeklyPlan,
           [day]: [...state.weeklyPlan[day], {
-            id: Math.random().toString(36).substr(2, 9),
+            id: Math.random().toString(36).substring(2, 9),
             exerciseId: exercise.exerciseId || '',
-            title: exercise.title || 'Untitled',
+            title: exercise.title || 'Sem título',
             sets: exercise.sets || '3',
             reps: exercise.reps || '12',
             time: exercise.time || '',
@@ -121,8 +121,8 @@ export const useForgeStore = create<ForgeStore>()(
           [type]: [...state.metrics[type], {
             date: new Date().toISOString().split('T')[0],
             value,
-            label: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-          }].slice(-10) // Keep last 10 entries
+            label: new Date().toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
+          }].slice(-10)
         }
       })),
 
@@ -136,7 +136,7 @@ export const useForgeStore = create<ForgeStore>()(
               [exercise]: [...exerciseMetrics, {
                 date: new Date().toISOString().split('T')[0],
                 value,
-                label: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                label: new Date().toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
               }].slice(-10)
             }
           }

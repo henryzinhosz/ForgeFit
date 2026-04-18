@@ -1,39 +1,35 @@
 'use server';
 /**
- * @fileOverview A Genkit flow for generating a personalized weekly workout plan.
- *
- * - aiGenWorkoutPlan - A function that handles the generation of a workout plan.
- * - AIGenWorkoutPlanInput - The input type for the aiGenWorkoutPlan function.
- * - AIGenWorkoutPlanOutput - The return type for the aiGenWorkoutPlan function.
+ * @fileOverview Fluxo para gerar plano de treino semanal em português.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const AIGenWorkoutPlanInputSchema = z.object({
-  fitnessGoals: z.string().describe('The user\'s primary fitness goals (e.g., build strength, lose weight, improve endurance).'),
-  workoutDuration: z.string().describe('The preferred duration for each workout session (e.g., "30 minutes", "1 hour", "1.5 hours").'),
-  availableEquipment: z.string().describe('A list of all available workout equipment (e.g., "dumbbells, resistance bands", "full gym access", "bodyweight only").'),
+  fitnessGoals: z.string().describe('Metas fitness do usuário.'),
+  workoutDuration: z.string().describe('Duração preferida por sessão.'),
+  availableEquipment: z.string().describe('Equipamentos disponíveis.'),
 });
 export type AIGenWorkoutPlanInput = z.infer<typeof AIGenWorkoutPlanInputSchema>;
 
 const ExerciseSchema = z.object({
-  exerciseName: z.string().describe('The name of the exercise.'),
-  sets: z.string().describe('The number of sets for the exercise (e.g., "3", "4-5").'),
-  repsOrTime: z.string().describe('The number of repetitions or duration for the exercise (e.g., "10-12 reps", "30 seconds", "1 km").'),
-  instructions: z.string().describe('Brief instructions for performing the exercise.'),
-  notes: z.string().optional().describe('Any additional notes or tips for the exercise.'),
+  exerciseName: z.string().describe('Nome do exercício.'),
+  sets: z.string().describe('Séries.'),
+  repsOrTime: z.string().describe('Repetições ou tempo.'),
+  instructions: z.string().describe('Instruções breves.'),
+  notes: z.string().optional().describe('Notas adicionais.'),
 });
 
 const DailyWorkoutSchema = z.object({
-  day: z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']).describe('The day of the week.'),
-  workout: z.array(ExerciseSchema).describe('A list of exercises for the day. Can be empty if it\'s a rest day.'),
-  dailyNotes: z.string().optional().describe('General notes or advice for this specific day\'s workout.'),
+  day: z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']).describe('Dia da semana.'),
+  workout: z.array(ExerciseSchema).describe('Lista de exercícios.'),
+  dailyNotes: z.string().optional().describe('Dicas para o dia.'),
 });
 
 const AIGenWorkoutPlanOutputSchema = z.object({
-  weeklyPlan: z.array(DailyWorkoutSchema).describe('A detailed weekly workout plan for 7 days.'),
-  generalNotes: z.string().optional().describe('Overall general notes or advice for the entire weekly plan.'),
+  weeklyPlan: z.array(DailyWorkoutSchema).describe('Plano semanal de 7 dias.'),
+  generalNotes: z.string().optional().describe('Conselhos gerais em português.'),
 });
 export type AIGenWorkoutPlanOutput = z.infer<typeof AIGenWorkoutPlanOutputSchema>;
 
@@ -45,20 +41,15 @@ const aiGenWorkoutPlanPrompt = ai.definePrompt({
   name: 'aiGenWorkoutPlanPrompt',
   input: { schema: AIGenWorkoutPlanInputSchema },
   output: { schema: AIGenWorkoutPlanOutputSchema },
-  prompt: `You are an expert fitness coach and personal trainer. Your goal is to create a personalized weekly workout plan.
+  prompt: `Você é um personal trainer especialista. Crie um plano de treino semanal personalizado em PORTUGUÊS.
 
-Based on the user's fitness goals, preferred workout duration, and available equipment, generate a comprehensive 7-day workout plan.
-Ensure that the plan is balanced, effective, and adheres strictly to the provided parameters.
-If a day is a rest day, the 'workout' array for that day should be empty.
-Include clear exercise names, sets, reps/time, and brief instructions for each exercise.
+Baseado nas metas, duração e equipamentos, gere um plano de 7 dias equilibrado.
+Se um dia for descanso, deixe a lista de exercícios vazia.
+TUDO DEVE SER ESCRITO EM PORTUGUÊS (Brasil).
 
-Strictly output the response as a JSON object matching the AIGenWorkoutPlanOutputSchema.
-Do not include any other text or explanation outside the JSON object.
-
-User Details:
-Fitness Goals: {{{fitnessGoals}}}
-Workout Duration per Session: {{{workoutDuration}}}
-Available Equipment: {{{availableEquipment}}}`,
+Metas: {{{fitnessGoals}}}
+Duração: {{{workoutDuration}}}
+Equipamentos: {{{availableEquipment}}}`,
 });
 
 const aiGenWorkoutPlanFlow = ai.defineFlow(

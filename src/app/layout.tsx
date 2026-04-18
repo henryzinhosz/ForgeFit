@@ -2,8 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ForgeFit | Professional Workout & Routine Manager',
-  description: 'Manage your workouts, track progress, and reach your fitness goals with ForgeFit.',
+  title: 'ForgeFit | Gestão de Treino Profissional',
+  description: 'Gerencie seus treinos, acompanhe seu progresso e alcance suas metas fitness com ForgeFit.',
 };
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
