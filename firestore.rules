@@ -3,17 +3,20 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * SILO DE DADOS DO USUÁRIO (ESTRUTURA ABSOLUTA)
-     * Garante que o usuário autenticado tenha acesso total e irrestrito
-     * a qualquer documento ou subcoleção dentro do seu próprio ID.
-     * O uso de {document=**} resolve erros de listagem em subcoleções.
+     * SILO DE DADOS DO USUÁRIO (REESTRUTURADO)
+     * Garantia de acesso absoluto ao dono do ID em todas as subcoleções.
      */
-    match /users/{userId}/{document=**} {
+    match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Regra explícita para todas as subcoleções aninhadas
+      match /{allSubcollections=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     /**
-     * EXERCÍCIOS GLOBAIS (LEITURA PÚBLICA PARA USUÁRIOS LOGADOS)
+     * EXERCÍCIOS GLOBAIS
      */
     match /exercises/{exerciseId} {
       allow read: if request.auth != null;
@@ -23,9 +26,7 @@ service cloud.firestore {
      * EXERCÍCIOS PERSONALIZADOS
      */
     match /custom_exercises/{exerciseId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && (resource == null || resource.data.creatorUserId == request.auth.uid);
+      allow read, write: if request.auth != null;
     }
   }
 }
