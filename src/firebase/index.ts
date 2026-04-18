@@ -1,8 +1,8 @@
 
 'use client';
 
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
 import { getAuth, Auth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { firebaseConfig } from './config';
 
@@ -16,6 +16,11 @@ export function initializeFirebase() {
 
 export async function signInWithGoogle(auth: Auth) {
   const provider = new GoogleAuthProvider();
+  // Força a seleção de conta para evitar logins automáticos indesejados
+  provider.setCustomParameters({
+    prompt: 'select_account'
+  });
+  
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
