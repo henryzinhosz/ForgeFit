@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, Database, LineChart, Apple, Home, LogIn, LogOut } from 'lucide-react';
+import { Calendar, Database, LineChart, Apple, Home, LogIn, LogOut, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser, signInWithGoogle, logout } from '@/firebase';
 import { Button } from './ui/button';
@@ -22,16 +22,41 @@ export function Navigation() {
   const { user } = useUser();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-white/5 px-2 py-3 z-50 safe-area-bottom md:top-0 md:bottom-auto md:border-b md:border-t-0">
-      <div className="max-w-screen-xl mx-auto flex items-center justify-around md:justify-between">
-        <div className="hidden md:flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+    <>
+      {/* Top Bar for Mobile & Desktop Logo/Auth */}
+      <nav className="fixed top-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-b border-white/5 px-4 h-16 z-50 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,0,0,0.5)]">
             <span className="text-primary-foreground font-bold font-headline">F</span>
           </div>
-          <span className="font-headline font-bold text-xl text-primary">ForgeFit</span>
+          <span className="font-headline font-bold text-xl text-primary italic uppercase tracking-tighter">ForgeFit</span>
         </div>
-        
-        <div className="flex items-center justify-around flex-1 md:flex-initial md:gap-8">
+
+        <div className="flex items-center gap-3">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex flex-col items-end">
+                <span className="text-[10px] font-black uppercase text-primary leading-none">Soldado</span>
+                <span className="text-xs font-bold text-white/60 truncate max-w-[100px]">{user.displayName}</span>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => logout(auth)} className="text-muted-foreground hover:text-primary rounded-full hover:bg-primary/10">
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              onClick={() => signInWithGoogle(auth)} 
+              className="bg-primary hover:bg-primary/90 text-white font-black h-10 px-6 rounded-full shadow-[0_0_20px_rgba(255,0,0,0.4)] transition-all active:scale-95"
+            >
+              <LogIn className="w-4 h-4 mr-2" /> ENTRAR
+            </Button>
+          )}
+        </div>
+      </nav>
+
+      {/* Bottom Nav for Mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-white/5 px-2 py-3 z-50 safe-area-bottom md:hidden">
+        <div className="flex items-center justify-around">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -42,13 +67,13 @@ export function Navigation() {
                   "flex flex-col items-center gap-1.5 p-2 transition-all duration-300 rounded-2xl min-w-[64px]",
                   isActive 
                     ? "text-primary bg-primary/10" 
-                    : "text-muted-foreground hover:text-orange-400 hover:bg-white/5"
+                    : "text-muted-foreground hover:text-primary"
                 )}
               >
                 <item.icon className={cn("w-6 h-6 transition-transform", isActive && "scale-110")} />
                 <span className={cn(
-                  "text-[10px] font-bold uppercase tracking-tighter",
-                  isActive ? "opacity-100" : "opacity-70"
+                  "text-[9px] font-black uppercase tracking-tighter",
+                  isActive ? "opacity-100" : "opacity-60"
                 )}>
                   {item.label}
                 </span>
@@ -56,22 +81,10 @@ export function Navigation() {
             );
           })}
         </div>
+      </nav>
 
-        <div className="hidden md:flex items-center gap-4">
-          {user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-white/60 truncate max-w-[100px]">{user.displayName}</span>
-              <Button variant="ghost" size="icon" onClick={() => logout(auth)} className="text-muted-foreground hover:text-primary">
-                <LogOut className="w-5 h-5" />
-              </Button>
-            </div>
-          ) : (
-            <Button onClick={() => signInWithGoogle(auth)} className="bg-primary hover:bg-primary/90 text-white font-bold h-10 px-6 rounded-full">
-              <LogIn className="w-4 h-4 mr-2" /> Entrar
-            </Button>
-          )}
-        </div>
-      </div>
-    </nav>
+      {/* Desktop Sidebar/Menu spacer - Adjusting main content padding via page layout usually, but we define the space here if needed */}
+      <div className="hidden md:block h-16 w-full" />
+    </>
   );
 }
