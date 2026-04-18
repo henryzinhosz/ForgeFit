@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "exercise-weights",
+      "description": "Person lifting dumbbells",
+      "imageUrl": "https://picsum.photos/seed/weights/800/600",
+      "imageHint": "weight lifting"
+    },
+    {
+      "id": "exercise-running",
+      "description": "Person running on a track",
+      "imageUrl": "https://picsum.photos/seed/running/800/600",
+      "imageHint": "running athlete"
+    },
+    {
+      "id": "exercise-calisthenics",
+      "description": "Person performing a pull-up",
+      "imageUrl": "https://picsum.photos/seed/calisthenics/800/600",
+      "imageHint": "calisthenics pullups"
+    },
+    {
+      "id": "exercise-cycling",
+      "description": "Cyclist on a road bike",
+      "imageUrl": "https://picsum.photos/seed/cycling/800/600",
+      "imageHint": "cycling bike"
+    }
+  ]
 }
