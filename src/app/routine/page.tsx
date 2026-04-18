@@ -65,10 +65,10 @@ export default function RoutinePage() {
   const totalProtein = meals.reduce((acc, curr) => acc + (curr.protein || 0), 0);
 
   const mealSlots = [
-    { key: 'café', label: 'Café da Manhã', time: '06:30', icon: Coffee },
-    { key: 'almoço', label: 'Almoço', time: '12:30', icon: Sun },
-    { key: 'janta', label: 'Jantar', time: '18:00', icon: Moon },
-    { key: 'ceia', label: 'Ceia', time: '20:00', icon: Clock },
+    { key: 'café', label: 'Café da Manhã', icon: Coffee },
+    { key: 'almoço', label: 'Almoço', icon: Sun },
+    { key: 'janta', label: 'Jantar', icon: Moon },
+    { key: 'lanches', label: 'Lanches / Outros', icon: Clock },
   ];
 
   const handleAddFood = (slot: string, food: any) => {
@@ -102,12 +102,12 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium">Anote sua rotina alimentar e tenha uma média aproximada de calorias e proteínas.</p>
+          <p className="text-muted-foreground font-medium">Anote sua rotina alimentar e tenha uma média aproximada de Calorias e Proteínas.</p>
         </header>
 
         <section className="space-y-6">
           <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2">
-            <Utensils className="text-primary w-6 h-6" /> Alimentação do Dia
+            <Utensils className="text-primary w-6 h-6" /> Alimentação Do Dia
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -120,7 +120,6 @@ export default function RoutinePage() {
                       <div className="bg-primary/20 p-2 rounded-lg text-primary"><slot.icon className="w-5 h-5" /></div>
                       <div>
                         <CardTitle className="text-sm font-bold text-white uppercase italic">{slot.label}</CardTitle>
-                        <CardDescription className="text-[10px] text-primary/80 font-black italic">{slot.time}</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
