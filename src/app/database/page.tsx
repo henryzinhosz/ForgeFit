@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Info } from 'lucide-react';
 import { useForgeStore, DayOfWeek } from '@/lib/store';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -94,7 +95,7 @@ export default function DatabasePage() {
                   onClick={() => setCategory(cat)}
                   className={cn(
                     "rounded-full px-6",
-                    category === cat ? "bg-primary" : "border-border text-muted-foreground"
+                    category === cat ? "bg-primary text-white" : "border-border text-muted-foreground hover:bg-white/5"
                   )}
                 >
                   {cat}
@@ -165,7 +166,7 @@ export default function DatabasePage() {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90">Confirmar Adição</Button>
+                        <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 text-white font-bold">Confirmar Adição</Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
