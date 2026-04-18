@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -158,6 +157,7 @@ export default function DatabasePage() {
                     alt={ex.title}
                     width={800}
                     height={600}
+                    unoptimized
                     className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100"
                     data-ai-hint={imgData.imageHint}
                   />
@@ -197,6 +197,7 @@ export default function DatabasePage() {
                               src={imgData.imageUrl} 
                               alt={ex.title}
                               fill
+                              unoptimized
                               className="object-cover object-top opacity-90"
                               data-ai-hint={imgData.imageHint}
                             />
