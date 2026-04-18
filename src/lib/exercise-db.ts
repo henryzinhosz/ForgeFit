@@ -22,6 +22,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '25', title: 'Prancha', category: 'Calistenia', instructions: 'Apoie-se nos antebraços e pontas dos pés, mantendo o abdômen contraído.', imageId: 'prancha-img' },
   { id: '27', title: 'Abdominal Remador', category: 'Calistenia', instructions: 'Deitado em decúbito dorsal, braços estendidos atrás da cabeça. Flexione o tronco e os joelhos simultaneamente, abraçando as pernas.', imageId: 'remador-gif' },
   { id: '28', title: 'Força superior (negativas)', category: 'Calistenia', instructions: 'Para a barra na atura do queixo, após isso desça lentamente os braços, segurando por 5 segundos', imageId: 'forca-superior-gif' },
+  { id: '29', title: 'Isometria na barra fixa', category: 'Calistenia', instructions: 'Segure por 15 segundos no topo da barra fixa', imageId: 'isometria-barra-gif' },
   
   // Cardio
   { id: '41', title: 'Corrida Alternada', category: 'Cardio', instructions: 'Corrida alternada em trote leve em cadencia com tiros curtos de alta respiração', imageId: 'corrida-tfm-gif' },

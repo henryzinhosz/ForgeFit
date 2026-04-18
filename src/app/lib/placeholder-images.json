@@ -90,6 +90,12 @@
       "description": "Flexão de braço com apoio dos joelhos",
       "imageUrl": "https://www.lyfta.app/thumbnails/32111201.jpg",
       "imageHint": "Knee Pushup"
+    },
+    {
+      "id": "isometria-barra-gif",
+      "description": "GIF de Isometria na barra fixa",
+      "imageUrl": "https://i.pinimg.com/originals/1b/18/65/1b1865514735f5b576466d26b25441e3.gif",
+      "imageHint": "Pullup Isometric"
     }
   ]
 }
