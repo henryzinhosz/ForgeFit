@@ -33,11 +33,13 @@
     @apply border-border outline-none;
   }
   body {
-    @apply bg-black text-foreground antialiased font-body;
+    @apply bg-black text-foreground antialiased font-body overflow-x-hidden;
     background-image: 
       radial-gradient(circle at 50% -20%, hsla(var(--primary), 0.2), transparent),
       radial-gradient(circle at 0% 100%, hsla(var(--accent), 0.15), transparent);
     background-attachment: fixed;
+    /* Previne overscroll no iOS para parecer mais nativo */
+    overscroll-behavior-y: none;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline font-bold tracking-tight uppercase;
@@ -67,4 +69,9 @@
   to {
     filter: drop-shadow(0 0 10px hsla(var(--primary), 0.8));
   }
+}
+
+/* Ajuste para notch de celulares */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
