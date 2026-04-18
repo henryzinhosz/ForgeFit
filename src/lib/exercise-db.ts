@@ -26,9 +26,9 @@ export const EXERCISE_DATABASE: Exercise[] = [
   { id: '28', title: 'Força Superior (Negativas)', category: 'Calistenia', instructions: 'Suba na barra até o queixo e desça o corpo de forma lenta e controlada, levando cerca de 5 segundos.', imageId: 'forca-superior-gif' },
   { id: '29', title: 'Isometria na Barra Fixa', category: 'Calistenia', instructions: 'Mantenha o corpo sustentado no topo da barra fixa, com o queixo acima da barra, pelo tempo determinado.', imageId: 'isometria-barra-gif' },
   { id: '30', title: 'Abdominal Supra', category: 'Calistenia', instructions: 'Deitado de costas e com os joelhos flexionados, eleve apenas a parte superior do tronco contraindo o abdômen.', imageId: 'abdominal-supra-gif' },
-  { id: '31', title: 'Suspensão na Barra Fixa', category: 'Calistenia', instructions: 'Mantenha o corpo suspenso e esticado pelo maior tempo possível na barra fixa.', imageId: 'pendurar-barra-gif' },
+  { id: '31', title: 'Suspensão na Barra Fixa', category: 'Calistenia', instructions: 'Mantenha o corpo esticado pelo maior tempo na barra fixa.', imageId: 'pendurar-barra-gif' },
   { id: '32', title: 'Elevação de Pernas', category: 'Calistenia', instructions: 'Deitado no chão com o corpo reto, eleve as pernas até 90 graus e retorne lentamente à posição inicial.', imageId: 'elevacao-perna-img' },
-  { id: '50', title: 'Simulado TAF', category: 'Calistenia', instructions: 'Realize o máximo de repetições dos exercícios do TAF: corrida, flexão, abdominal e barra fixa.', imageId: 'simulado-taf-img' },
+  { id: '50', title: 'Simulado TAF', category: 'Calistenia', instructions: 'Faça o máximo dos exercícios do TAF: corrida, flexão, abdominal e barra fixa.', imageId: 'simulado-taf-img' },
   
   // Cardio
   { id: '41', title: 'Corrida Alternada', category: 'Cardio', instructions: 'Corrida intervalada composta por trotes leves e tiros curtos de alta intensidade.', imageId: 'corrida-tfm-gif' },
