@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, Utensils, Coffee, Sun, Moon, Clock, Trash2, Flame, Target } from 'lucide-react';
+import { Utensils, Coffee, Sun, Moon, Clock, Trash2, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -16,6 +17,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, doc, query, where } from 'firebase/firestore';
+import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 
 const MILITARY_FOOD_DB = [
   { id: '1', name: 'Arroz Branco', portion: '1 escumadeira (150g)', calories: 190, protein: 4 },
@@ -47,37 +49,17 @@ export default function RoutinePage() {
     return query(collection(db, 'users', user.uid, 'meals'), where('date', '==', todayStr));
   }, [db, user, todayStr]);
 
-  const waterQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
-    return query(collection(db, 'users', user.uid, 'water'), where('date', '==', todayStr));
-  }, [db, user, todayStr]);
-
   const { data: meals } = useCollection(mealQuery);
-  const { data: waterLogs } = useCollection(waterQuery);
 
-  const waterCount = (waterLogs || []).reduce((acc, curr) => acc + (curr.amount || 0), 0);
-  
-  const userWeight = profile?.weight || 0;
-  const userHeight = profile?.height || 0;
-  const userAge = profile?.age || 0;
-  const userGender = profile?.gender || 'Masculino';
-  
-  const waterGoal = userWeight > 0 ? (userWeight * 0.050) : 4; 
-  const proteinGoalMin = userWeight > 0 ? Math.round(userWeight * 1.8) : 130;
-  const proteinGoalMax = userWeight > 0 ? Math.round(userWeight * 2.2) : 160;
-
-  const calculateCalorieGoal = () => {
-    if (userWeight > 0 && userHeight > 0 && userAge > 0) {
-      const bmr = userGender === 'Masculino'
-        ? 66.47 + (13.75 * userWeight) + (5.0 * userHeight) - (6.75 * userAge)
-        : 655.1 + (9.56 * userWeight) + (1.85 * userHeight) - (4.67 * userAge);
-      return Math.round(bmr * 1.55);
-    }
-    return 2500;
+  const metrics: HealthMetrics = {
+    weight: profile?.weight || 70,
+    height: profile?.height || 170,
+    age: profile?.age || 25,
+    gender: (profile?.gender as any) || 'Masculino'
   };
-  const calorieGoal = calculateCalorieGoal();
   
-  const waterProgress = waterGoal > 0 ? (waterCount / waterGoal) * 100 : 0;
+  const assessment = getHealthAssessment(metrics);
+  
   const totalCalories = (meals || []).reduce((acc, curr) => acc + (curr.calories || 0), 0);
   const totalProtein = (meals || []).reduce((acc, curr) => acc + (curr.protein || 0), 0);
 
@@ -101,15 +83,6 @@ export default function RoutinePage() {
   const handleRemoveFood = (id: string) => {
     if (!db || !user) return;
     deleteDocumentNonBlocking(doc(db, 'users', user.uid, 'meals', id));
-  };
-
-  const handleIncrementWater = () => {
-    if (!db || !user) return;
-    addDocumentNonBlocking(collection(db, 'users', user.uid, 'water'), {
-      date: todayStr,
-      amount: 1,
-      createdAt: new Date().toISOString()
-    });
   };
 
   return (
@@ -189,8 +162,8 @@ export default function RoutinePage() {
                 <div className="space-y-1">
                    <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Cálculos Baseados na OMS:</p>
                    <div className="flex flex-col gap-1">
-                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>
-                     <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (1.8-2.2g/kg): {proteinGoalMin} - {proteinGoalMax}g</p>
+                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {assessment.get} kcal</p>
+                     <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (1.8-2.2g/kg): {assessment.proteinRange.min} - {assessment.proteinRange.max}g</p>
                    </div>
                 </div>
               </div>
@@ -207,45 +180,9 @@ export default function RoutinePage() {
             </CardContent>
           </Card>
         </section>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
-            <CardHeader className="bg-white/5 pb-6 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic"><Droplets className="w-7 h-7" /> Hidratação</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8 space-y-8 flex flex-col items-center">
-              <div className="relative w-48 h-48 rounded-full border-8 border-white/5 flex items-center justify-center overflow-hidden">
-                <div className="absolute bottom-0 left-0 right-0 bg-accent/20 transition-all duration-700" style={{ height: `${Math.min(waterProgress, 100)}%` }} />
-                <div className="relative z-10 flex flex-col items-center">
-                  <span className="text-7xl font-black text-accent font-headline italic">{waterCount}</span>
-                  <span className="text-xs font-bold text-accent/80 uppercase tracking-widest">Litros</span>
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária (50ml/kg): {waterGoal.toFixed(1)}L</p>
-                <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
-            <CardHeader className="bg-white/5 pb-6 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Balanço Calórico</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <div className="p-8 rounded-3xl bg-white/5 border border-white/5 text-center space-y-4">
-                <Flame className={cn("w-12 h-12 mx-auto", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
-                <h3 className="text-xl font-headline font-bold uppercase italic">Missão Nutricional</h3>
-                <p className="text-sm text-muted-foreground font-bold">
-                  Você consumiu {totalCalories} kcal de sua meta de {calorieGoal} kcal hoje.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
         
         <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-          Lembrando, essas metas são baseadas em calculo de peso, altura e genero. Seguindo os parametros basicos da OMS, podendo variar de acordo com dietas reguladas
+          Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
         </p>
       </main>
     </div>
