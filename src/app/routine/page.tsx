@@ -62,7 +62,7 @@ export default function RoutinePage() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
   
-  const waterGoal = userWeight > 0 ? (userWeight * 0.035) : 4;
+  const waterGoal = userWeight > 0 ? (userWeight * 0.050) : 4; // Atualizado para 50ml/kg
   const proteinGoalMin = userWeight > 0 ? Math.round(userWeight * 1.8) : 130;
   const proteinGoalMax = userWeight > 0 ? Math.round(userWeight * 2.2) : 160;
 
@@ -222,7 +222,7 @@ export default function RoutinePage() {
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária (35ml/kg): {waterGoal.toFixed(1)}L</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária (50ml/kg): {waterGoal.toFixed(1)}L</p>
                 <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
               </div>
             </CardContent>

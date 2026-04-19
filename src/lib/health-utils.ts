@@ -82,10 +82,10 @@ export function calculateMetabolism(metrics: HealthMetrics): { tmb: number; get:
 }
 
 /**
- * Calcula metas de hidratação (35ml/kg) e proteína (1.8g - 2.2g/kg).
+ * Calcula metas de hidratação (50ml/kg) e proteína (1.8g - 2.2g/kg).
  */
 export function calculateNutrients(weight: number): { water: number; protein: { min: number; max: number } } {
-  const water = (35 * weight) / 1000; // Converte ml para Litros
+  const water = (50 * weight) / 1000; // Aumentado para 50ml por quilo
   return {
     water: parseFloat(water.toFixed(1)),
     protein: {

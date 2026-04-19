@@ -273,7 +273,7 @@ export default function ProgressPage() {
                   <span className="text-lg font-black text-accent italic">{assessment.proteinRange.min} - {assessment.proteinRange.max}g</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Água Diária (35ml/kg)</span>
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Água Diária (50ml/kg)</span>
                   <span className="text-lg font-black text-blue-400 italic">{assessment.waterLiters}L</span>
                 </div>
               </div>

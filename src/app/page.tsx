@@ -240,16 +240,19 @@ export default function Home() {
                   <span className="text-5xl font-black text-accent italic leading-none">{currentWater}</span>
                   <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {healthAssessment.waterLiters || 4}L</span>
                 </div>
-                <Button onClick={handleIncrementWater} className="w-full h-14 bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 border-2 rounded-2xl font-black uppercase italic">
-                  +1 LITRO <Droplets className="ml-2 w-5 h-5" />
-                </Button>
+                <div className="space-y-2">
+                  <Button onClick={handleIncrementWater} className="w-full h-14 bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 border-2 rounded-2xl font-black uppercase italic">
+                    +1 LITRO <Droplets className="ml-2 w-5 h-5" />
+                  </Button>
+                  <p className="text-[9px] font-bold uppercase italic text-center text-muted-foreground">Meta Diária (50ml/kg): {healthAssessment.waterLiters}L</p>
+                </div>
               </CardContent>
             </Card>
 
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <Target className="w-5 h-5" /> Metas de Saúde
+                  <Target className="w-5 h-5" /> Meta Nutricional Determinada
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
@@ -268,7 +271,7 @@ export default function Home() {
                   </div>
                 </div>
                 <p className="text-[9px] font-bold uppercase italic opacity-70 text-center">
-                  Baseado em: {profile?.weight || '---'}kg | {profile?.age || '---'} anos | {profile?.gender || '---'}
+                  Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
                 </p>
               </CardContent>
             </Card>
