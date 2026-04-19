@@ -1,7 +1,6 @@
 
 'use client';
 
-import type { Viewport } from 'next';
 import './globals.css';
 import { initializeFirebase, FirebaseClientProvider } from '@/firebase';
 
@@ -20,11 +19,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
         
-        {/* Configurações de Ícone para Navegador e Mobile */}
-        <link rel="icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" type="image/jpeg" />
+        {/* Ícone da Aba do Navegador e Atalhos */}
+        <link rel="icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" type="image/jpeg" sizes="any" />
         <link rel="shortcut icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" />
         
+        {/* Configurações PWA */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="ForgeFIT" />
