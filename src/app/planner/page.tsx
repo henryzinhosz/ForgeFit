@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trash2, Pencil, Plus, Loader2, Calendar } from 'lucide-react';
+import { Trash2, Pencil, Plus, Loader2, Calendar, Info } from 'lucide-react';
 import { useCollection, useFirestore, useUser, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import {
@@ -18,12 +18,16 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { EXERCISE_DATABASE } from '@/lib/exercise-db';
+import { getPlaceholderById } from '@/lib/placeholder-images';
 
 export default function PlannerPage() {
   const { user } = useUser();
@@ -145,46 +149,87 @@ export default function PlannerPage() {
                   <CardContent className="p-0">
                     {workouts.filter(w => w.day === day.key).length > 0 ? (
                       <div className="divide-y divide-white/5">
-                        {workouts.filter(w => w.day === day.key).map((ex) => (
-                          <div key={ex.id} className={cn(
-                            "flex items-center gap-4 p-4 md:p-6 transition-colors",
-                            ex.completed ? "bg-green-500/5" : "hover:bg-white/5"
-                          )}>
-                            <Checkbox 
-                              checked={ex.completed} 
-                              onCheckedChange={() => toggleExercise(ex.id, ex.completed)}
-                              className="w-6 h-6 rounded-full border-primary/50 data-[state=checked]:bg-primary"
-                            />
-                            <div className="flex-1 space-y-1">
-                              <h4 className={cn("text-lg font-bold uppercase italic", ex.completed && "line-through text-muted-foreground")}>
-                                {ex.title}
-                              </h4>
-                              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-black text-primary/80 italic">
-                                <span>{ex.sets} Séries</span>
-                                <span>{ex.reps} Reps</span>
-                                {ex.time && <span>{ex.time}</span>}
+                        {workouts.filter(w => w.day === day.key).map((ex) => {
+                          const exerciseData = EXERCISE_DATABASE.find(e => e.id === ex.exerciseId);
+                          const imgData = exerciseData ? getPlaceholderById(exerciseData.imageId) : null;
+                          
+                          return (
+                            <div key={ex.id} className={cn(
+                              "flex items-center gap-4 p-4 md:p-6 transition-colors",
+                              ex.completed ? "bg-green-500/5" : "hover:bg-white/5"
+                            )}>
+                              <Checkbox 
+                                checked={ex.completed} 
+                                onCheckedChange={() => toggleExercise(ex.id, ex.completed)}
+                                className="w-6 h-6 rounded-full border-primary/50 data-[state=checked]:bg-primary"
+                              />
+                              <div className="flex-1 space-y-1">
+                                <h4 className={cn("text-lg font-bold uppercase italic", ex.completed && "line-through text-muted-foreground")}>
+                                  {ex.title}
+                                </h4>
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-black text-primary/80 italic">
+                                  <span>{ex.sets} Séries</span>
+                                  <span>{ex.reps} Reps</span>
+                                  {ex.time && <span>{ex.time}</span>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {exerciseData && (
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="text-accent hover:text-accent hover:bg-accent/10 rounded-xl">
+                                        <Info className="w-5 h-5" />
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="bg-card border-white/10 text-white max-w-lg rounded-3xl overflow-hidden">
+                                      <DialogHeader className="p-6 pb-0 text-left">
+                                        <DialogTitle className="text-3xl font-headline text-primary italic uppercase">{exerciseData.title}</DialogTitle>
+                                        <DialogDescription className="text-accent font-bold uppercase tracking-widest">{exerciseData.category}</DialogDescription>
+                                      </DialogHeader>
+                                      <div className="space-y-6 p-6">
+                                        {imgData && (
+                                          <div className="aspect-video bg-white rounded-2xl overflow-hidden border border-white/10 relative shadow-2xl flex items-center justify-center">
+                                            <Image 
+                                              src={imgData.imageUrl} 
+                                              alt={exerciseData.title}
+                                              fill
+                                              unoptimized
+                                              className="object-contain object-center"
+                                              data-ai-hint={imgData.imageHint}
+                                            />
+                                            <div className="absolute bottom-3 right-3 pointer-events-none select-none">
+                                              <span className="text-[12px] font-black uppercase italic text-primary/30 tracking-tighter">ForgeFIT</span>
+                                            </div>
+                                          </div>
+                                        )}
+                                        <div className="space-y-4">
+                                          <h4 className="font-bold text-lg text-white border-l-4 border-primary pl-4 uppercase italic">Guia de Execução Profissional</h4>
+                                          <p className="text-muted-foreground leading-relaxed text-base bg-white/5 p-4 rounded-2xl border border-white/5">{exerciseData.instructions}</p>
+                                        </div>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                )}
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => openEditDialog(ex)}
+                                  className="text-accent hover:text-accent hover:bg-accent/10 rounded-xl"
+                                >
+                                  <Pencil className="w-5 h-5" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => removeExercise(ex.id)}
+                                  className="text-destructive hover:bg-destructive/10 rounded-xl"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </Button>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => openEditDialog(ex)}
-                                className="text-accent hover:text-accent hover:bg-accent/10 rounded-xl"
-                              >
-                                <Pencil className="w-5 h-5" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => removeExercise(ex.id)}
-                                className="text-destructive hover:bg-destructive/10 rounded-xl"
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center py-20 px-4 text-center space-y-4">
