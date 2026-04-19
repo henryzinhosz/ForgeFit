@@ -3,8 +3,8 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'ForgeFit',
-    short_name: 'ForgeFit',
+    name: 'ForgeFIT',
+    short_name: 'ForgeFIT',
     description: 'Plataforma de alta performance para treinamento físico e musculação.',
     start_url: '/',
     display: 'standalone',
