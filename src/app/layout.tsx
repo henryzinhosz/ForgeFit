@@ -19,7 +19,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
         
-        {/* Ícone da Aba do Navegador (Favicon) */}
+        {/* Ícone da Aba do Navegador (Favicon) - Imagem do Bodybuilder */}
         <link rel="icon" href="https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg" type="image/jpeg" />
         <link rel="shortcut icon" href="https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg" type="image/jpeg" />
         
