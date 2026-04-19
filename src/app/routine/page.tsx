@@ -90,7 +90,7 @@ export default function RoutinePage() {
       <Navigation />
       
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
-        <header className="space-y-2 text-center md:text-left">
+        <header className="space-y-2 text-center">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
           <p className="text-muted-foreground font-medium text-sm">Acompanhe seu balanço nutricional diário.</p>
         </header>
@@ -182,7 +182,7 @@ export default function RoutinePage() {
         </section>
         
         <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-          Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
+          Lembrando, essas metas são baseadas em calculo de peso, altura e genero. Seguindo os parametros basicos da OMS, podendo variar de acordo com dietas reguladas
         </p>
       </main>
     </div>
