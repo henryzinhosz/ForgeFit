@@ -15,11 +15,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: 'https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg',
         sizes: '192x192',
         type: 'image/jpeg',
+        purpose: 'any',
       },
       {
         src: 'https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg',
         sizes: '512x512',
         type: 'image/jpeg',
+        purpose: 'maskable',
       },
     ],
   }
