@@ -17,7 +17,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Info, Flame } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Info, Flame, Target } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -92,7 +92,6 @@ export default function ProgressPage() {
       const weightValue = parseFloat(weightInput);
       const metricsRef = collection(db, 'users', user.uid, 'metrics');
 
-      // 1. Registro no histórico para o gráfico
       addDocumentNonBlocking(metricsRef, {
         type: 'weight',
         value: weightValue,
@@ -100,7 +99,6 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
-      // 2. Sincronização Automática com o Perfil Global (Recalcula Metas)
       setDocumentNonBlocking(profileRef, {
         weight: weightValue,
         updatedAt: new Date().toISOString()
@@ -123,7 +121,6 @@ export default function ProgressPage() {
     }
   };
 
-  // Cálculos Oficiais para o relatório de insights
   const userWeight = profile?.weight || 0;
   const userHeight = profile?.height || 0;
   const userAge = profile?.age || 0;
@@ -151,7 +148,7 @@ export default function ProgressPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
-              <p className="text-muted-foreground font-medium">Dados sincronizados com seu Perfil Global.</p>
+              <p className="text-muted-foreground font-medium">Sincronização global com perfil médico oficial.</p>
             </div>
             <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
               <Info className="text-primary w-5 h-5 shrink-0" />
@@ -163,7 +160,6 @@ export default function ProgressPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Monitor de Peso Corporal */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
@@ -201,7 +197,6 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
 
-          {/* Gráfico de Recordes Pessoais (PR) */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic">
@@ -245,15 +240,14 @@ export default function ProgressPage() {
           </Card>
         </div>
 
-        {/* Análise de Performance e Resumo Global */}
         <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório de Performance</CardTitle>
+            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório de Performance Médica</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
             <div className="space-y-6">
               <h4 className="text-accent font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" /> Insights do Sistema
+                <TrendingUp className="w-4 h-4" /> Insights de Evolução
               </h4>
               <div className="space-y-4">
                 {performanceInsights.map((insight, idx) => (
@@ -266,21 +260,35 @@ export default function ProgressPage() {
 
             <div className="space-y-6">
               <h4 className="text-primary font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <Flame className="w-4 h-4" /> Metas Médicas Atuais
+                <Target className="w-4 h-4" /> Metas Oficiais Sugeridas
               </h4>
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Calorias (TDEE)</span>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Calorias (Mifflin-St Jeor)</span>
+                    <span className="text-xs font-bold text-white/40 uppercase">TDEE / Gasto Total</span>
+                  </div>
                   <span className="text-lg font-black text-white italic">{calorieGoal} kcal</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Proteína (2g/kg)</span>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Proteína Diária (2g/kg)</span>
+                    <span className="text-xs font-bold text-white/40 uppercase">Reconstrução Muscular</span>
+                  </div>
                   <span className="text-lg font-black text-accent italic">{proteinGoal}g</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Hidratação (50ml/kg)</span>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Hidratação (50ml/kg)</span>
+                    <span className="text-xs font-bold text-white/40 uppercase">Saúde e Performance</span>
+                  </div>
                   <span className="text-lg font-black text-primary italic">{waterGoal.toFixed(1)}L</span>
                 </div>
+              </div>
+              <div className="px-4 py-2 bg-white/5 rounded-xl border border-dashed border-white/10">
+                <p className="text-[9px] font-bold uppercase italic text-white/60 text-center">
+                  Baseado em: {userWeight}kg | {userHeight}cm | {userAge} anos | {userGender}
+                </p>
               </div>
             </div>
           </CardContent>

@@ -2,17 +2,27 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Modelo de Silo Absoluto: Dono do UID tem acesso total e irrestrito a tudo em /users/{userId}
+    // Regra explícita para o documento de perfil do usuário
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // Permissão recursiva absoluta para todas as subcoleções (metrics, workouts, water, meals, etc)
-      match /{allPaths=**} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
     }
 
-    // Regras auxiliares para exercícios (apenas leitura para autenticados)
+    // Regras explícitas para subcoleções do usuário (Silo de Dados)
+    // Isso resolve o erro de 'Missing or insufficient permissions' em listagens filtradas
+    match /users/{userId}/metrics/{id} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /users/{userId}/workouts/{id} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /users/{userId}/water/{id} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /users/{userId}/meals/{id} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Regras auxiliares para banco de exercícios (leitura pública para autenticados)
     match /exercises/{exerciseId} {
       allow read: if request.auth != null;
     }

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, Flame, Target } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Flame, Target, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
@@ -87,17 +87,15 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  // Cálculos Oficiais (Sugestão Médica)
-  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4; // 50ml por kg
-  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160; // 2g por kg
+  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
+  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
-      // Equação de Mifflin-St Jeor
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      return Math.round(bmr * 1.6); // Fator de atividade intensa/militar
+      return Math.round(bmr * 1.6);
     }
     return 2500;
   };
@@ -142,9 +140,16 @@ export default function Home() {
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
             <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Quartel General</h1>
-            <p className="text-muted-foreground font-medium">
-              Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-muted-foreground font-medium">
+                Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
+              </p>
+              {userAge > 0 && (
+                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase italic text-white/60">
+                  {userAge} Anos
+                </span>
+              )}
+            </div>
           </div>
           
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
@@ -261,13 +266,16 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <Target className="w-5 h-5" /> Metas Oficiais
+                  <Target className="w-5 h-5" /> Metas Médicas
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
                 <div className="bg-white/20 p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase italic">Meta Calórica (TDEE)</span>
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] font-black uppercase italic block">Meta Calórica (TDEE)</span>
+                      <span className="text-[8px] font-bold text-white/50 uppercase">Base: Mifflin-St Jeor</span>
+                    </div>
                     <span className="text-sm font-black italic">{calorieGoal} kcal</span>
                   </div>
                   <div className="flex items-center justify-between">
