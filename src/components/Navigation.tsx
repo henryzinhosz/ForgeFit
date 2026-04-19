@@ -28,9 +28,9 @@ export function Navigation() {
     <>
       {/* Top Bar */}
       <nav className="fixed top-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-b border-white/5 px-4 h-16 z-50 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4 sm:gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shadow-[0_0_20px_rgba(255,0,0,0.6)] relative border border-white/10">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden flex items-center justify-center shadow-[0_0_20px_rgba(255,0,0,0.6)] relative border border-white/10">
               <Image 
                 src={logoImg.imageUrl} 
                 alt="ForgeFit Logo" 
@@ -39,7 +39,7 @@ export function Navigation() {
                 data-ai-hint={logoImg.imageHint}
               />
             </div>
-            <span className="font-headline font-bold text-xl text-primary italic uppercase tracking-tighter">ForgeFit</span>
+            <span className="font-headline font-bold text-lg sm:text-xl text-primary italic uppercase tracking-tighter">ForgeFit</span>
           </Link>
 
           {/* Nav Links - Desktop */}
@@ -84,9 +84,11 @@ export function Navigation() {
           ) : (
             <Button 
               onClick={() => signInWithGoogle(auth)} 
-              className="bg-white text-black hover:bg-white/90 font-black h-10 px-6 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all active:scale-95 flex items-center gap-2"
+              className="bg-white text-black hover:bg-white/90 font-black h-9 sm:h-10 px-3 sm:px-6 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all active:scale-95 flex items-center gap-2"
             >
-              <LogIn className="w-4 h-4" /> ENTRAR COM GOOGLE
+              <LogIn className="w-4 h-4" /> 
+              <span className="hidden sm:inline">ENTRAR COM GOOGLE</span>
+              <span className="inline sm:hidden">LOGIN</span>
             </Button>
           )}
         </div>
