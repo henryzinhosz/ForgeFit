@@ -3,7 +3,7 @@
 
 import { useState, useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Utensils, Coffee, Sun, Moon, Clock, Trash2, Search, Loader2 } from 'lucide-react';
@@ -30,8 +30,9 @@ const BRAZILIAN_FOOD_DB = [
   { id: '6', name: 'Macarrão Integral Cozido', portion: '1 escumadeira (100g)', calories: 124, protein: 5 },
   { id: '7', name: 'Quinoa Cozida', portion: '100g', calories: 120, protein: 4 },
   { id: '8', name: 'Cuscuz Nordestino', portion: '1 pedaço (100g)', calories: 112, protein: 3 },
+  { id: '9', name: 'Grão de Bico Cozido', portion: '100g', calories: 164, protein: 9 },
   
-  // Proteínas Animais
+  // Proteínas Animais (Carnes)
   { id: '10', name: 'Bife de Patinho Grelhado', portion: '100g', calories: 219, protein: 35 },
   { id: '11', name: 'Bife de Alcatra Grelhado', portion: '100g', calories: 241, protein: 32 },
   { id: '12', name: 'Picanha Grelhada (sem gordura)', portion: '100g', calories: 238, protein: 30 },
@@ -43,8 +44,10 @@ const BRAZILIAN_FOOD_DB = [
   { id: '18', name: 'Salmão Grelhado', portion: '100g', calories: 208, protein: 22 },
   { id: '19', name: 'Atum em Lata (em água)', portion: '1 lata (120g)', calories: 116, protein: 26 },
   { id: '20', name: 'Carne Moída (Acém)', portion: '100g', calories: 212, protein: 26 },
+  { id: '21', name: 'Lombo de Porco Assado', portion: '100g', calories: 210, protein: 28 },
+  { id: '22', name: 'Fígado de Boi Grelhado', portion: '100g', calories: 220, protein: 29 },
 
-  // Pães e Cafés
+  // Pães, Cafés e Laticínios
   { id: '30', name: 'Pão Francês', portion: '1 unidade (50g)', calories: 135, protein: 4 },
   { id: '31', name: 'Pão de Forma Integral', portion: '2 fatias (50g)', calories: 122, protein: 5 },
   { id: '32', name: 'Pão de Queijo', portion: '1 unidade média (30g)', calories: 105, protein: 2 },
@@ -55,9 +58,10 @@ const BRAZILIAN_FOOD_DB = [
   { id: '37', name: 'Leite Integral', portion: '1 copo (200ml)', calories: 120, protein: 6 },
   { id: '38', name: 'Leite Desnatado', portion: '1 copo (200ml)', calories: 70, protein: 6 },
   { id: '39', name: 'Iogurte Natural', portion: '100g', calories: 63, protein: 3 },
-  { id: '40', name: 'Café sem Açúcar', portion: '50ml', calories: 2, protein: 0 },
+  { id: '40', name: 'Iogurte Grego', portion: '100g', calories: 110, protein: 7 },
+  { id: '41', name: 'Requeijão Light', portion: '1 colher (30g)', calories: 50, protein: 3 },
 
-  // Tubérculos e Vegetais
+  // Tubérculos, Vegetais e Legumes
   { id: '50', name: 'Batata Doce Cozida', portion: '100g', calories: 86, protein: 1 },
   { id: '51', name: 'Batata Inglesa Cozida', portion: '100g', calories: 77, protein: 2 },
   { id: '52', name: 'Mandioca Cozida', portion: '100g', calories: 160, protein: 1 },
@@ -68,6 +72,8 @@ const BRAZILIAN_FOOD_DB = [
   { id: '57', name: 'Cenoura Crua', portion: '100g', calories: 41, protein: 1 },
   { id: '58', name: 'Abóbora Cozida', portion: '100g', calories: 26, protein: 1 },
   { id: '59', name: 'Espinafre Cozido', portion: '100g', calories: 23, protein: 3 },
+  { id: '60', name: 'Berinjela Grelhada', portion: '100g', calories: 30, protein: 1 },
+  { id: '61', name: 'Abobrinha Cozida', portion: '100g', calories: 17, protein: 1 },
 
   // Frutas
   { id: '70', name: 'Banana Prata', portion: '1 unidade média', calories: 89, protein: 1 },
@@ -80,6 +86,8 @@ const BRAZILIAN_FOOD_DB = [
   { id: '77', name: 'Manga Palmer', portion: '100g', calories: 60, protein: 0 },
   { id: '78', name: 'Uva (Itália)', portion: '100g', calories: 67, protein: 1 },
   { id: '79', name: 'Abacaxi', portion: '1 fatia média', calories: 50, protein: 0 },
+  { id: '80', name: 'Morango', portion: '5 unidades', calories: 30, protein: 0 },
+  { id: '81', name: 'Pêra', portion: '1 unidade', calories: 57, protein: 0 },
 
   // Suplementos e Diversos
   { id: '90', name: 'Whey Protein', portion: '1 dose (30g)', calories: 110, protein: 24 },
@@ -88,6 +96,8 @@ const BRAZILIAN_FOOD_DB = [
   { id: '93', name: 'Azeite de Oliva', portion: '1 colher de sopa', calories: 119, protein: 0 },
   { id: '94', name: 'Castanha do Pará', portion: '1 unidade', calories: 27, protein: 0 },
   { id: '95', name: 'Mel de Abelha', portion: '1 colher de sopa', calories: 64, protein: 0 },
+  { id: '96', name: 'Creatina Monoidratada', portion: '5g', calories: 0, protein: 0 },
+  { id: '97', name: 'Barrinha de Proteína', portion: '1 unidade (40g)', calories: 150, protein: 12 },
 ];
 
 export default function RoutinePage() {
@@ -167,22 +177,22 @@ export default function RoutinePage() {
     <div className="min-h-screen pb-24 md:pt-20 bg-black">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-4 space-y-3">
+      <main className="max-w-screen-xl mx-auto px-4 py-4 space-y-4">
         <header className="space-y-1 text-center">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
           <p className="text-muted-foreground font-medium text-sm">Acompanhe seu balanço nutricional diário.</p>
         </header>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2">
+        <section className="space-y-6">
+          <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2 justify-center">
             <Utensils className="text-primary w-6 h-6" /> Alimentação Do Dia
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {mealSlots.map((slot) => {
               const items = (meals || []).filter(m => m.slot === slot.key);
               return (
-                <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden shadow-xl min-h-[300px] flex flex-col">
+                <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden shadow-xl min-h-[350px] flex flex-col">
                   <CardHeader className="p-6 bg-white/5 flex flex-row items-center justify-between space-y-0 border-b border-white/5">
                     <div className="flex items-center gap-4">
                       <div className="bg-primary/20 p-3 rounded-xl text-primary"><slot.icon className="w-6 h-6" /></div>
@@ -238,7 +248,7 @@ export default function RoutinePage() {
                             />
                           </div>
                         </DialogHeader>
-                        <ScrollArea className="h-[400px] px-6 pb-6">
+                        <ScrollArea className="h-[450px] px-6 pb-6">
                           <div className="grid gap-2">
                             {filteredFoods.length > 0 ? filteredFoods.map((food) => (
                               <button 
@@ -268,7 +278,7 @@ export default function RoutinePage() {
             })}
           </div>
 
-          <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl rounded-3xl overflow-hidden">
+          <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl rounded-3xl overflow-hidden mx-auto max-w-4xl">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-3 text-center md:text-left">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Meta Nutricional Determinada</h3>
