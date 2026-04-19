@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserProfile": {
@@ -12,7 +11,8 @@
         "age": { "type": "number" },
         "gender": { "type": "string", "enum": ["Masculino", "Feminino"] },
         "dailyWaterGoal": { "type": "number" },
-        "dailyProteinGoal": { "type": "number" }
+        "dailyProteinGoal": { "type": "number" },
+        "calorieGoal": { "type": "number" }
       }
     },
     "Workout": {
@@ -51,7 +51,7 @@
     "Meal": {
       "title": "Meal",
       "type": "object",
-      "description": "Registro de alimentação no rancho.",
+      "description": "Registro de alimentação.",
       "properties": {
         "name": { "type": "string" },
         "calories": { "type": "number" },

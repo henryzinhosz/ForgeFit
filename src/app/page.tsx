@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -62,6 +62,7 @@ export default function Home() {
 
   const { data: profile } = useDoc(profileRef);
 
+  // Consultas Simples (Seguindo o padrão funcional do Planner)
   const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user || !currentDate) return null;
     return query(collection(db, 'users', user.uid, 'workouts'), where('day', '==', currentDate.key));
@@ -86,16 +87,16 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  // Cálculos Médicos
-  const calorieGoal = (() => {
+  // Meta Calórica (Mifflin-St Jeor)
+  const calorieGoal = useMemo(() => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      return Math.round(bmr * 1.6);
+      return Math.round(bmr * 1.55);
     }
     return 2500;
-  })();
+  }, [userWeight, userHeight, userAge, userGender]);
 
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
@@ -152,8 +153,8 @@ export default function Home() {
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações Médicas</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Ajuste seu peso, altura e idade para metas precisas.</DialogDescription>
+                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações Biométricas</DialogTitle>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Defina seu perfil para metas de precisão.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">

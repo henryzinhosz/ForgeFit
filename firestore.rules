@@ -1,14 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // REGRA DE OURO: Silo Absoluto e Recursivo por Usuário
-    // O padrão {document=**} garante que o dono do ID tenha acesso total a 
-    // QUALQUER documento ou subcoleção (metrics, workouts, water, meals) sem ambiguidades.
+    // REGRA DE OURO: Silo absoluto por usuário. 
+    // O uso de {document=**} permite acesso total a subcoleções de forma recursiva.
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Banco de Exercícios: Apenas leitura para usuários logados
+    // Coleção pública de exercícios (apenas leitura)
     match /exercises/{exerciseId} {
       allow read: if request.auth != null;
     }
