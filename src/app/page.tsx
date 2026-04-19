@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, Flame, Target } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Target, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
@@ -86,21 +87,19 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
-  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
-
-  // Meta Calórica Oficial (Mifflin-St Jeor)
-  const calculateCalorieGoal = () => {
+  // Meta Médicas Oficiais
+  const calorieGoal = (() => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      // Multiplicado por fator de atividade 1.6 para militares em treinamento
       return Math.round(bmr * 1.6);
     }
     return 2500;
-  };
-  const calorieGoal = calculateCalorieGoal();
+  })();
+
+  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
+  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
 
   const handleIncrementWater = () => {
     if (!db || !user || !currentDate) return;
@@ -139,18 +138,11 @@ export default function Home() {
       
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Quartel General</h1>
-            <div className="flex items-center gap-3">
-              <p className="text-muted-foreground font-medium">
-                Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
-              </p>
-              {userAge > 0 && (
-                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase italic text-white/60">
-                  {userAge} Anos
-                </span>
-              )}
-            </div>
+            <p className="text-muted-foreground font-medium">
+              Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
+            </p>
           </div>
           
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
@@ -159,45 +151,26 @@ export default function Home() {
                 <Settings2 className="w-5 h-5" /> Perfil Biométrico
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-card border-white/10 text-white rounded-3xl sm:max-w-md">
+            <DialogContent className="bg-card border-white/10 text-white rounded-3xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações de Saúde</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Dados para metas oficiais de água, proteína e calorias.</DialogDescription>
+                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações Médicas</DialogTitle>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Essencial para cálculos de calorias e proteínas.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="uppercase font-black text-[10px] italic text-primary">Peso Atual (kg)</Label>
-                    <input 
-                      type="number" 
-                      placeholder="Ex: 85" 
-                      value={weightInput} 
-                      onChange={(e) => setWeightInput(e.target.value)}
-                      className="h-12 w-full bg-white/5 border border-white/10 rounded-xl text-lg font-bold px-4 focus:outline-none focus:border-primary"
-                    />
+                    <Label className="uppercase font-black text-[10px] italic text-primary">Peso (kg)</Label>
+                    <input type="number" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="h-12 w-full bg-white/5 border border-white/10 rounded-xl px-4 focus:border-primary outline-none font-bold" />
                   </div>
                   <div className="space-y-2">
                     <Label className="uppercase font-black text-[10px] italic text-primary">Altura (cm)</Label>
-                    <input 
-                      type="number" 
-                      placeholder="Ex: 180" 
-                      value={heightInput} 
-                      onChange={(e) => setHeightInput(e.target.value)}
-                      className="h-12 w-full bg-white/5 border border-white/10 rounded-xl text-lg font-bold px-4 focus:outline-none focus:border-primary"
-                    />
+                    <input type="number" value={heightInput} onChange={(e) => setHeightInput(e.target.value)} className="h-12 w-full bg-white/5 border border-white/10 rounded-xl px-4 focus:border-primary outline-none font-bold" />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="uppercase font-black text-[10px] italic text-primary">Idade</Label>
-                    <input 
-                      type="number" 
-                      placeholder="Ex: 25" 
-                      value={ageInput} 
-                      onChange={(e) => setAgeInput(e.target.value)}
-                      className="h-12 w-full bg-white/5 border border-white/10 rounded-xl text-lg font-bold px-4 focus:outline-none focus:border-primary"
-                    />
+                    <input type="number" value={ageInput} onChange={(e) => setAgeInput(e.target.value)} className="h-12 w-full bg-white/5 border border-white/10 rounded-xl px-4 focus:border-primary outline-none font-bold" />
                   </div>
                   <div className="space-y-2">
                     <Label className="uppercase font-black text-[10px] italic text-primary">Gênero</Label>
@@ -214,7 +187,7 @@ export default function Home() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">ATUALIZAR PERFIL</Button>
+                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic">ATUALIZAR DADOS</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -226,7 +199,7 @@ export default function Home() {
               <div className="space-y-1">
                 <CardTitle className="text-2xl font-headline uppercase italic text-white">Missões do Dia</CardTitle>
                 <CardDescription className="font-bold text-muted-foreground">
-                  {totalToday > 0 ? `${completedToday} de ${totalToday} exercícios prontos` : 'Nenhum treino agendado para hoje.'}
+                  {totalToday > 0 ? `${completedToday} de ${totalToday} exercícios prontos` : 'Nenhum treino agendado.'}
                 </CardDescription>
               </div>
               <CheckCircle2 className={cn("w-10 h-10", progressPercent === 100 ? "text-green-500" : "text-muted")} />
@@ -237,11 +210,11 @@ export default function Home() {
                 {todaysExercises && todaysExercises.length > 0 ? todaysExercises.map((ex) => (
                   <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
                     <span className={cn("font-bold text-sm uppercase italic text-white", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
-                    <span className="text-xs font-black text-primary/80 italic tracking-tighter">{ex.sets}x{ex.reps}</span>
+                    <span className="text-xs font-black text-primary/80 italic">{ex.sets}x{ex.reps}</span>
                   </div>
                 )) : (
                   <div className="p-10 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                    <p className="text-xs font-bold uppercase text-muted-foreground italic">Monte seu treino no Banco de Exercícios.</p>
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground italic">Monte seu treino na aba Agenda ou Exercícios.</p>
                   </div>
                 )}
               </div>
@@ -273,7 +246,7 @@ export default function Home() {
               <CardContent className="pt-4 space-y-4">
                 <div className="bg-white/20 p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase italic block">Meta Calórica (Mifflin)</span>
+                    <span className="text-[10px] font-black uppercase italic">Metabolismo (TDEE)</span>
                     <span className="text-sm font-black italic">{calorieGoal} kcal</span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -281,9 +254,9 @@ export default function Home() {
                     <span className="text-sm font-black italic">{proteinGoal}g</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center px-2">
-                  <span className="text-[9px] font-bold uppercase italic opacity-80">{userWeight}kg | {userHeight}cm | {userAge} anos</span>
-                </div>
+                <p className="text-[9px] font-bold uppercase italic opacity-70 text-center">
+                  Baseado em: {userWeight}kg | {userAge} anos | {userGender}
+                </p>
               </CardContent>
             </Card>
           </div>

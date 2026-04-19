@@ -1,14 +1,27 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Silo de Dados do Usuário: Padrão Recursivo Absoluto
-    // Garante que o usuário autenticado tenha acesso total e exclusivo a TUDO 
-    // dentro do seu caminho /users/{userId}/, incluindo todas as subcoleções (metrics, workouts, etc.)
-    match /users/{userId}/{document=**} {
+    // Regra de Ouro: Isolamento Total por Usuário
+    // Cada usuário só pode ler e escrever em sua própria "pasta" (documento e subcoleções)
+    match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Permissões explícitas para subcoleções (necessário para consultas complexas com filtros)
+      match /metrics/{metricId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /workouts/{workoutId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /water/{waterId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /meals/{mealId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
-    // Regras auxiliares para banco de exercícios (leitura pública para autenticados)
+    // Banco de Exercícios: Apenas leitura para usuários logados
     match /exercises/{exerciseId} {
       allow read: if request.auth != null;
     }
