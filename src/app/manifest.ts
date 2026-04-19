@@ -3,9 +3,9 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'ForgeFit - Treinamento Militar',
+    name: 'ForgeFit',
     short_name: 'ForgeFit',
-    description: 'Plataforma de alta performance para treinamento físico militar e musculação.',
+    description: 'Plataforma de alta performance para treinamento físico e musculação.',
     start_url: '/',
     display: 'standalone',
     background_color: '#000000',
