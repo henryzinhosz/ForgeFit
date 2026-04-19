@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -138,12 +139,14 @@ export default function Home() {
     <div className="min-h-screen pb-24 md:pt-20 bg-background text-foreground">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-3">
+      <main className="max-w-screen-xl mx-auto px-4 py-4 space-y-3">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white leading-tight">Seja Bem-vindo</h1>
+            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white leading-tight">
+              {currentDate ? `Treino de ${DAYS_PT[currentDate.index]}` : 'Seja Bem-vindo'}
+            </h1>
             <p className="text-muted-foreground font-medium text-sm">
-              Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
+              Pronto para começar mais um dia de treino, hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
             </p>
           </div>
           
