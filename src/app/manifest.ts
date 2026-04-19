@@ -12,13 +12,13 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#000000',
     icons: [
       {
-        src: 'https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg',
+        src: 'https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg',
         sizes: '192x192',
         type: 'image/jpeg',
         purpose: 'any',
       },
       {
-        src: 'https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg',
+        src: 'https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg',
         sizes: '512x512',
         type: 'image/jpeg',
         purpose: 'maskable',

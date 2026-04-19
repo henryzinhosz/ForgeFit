@@ -20,11 +20,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
         
         {/* Ícone da Aba do Navegador (Favicon) */}
-        <link rel="icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" type="image/jpeg" />
-        <link rel="shortcut icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" type="image/jpeg" />
+        <link rel="icon" href="https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg" type="image/jpeg" />
+        <link rel="shortcut icon" href="https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg" type="image/jpeg" />
         
         {/* Ícone para iPhone/iOS */}
-        <link rel="apple-touch-icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" />
+        <link rel="apple-touch-icon" href="https://i.pinimg.com/1200x/21/93/1c/21931ccfaa91987fe48b66da24a7d3ed.jpg" />
         
         {/* Configurações PWA */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
