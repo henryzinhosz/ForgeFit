@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
@@ -17,7 +17,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Info } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Info, Flame } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -81,18 +81,18 @@ export default function ProgressPage() {
         const latest = formattedLoads[formattedLoads.length - 1].value;
         const previous = formattedLoads[formattedLoads.length - 2].value;
         const diff = latest - previous;
-        if (diff > 0) return `Evolução de Força: Recorde no ${selectedEx} aumentou ${diff}kg. Excelente!`;
-        if (diff < 0) return `Alerta: Redução de carga no ${selectedEx}. Verifique descanso.`;
-        return `Estabilidade: Carga mantida no ${selectedEx}.`;
+        if (diff > 0) return `Evolução Detectada: Recorde no ${selectedEx} aumentou ${diff}kg. Excelente progresso!`;
+        if (diff < 0) return `Alerta de Performance: Redução de carga detectada. Avalie seu descanso e nutrição.`;
+        return `Estabilidade: Carga mantida no ${selectedEx}. Ótimo para consolidação de força.`;
       })()]
-    : ["Inicie o registro de cargas para ver sua análise."];
+    : ["Inicie o registro de cargas para receber insights de performance."];
 
   const handleAddWeight = () => {
     if (weightInput && db && user && profileRef) {
       const weightValue = parseFloat(weightInput);
       const metricsRef = collection(db, 'users', user.uid, 'metrics');
 
-      // 1. Histórico
+      // 1. Registro no histórico para o gráfico
       addDocumentNonBlocking(metricsRef, {
         type: 'weight',
         value: weightValue,
@@ -100,7 +100,7 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
-      // 2. Sincronização Global do Perfil (Força recálculo de metas)
+      // 2. Sincronização Automática com o Perfil Global (Recalcula Metas)
       setDocumentNonBlocking(profileRef, {
         weight: weightValue,
         updatedAt: new Date().toISOString()
@@ -123,6 +123,25 @@ export default function ProgressPage() {
     }
   };
 
+  // Cálculos Oficiais para o relatório de insights
+  const userWeight = profile?.weight || 0;
+  const userHeight = profile?.height || 0;
+  const userAge = profile?.age || 0;
+  const userGender = profile?.gender || 'Masculino';
+  
+  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
+  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
+
+  const calorieGoal = (() => {
+    if (userWeight > 0 && userHeight > 0 && userAge > 0) {
+      const bmr = userGender === 'Masculino'
+        ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
+        : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
+      return Math.round(bmr * 1.6);
+    }
+    return 2500;
+  })();
+
   return (
     <div className="min-h-screen pb-24 md:pt-20 bg-black">
       <Navigation />
@@ -132,18 +151,19 @@ export default function ProgressPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
-              <p className="text-muted-foreground font-medium">Histórico sincronizado Cloud Firestore.</p>
+              <p className="text-muted-foreground font-medium">Dados sincronizados com seu Perfil Global.</p>
             </div>
             <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
               <Info className="text-primary w-5 h-5 shrink-0" />
               <p className="text-[10px] font-bold text-white uppercase leading-tight italic">
-                Alterar o peso aqui atualiza automaticamente metas de água, proteína e calorias.
+                O registro de peso aqui atualiza automaticamente suas metas de calorias, proteína e água.
               </p>
             </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Monitor de Peso Corporal */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
@@ -175,12 +195,13 @@ export default function ProgressPage() {
                 )}
               </div>
               <div className="flex gap-2">
-                <Input type="number" placeholder="Novo peso (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
+                <Input type="number" placeholder="Peso Atual (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
                 <Button onClick={handleAddWeight} className="h-12 px-8 bg-primary text-white font-black rounded-xl shadow-[0_0_15px_rgba(255,0,0,0.3)] uppercase italic">REGISTRAR</Button>
               </div>
             </CardContent>
           </Card>
 
+          {/* Gráfico de Recordes Pessoais (PR) */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic">
@@ -194,7 +215,7 @@ export default function ProgressPage() {
                   <SelectItem value="Supino Reto">Supino</SelectItem>
                   <SelectItem value="Agachamento Livre">Agachamento</SelectItem>
                   <SelectItem value="Levantamento Terra">Terra</SelectItem>
-                  <SelectItem value="Desenvolvimento Militar">Ombros</SelectItem>
+                  <SelectItem value="Desenvolvimento Militar">Militares</SelectItem>
                 </SelectContent>
               </Select>
             </CardHeader>
@@ -224,16 +245,42 @@ export default function ProgressPage() {
           </Card>
         </div>
 
-        <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden relative">
+        {/* Análise de Performance e Resumo Global */}
+        <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Análise de Campo</CardTitle>
+            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório de Performance</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
-            <div className="space-y-4">
-              <div className="space-y-3">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
+            <div className="space-y-6">
+              <h4 className="text-accent font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" /> Insights do Sistema
+              </h4>
+              <div className="space-y-4">
                 {performanceInsights.map((insight, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-sm text-zinc-300 leading-relaxed font-bold italic">"{insight}"</div>
+                  <div key={idx} className="p-5 rounded-2xl bg-white/5 border border-white/5 text-sm text-zinc-300 leading-relaxed font-bold italic border-l-4 border-l-accent">
+                    "{insight}"
+                  </div>
                 ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h4 className="text-primary font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
+                <Flame className="w-4 h-4" /> Metas Médicas Atuais
+              </h4>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Calorias (TDEE)</span>
+                  <span className="text-lg font-black text-white italic">{calorieGoal} kcal</span>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Proteína (2g/kg)</span>
+                  <span className="text-lg font-black text-accent italic">{proteinGoal}g</span>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Hidratação (50ml/kg)</span>
+                  <span className="text-lg font-black text-primary italic">{waterGoal.toFixed(1)}L</span>
+                </div>
               </div>
             </div>
           </CardContent>

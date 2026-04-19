@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Calendar, Database, Apple, Home, LogIn, LogOut } from 'lucide-react';
+import { Calendar, Database, Apple, Home, LogIn, LogOut, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser, signInWithGoogle, logout } from '@/firebase';
 import { Button } from './ui/button';
@@ -13,6 +13,7 @@ import { getPlaceholderById } from '@/lib/placeholder-images';
 const navItems = [
   { href: '/', icon: Home, label: 'Início' },
   { href: '/planner', icon: Calendar, label: 'Agenda' },
+  { href: '/progress', icon: TrendingUp, label: 'Evolução' },
   { href: '/database', icon: Database, label: 'Exercícios' },
   { href: '/routine', icon: Apple, label: 'Rotina' },
 ];
