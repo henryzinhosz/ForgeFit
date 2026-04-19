@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -8,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useAuth, useUser, signInWithGoogle, logout } from '@/firebase';
 import { Button } from './ui/button';
 import { getPlaceholderById } from '@/lib/placeholder-images';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { href: '/', icon: Home, label: 'Início' },
@@ -66,15 +68,25 @@ export function Navigation() {
 
         <div className="flex items-center gap-3">
           {user ? (
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex flex-col items-end">
-                <span className="text-xs font-bold text-white/60 truncate max-w-[120px]">{user.displayName}</span>
+            <div className="flex items-center gap-4 pl-4 border-l border-white/10 group">
+              <div className="hidden sm:flex flex-col items-end leading-none">
+                <span className="text-[10px] font-black uppercase text-primary italic tracking-widest opacity-80 mb-0.5">Usuário Ativo</span>
+                <span className="text-sm font-headline font-bold text-white italic truncate max-w-[140px] tracking-tight">{user.displayName}</span>
+              </div>
+              <div className="relative">
+                <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-[0_0_15px_rgba(255,0,0,0.2)] group-hover:scale-105 transition-transform">
+                  <AvatarImage src={user.photoURL || ''} alt={user.displayName || ''} />
+                  <AvatarFallback className="bg-zinc-900 text-primary font-black uppercase italic">
+                    {user.displayName?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-card rounded-full" />
               </div>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => logout(auth)} 
-                className="text-muted-foreground hover:text-primary rounded-full hover:bg-primary/10"
+                className="text-muted-foreground hover:text-red-500 rounded-full hover:bg-red-500/10 transition-all ml-1"
                 title="Sair"
               >
                 <LogOut className="w-5 h-5" />

@@ -20,7 +20,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
         
-        {/* Configurações Avançadas de PWA */}
+        {/* Configurações de Identidade Visual */}
         <link rel="icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="https://i.pinimg.com/736x/c9/7d/39/c97d39bf4d61146c0391f049300bf4b3.jpg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
