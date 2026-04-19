@@ -13,8 +13,8 @@ import { getPlaceholderById } from '@/lib/placeholder-images';
 const navItems = [
   { href: '/', icon: Home, label: 'Início' },
   { href: '/planner', icon: Calendar, label: 'Agenda' },
-  { href: '/progress', icon: TrendingUp, label: 'Evolução' },
   { href: '/database', icon: Database, label: 'Exercícios' },
+  { href: '/progress', icon: TrendingUp, label: 'Evolução' },
   { href: '/routine', icon: Apple, label: 'Rotina' },
 ];
 
