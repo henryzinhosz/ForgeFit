@@ -16,7 +16,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, CheckCircle2, Loader2 } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, CheckCircle2, Loader2, Info } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -34,14 +34,26 @@ export default function ProgressPage() {
   const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
 
+  // Queries otimizadas para o Silo de Dados do Usuário
   const weightQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    return query(collection(db, 'users', user.uid, 'metrics'), where('type', '==', 'weight'), orderBy('date', 'asc'), limit(15));
+    return query(
+      collection(db, 'users', user.uid, 'metrics'), 
+      where('type', '==', 'weight'), 
+      orderBy('date', 'asc'), 
+      limit(15)
+    );
   }, [db, user]);
 
   const loadQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    return query(collection(db, 'users', user.uid, 'metrics'), where('type', '==', 'maxLoad'), where('exerciseName', '==', selectedEx), orderBy('date', 'asc'), limit(15));
+    return query(
+      collection(db, 'users', user.uid, 'metrics'), 
+      where('type', '==', 'maxLoad'), 
+      where('exerciseName', '==', selectedEx), 
+      orderBy('date', 'asc'), 
+      limit(15)
+    );
   }, [db, user, selectedEx]);
 
   const { data: rawWeights, isLoading: loadingWeight } = useCollection(weightQuery);
@@ -77,7 +89,7 @@ export default function ProgressPage() {
       const metricsRef = collection(db, 'users', user.uid, 'metrics');
       const profileRef = doc(db, 'users', user.uid);
 
-      // Registrar histórico de peso
+      // 1. Registrar no histórico de métricas
       addDocumentNonBlocking(metricsRef, {
         type: 'weight',
         value: weightValue,
@@ -85,7 +97,7 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
-      // Sincronizar peso no perfil global para atualizar metas automáticas (água/proteína/calorias)
+      // 2. Sincronização Automática: Atualiza o perfil global para recalcular metas instantaneamente
       setDocumentNonBlocking(profileRef, {
         weight: weightValue,
         updatedAt: new Date().toISOString()
@@ -113,9 +125,19 @@ export default function ProgressPage() {
       <Navigation />
       
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
-        <header className="space-y-2">
-          <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Análise de Performance</h1>
-          <p className="text-muted-foreground font-medium">Sincronização biométrica em tempo real via Cloud Firestore.</p>
+        <header className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
+              <p className="text-muted-foreground font-medium">Histórico sincronizado via Cloud Firestore em tempo real.</p>
+            </div>
+            <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
+              <Info className="text-primary w-5 h-5 shrink-0" />
+              <p className="text-[10px] font-bold text-white uppercase leading-tight italic">
+                Aviso: Alterar o peso aqui atualiza automaticamente suas metas de saúde (água, proteína e calorias).
+              </p>
+            </div>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -125,7 +147,7 @@ export default function ProgressPage() {
                 <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
                   <Scale className="w-6 h-6" /> Peso Corporal
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">O peso aqui atualiza suas metas e seu perfil automaticamente.</CardDescription>
+                <CardDescription className="text-muted-foreground uppercase text-[9px] font-bold">Monitoramento de massa e composição.</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -142,18 +164,18 @@ export default function ProgressPage() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
-                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#666'}} dy={10} />
-                      <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#666'}} />
-                      <Tooltip contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}} />
+                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666', fontWeight: 'bold'}} dy={10} />
+                      <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666', fontWeight: 'bold'}} />
+                      <Tooltip contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c', color: 'white'}} />
                       <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={4} fillOpacity={1} fill="url(#colorWeight)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-muted-foreground italic uppercase font-bold text-xs">Aguardando dados...</div>
+                  <div className="h-full flex items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 text-muted-foreground italic uppercase font-bold text-[10px]">Aguardando primeiro registro de peso...</div>
                 )}
               </div>
               <div className="flex gap-2">
-                <Input type="number" placeholder="Peso atual (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
+                <Input type="number" placeholder="Peso (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
                 <Button onClick={handleAddWeight} className="h-12 px-8 bg-primary text-white font-black rounded-xl shadow-[0_0_15px_rgba(255,0,0,0.3)] uppercase italic">REGISTRAR</Button>
               </div>
             </CardContent>
@@ -163,8 +185,9 @@ export default function ProgressPage() {
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div className="space-y-1">
                 <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic">
-                  <Dumbbell className="w-6 h-6" /> Recordes Pessoais (PR)
+                  <Dumbbell className="w-6 h-6" /> Recordes de Carga (PR)
                 </CardTitle>
+                <CardDescription className="text-muted-foreground uppercase text-[9px] font-bold">Sua força bruta em tempo real.</CardDescription>
               </div>
               <Select value={selectedEx} onValueChange={setSelectedEx}>
                 <SelectTrigger className="w-[160px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
@@ -186,14 +209,14 @@ export default function ProgressPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={formattedLoads}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
-                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#666'}} dy={10} />
-                      <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#666'}} />
-                      <Tooltip contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}} />
+                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666', fontWeight: 'bold'}} dy={10} />
+                      <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666', fontWeight: 'bold'}} />
+                      <Tooltip contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c', color: 'white'}} />
                       <Line type="monotone" dataKey="value" stroke="hsl(var(--accent))" strokeWidth={4} dot={{ r: 6, fill: 'hsl(var(--accent))', strokeWidth: 2, stroke: '#000' }} />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-muted-foreground italic uppercase font-bold text-xs">Registre sua carga em {selectedEx}</div>
+                  <div className="h-full flex items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 text-muted-foreground italic uppercase font-bold text-[10px]">Registre sua carga em {selectedEx}</div>
                 )}
               </div>
               <div className="flex gap-2">
@@ -207,8 +230,8 @@ export default function ProgressPage() {
         <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden relative">
           <div className="absolute top-0 right-0 p-8 opacity-5"><TrendingUp className="w-48 h-48 text-primary" /></div>
           <CardHeader>
-            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório Analítico</CardTitle>
-            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights baseados no histórico de dados sincronizados em tempo real.</CardDescription>
+            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Análise de Campo</CardTitle>
+            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights baseados na sua evolução física sincronizada.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
             <div className="space-y-4">
