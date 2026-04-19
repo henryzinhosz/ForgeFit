@@ -27,6 +27,7 @@ import {
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
+import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 
 export default function ProgressPage() {
   const { user } = useUser();
@@ -35,7 +36,6 @@ export default function ProgressPage() {
   const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
 
-  // Perfil Global
   const profileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
     return doc(db, 'users', user.uid);
@@ -43,8 +43,6 @@ export default function ProgressPage() {
 
   const { data: profile } = useDoc(profileRef);
 
-  // ESTRATÉGIA ANTI-ERRO: Buscamos a coleção completa e filtramos no JS (Client-Side)
-  // Isso evita erros de permissão em consultas complexas e a necessidade de índices compostos.
   const metricsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return collection(db, 'users', user.uid, 'metrics');
@@ -52,7 +50,6 @@ export default function ProgressPage() {
 
   const { data: rawMetrics, isLoading } = useCollection(metricsQuery);
 
-  // Filtragem e Ordenação no Client-Side
   const weightData = useMemo(() => {
     if (!rawMetrics) return [];
     return rawMetrics
@@ -77,67 +74,16 @@ export default function ProgressPage() {
       }));
   }, [rawMetrics, selectedEx]);
 
-  // Metas Médicas e Biometria
-  const userWeight = profile?.weight || 0;
-  const userHeight = profile?.height || 0;
-  const userAge = profile?.age || 0;
-  const userGender = profile?.gender || 'Masculino';
-
-  // Cálculo de IMC (Índice de Massa Corporal)
-  const bmi = useMemo(() => {
-    if (userWeight > 0 && userHeight > 0) {
-      const heightInMeters = userHeight / 100;
-      return parseFloat((userWeight / (heightInMeters * heightInMeters)).toFixed(1));
-    }
-    return 0;
-  }, [userWeight, userHeight]);
-
-  // Classificação de IMC (Tabela Médica OMS Atualizada)
-  const bmiStatus = useMemo(() => {
-    if (bmi === 0) return { label: "Dados insuficientes", color: "text-muted-foreground" };
-    if (bmi < 18.5) return { label: "Abaixo do peso", color: "text-yellow-500" };
-    if (bmi < 25) return { label: "Peso normal", color: "text-green-500" };
-    if (bmi < 30) return { label: "Sobrepeso", color: "text-yellow-600" };
-    if (bmi < 35) return { label: "Obesidade Grau I", color: "text-orange-500" };
-    if (bmi < 40) return { label: "Obesidade Grau II", color: "text-red-500" };
-    return { label: "Obesidade Grau III (Mórbida)", color: "text-red-700" };
-  }, [bmi]);
-
-  // Meta Calórica (Mifflin-St Jeor)
-  const calorieGoal = useMemo(() => {
-    if (userWeight > 0 && userHeight > 0 && userAge > 0) {
-      const bmr = userGender === 'Masculino'
-        ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
-        : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      return Math.round(bmr * 1.55); // Fator de atividade moderada
-    }
-    return 2500;
-  }, [userWeight, userHeight, userAge, userGender]);
-
-  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
-
-  const getInsights = () => {
-    const insights = [];
-    
-    // Insight de IMC e Obesidade
-    if (bmi > 0) {
-      insights.push(`Seu IMC atual é ${bmi}. Classificação médica: ${bmiStatus.label}.`);
-    }
-
-    // Insights de Força
-    if (loadData.length >= 2) {
-      const latest = loadData[loadData.length - 1].value;
-      const previous = loadData[loadData.length - 2].value;
-      const diff = latest - previous;
-      if (diff > 0) insights.push(`Evolução de Força: +${diff}kg no ${selectedEx}! Excelente progressão.`);
-      else if (diff < 0) insights.push(`Alerta de Carga: Queda detectada no ${selectedEx}. Revise seu descanso e alimentação.`);
-      else insights.push(`Estabilidade: Carga mantida no ${selectedEx}. Bom para consolidar a técnica.`);
-    } else if (loadData.length === 0) {
-      insights.push("Inicie seus registros de carga (PRs) para gerar análise de performance de força.");
-    }
-
-    return insights;
-  };
+  // Avaliação de Saúde Determinística
+  const assessment = useMemo(() => {
+    const metrics: HealthMetrics = {
+      weight: profile?.weight || 70,
+      height: profile?.height || 170,
+      age: profile?.age || 25,
+      gender: (profile?.gender as any) || 'Masculino'
+    };
+    return getHealthAssessment(metrics);
+  }, [profile]);
 
   const handleAddWeight = () => {
     if (weightInput && db && user && profileRef) {
@@ -151,7 +97,6 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
-      // Sincroniza com Perfil Global (Importante para recalcular IMC/Calorias em todo o app)
       setDocumentNonBlocking(profileRef, {
         weight: val,
         updatedAt: new Date().toISOString()
@@ -183,19 +128,18 @@ export default function ProgressPage() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
-            <p className="text-muted-foreground font-medium">Dados e insights baseados em tabelas médicas oficiais.</p>
+            <p className="text-muted-foreground font-medium">Lógica determinística baseada na OMS e Harris-Benedict.</p>
           </div>
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
             <Target className="text-primary w-5 h-5" />
             <div className="space-y-0.5">
-              <span className="text-[10px] font-black uppercase text-white italic">Fórmula Mifflin-St Jeor</span>
-              <p className="text-sm font-bold text-white">{calorieGoal} kcal | {proteinGoal}g Prot</p>
+              <span className="text-[10px] font-black uppercase text-white italic">GET (Metabolismo Total)</span>
+              <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
             </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Card de Peso */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary italic uppercase">
@@ -225,7 +169,7 @@ export default function ProgressPage() {
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
                     <TrendingUp className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">Nenhum histórico de peso disponível.</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">Aguardando primeiro registro...</p>
                   </div>
                 )}
               </div>
@@ -236,7 +180,6 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
 
-          {/* Card de Recordes Pessoais */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
@@ -283,7 +226,6 @@ export default function ProgressPage() {
           </Card>
         </div>
 
-        {/* Card de Análise de Performance e IMC */}
         <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden">
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 p-10">
             <div className="space-y-6">
@@ -291,49 +233,45 @@ export default function ProgressPage() {
                 <AlertCircle className="w-4 h-4" /> Análise Médica & Performance
               </h4>
               <div className="space-y-4">
-                {/* Status IMC Detalhado */}
                 <div className="p-5 rounded-2xl bg-white/5 border-l-4 border-l-primary flex items-start gap-4">
                   <div className="bg-primary/20 p-2 rounded-lg">
                     <Info className="w-5 h-5 text-primary" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-black uppercase italic text-primary">Classificação Médica (IMC)</p>
-                    <p className={cn("text-lg font-black italic", bmiStatus.color)}>{bmiStatus.label}</p>
+                    <p className="text-xs font-black uppercase italic text-primary">Classificação Médica (IMC OMS)</p>
+                    <p className="text-lg font-black italic text-white">{assessment.bmiClassification}</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase italic">
-                      Seu IMC: {bmi} | Ideal: 18.5 - 24.9
+                      Seu IMC: {assessment.bmi} | Ideal: 18.5 - 24.9
                     </p>
                   </div>
                 </div>
 
-                {/* Outros Insights */}
-                {getInsights().map((insight, idx) => (
-                  <div key={idx} className="p-5 rounded-2xl bg-white/5 border-l-4 border-l-accent text-sm text-zinc-300 leading-relaxed font-bold italic">
-                    "{insight}"
-                  </div>
-                ))}
+                <div className="p-5 rounded-2xl bg-white/5 border-l-4 border-l-accent text-sm text-zinc-300 leading-relaxed font-bold italic">
+                  "Sua taxa metabólica basal é de {assessment.tmb} kcal. Com o fator de atividade 1.55, seu gasto diário total é de {assessment.get} kcal."
+                </div>
               </div>
             </div>
 
             <div className="space-y-6">
               <h4 className="text-primary font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <Target className="w-4 h-4" /> Perfil Biofísico
+                <Target className="w-4 h-4" /> Alvos Nutricionais Determinísticos
               </h4>
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">TMB (Mifflin)</span>
-                  <span className="text-lg font-black text-white italic">{calorieGoal} kcal</span>
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">TMB (Harris-Benedict)</span>
+                  <span className="text-lg font-black text-white italic">{assessment.tmb} kcal</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Proteína (2g/kg)</span>
-                  <span className="text-lg font-black text-accent italic">{proteinGoal}g</span>
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Proteína (1.8g - 2.2g/kg)</span>
+                  <span className="text-lg font-black text-accent italic">{assessment.proteinRange.min} - {assessment.proteinRange.max}g</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Água Diária (50ml/kg)</span>
-                  <span className="text-lg font-black text-blue-400 italic">{(userWeight * 0.05).toFixed(1)}L</span>
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Água Diária (35ml/kg)</span>
+                  <span className="text-lg font-black text-blue-400 italic">{assessment.waterLiters}L</span>
                 </div>
               </div>
               <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-                Sincronizado via Cloud Firestore: {userWeight}kg | {userHeight}cm | {userAge} anos
+                Lógica ADS: Dados salvos em tempo real no Cloud Firestore.
               </p>
             </div>
           </CardContent>

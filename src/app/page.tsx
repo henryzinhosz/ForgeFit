@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, Target } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Target, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
+import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 import {
   Dialog,
   DialogContent,
@@ -43,7 +44,7 @@ export default function Home() {
   const [weightInput, setWeightInput] = useState<string>('');
   const [heightInput, setHeightInput] = useState<string>('');
   const [ageInput, setAgeInput] = useState<string>('');
-  const [genderInput, setGenderInput] = useState<string>('');
+  const [genderInput, setGenderInput] = useState<string>('Masculino');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
@@ -62,7 +63,6 @@ export default function Home() {
 
   const { data: profile } = useDoc(profileRef);
 
-  // Consultas Simples (Seguindo o padrão funcional do Planner)
   const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user || !currentDate) return null;
     return query(collection(db, 'users', user.uid, 'workouts'), where('day', '==', currentDate.key));
@@ -82,24 +82,16 @@ export default function Home() {
   
   const currentWater = (waterLogs || []).reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
-  const userWeight = profile?.weight || 0;
-  const userHeight = profile?.height || 0;
-  const userAge = profile?.age || 0;
-  const userGender = profile?.gender || 'Masculino';
-
-  // Meta Calórica (Mifflin-St Jeor)
-  const calorieGoal = useMemo(() => {
-    if (userWeight > 0 && userHeight > 0 && userAge > 0) {
-      const bmr = userGender === 'Masculino'
-        ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
-        : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      return Math.round(bmr * 1.55);
-    }
-    return 2500;
-  }, [userWeight, userHeight, userAge, userGender]);
-
-  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
-  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
+  // Avaliação de Saúde Determinística
+  const healthAssessment = useMemo(() => {
+    const metrics: HealthMetrics = {
+      weight: profile?.weight || 70,
+      height: profile?.height || 170,
+      age: profile?.age || 25,
+      gender: (profile?.gender as any) || 'Masculino'
+    };
+    return getHealthAssessment(metrics);
+  }, [profile]);
 
   const handleIncrementWater = () => {
     if (!db || !user || !currentDate) return;
@@ -154,7 +146,7 @@ export default function Home() {
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações Biométricas</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Defina seu perfil para metas de precisão.</DialogDescription>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Defina seu perfil para metas de precisão baseadas na OMS.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -193,6 +185,13 @@ export default function Home() {
           </Dialog>
         </section>
 
+        {!healthAssessment.isValid && (
+          <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 text-red-500 mb-4">
+            <AlertTriangle className="w-5 h-5" />
+            <span className="text-xs font-bold uppercase italic">{healthAssessment.error || "Dados biométricos incompletos ou irreais."}</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -229,7 +228,7 @@ export default function Home() {
               <CardContent className="space-y-6">
                 <div className="flex items-end gap-2">
                   <span className="text-5xl font-black text-accent italic leading-none">{currentWater}</span>
-                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {waterGoal.toFixed(1)}L</span>
+                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {healthAssessment.waterLiters}L</span>
                 </div>
                 <Button onClick={handleIncrementWater} className="w-full h-14 bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 border-2 rounded-2xl font-black uppercase italic">
                   +1 LITRO <Droplets className="ml-2 w-5 h-5" />
@@ -246,16 +245,20 @@ export default function Home() {
               <CardContent className="pt-4 space-y-4">
                 <div className="bg-white/20 p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase italic">Meta Calórica</span>
-                    <span className="text-sm font-black italic">{calorieGoal} kcal</span>
+                    <span className="text-[10px] font-black uppercase italic">GET (Harris-Benedict)</span>
+                    <span className="text-sm font-black italic">{healthAssessment.get} kcal</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase italic">Proteína Diária</span>
-                    <span className="text-sm font-black italic">{proteinGoal}g</span>
+                    <span className="text-sm font-black italic">{healthAssessment.proteinRange.min} - {healthAssessment.proteinRange.max}g</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase italic">Classificação IMC</span>
+                    <span className="text-[10px] font-black italic uppercase">{healthAssessment.bmiClassification}</span>
                   </div>
                 </div>
                 <p className="text-[9px] font-bold uppercase italic opacity-70 text-center">
-                  Baseado em: {userWeight}kg | {userAge} anos | {userGender}
+                  Baseado em: {profile?.weight || 70}kg | {profile?.age || 25} anos | {profile?.gender || 'Masculino'}
                 </p>
               </CardContent>
             </Card>
