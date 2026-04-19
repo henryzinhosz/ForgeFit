@@ -48,7 +48,6 @@ export default function ProgressPage() {
     return collection(db, 'users', user.uid, 'metrics');
   }, [db, user]);
 
-  // Estratégia de Filtragem no Cliente para evitar erros de permissão e índices complexos
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
 
   const weightData = useMemo(() => {
@@ -136,12 +135,12 @@ export default function ProgressPage() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
-            <p className="text-muted-foreground font-medium">Lógica determinística baseada na OMS e Harris-Benedict.</p>
+            <p className="text-muted-foreground font-medium">Acompanhe seu progresso e metas de saúde.</p>
           </div>
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
             <Target className="text-primary w-5 h-5" />
             <div className="space-y-0.5">
-              <span className="text-[10px] font-black uppercase text-white italic">GET (Metabolismo Total)</span>
+              <span className="text-[10px] font-black uppercase text-white italic">GET (Gasto Total)</span>
               <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
             </div>
           </div>
@@ -262,7 +261,7 @@ export default function ProgressPage() {
 
             <div className="space-y-6">
               <h4 className="text-primary font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <Target className="w-4 h-4" /> Alvos Nutricionais Determinísticos
+                <Target className="w-4 h-4" /> Meta Nutricional Determinada
               </h4>
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
@@ -279,7 +278,7 @@ export default function ProgressPage() {
                 </div>
               </div>
               <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-                Lógica ADS: Dados salvos em tempo real no Cloud Firestore.
+                Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
               </p>
             </div>
           </CardContent>

@@ -62,21 +62,22 @@ export default function RoutinePage() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
   
-  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
-  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
+  const waterGoal = userWeight > 0 ? (userWeight * 0.035) : 4;
+  const proteinGoalMin = userWeight > 0 ? Math.round(userWeight * 1.8) : 130;
+  const proteinGoalMax = userWeight > 0 ? Math.round(userWeight * 2.2) : 160;
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
       const bmr = userGender === 'Masculino'
-        ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
-        : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      return Math.round(bmr * 1.6);
+        ? 66.47 + (13.75 * userWeight) + (5.0 * userHeight) - (6.75 * userAge)
+        : 655.1 + (9.56 * userWeight) + (1.85 * userHeight) - (4.67 * userAge);
+      return Math.round(bmr * 1.55);
     }
     return 2500;
   };
   const calorieGoal = calculateCalorieGoal();
   
-  const waterProgress = (waterCount / waterGoal) * 100;
+  const waterProgress = waterGoal > 0 ? (waterCount / waterGoal) * 100 : 0;
   const totalCalories = (meals || []).reduce((acc, curr) => acc + (curr.calories || 0), 0);
   const totalProtein = (meals || []).reduce((acc, curr) => acc + (curr.protein || 0), 0);
 
@@ -118,7 +119,7 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium text-sm">Acompanhe suas Calorias e Proteínas Reais.</p>
+          <p className="text-muted-foreground font-medium text-sm">Acompanhe seu balanço nutricional diário.</p>
         </header>
 
         <section className="space-y-6">
@@ -184,12 +185,12 @@ export default function RoutinePage() {
           <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl rounded-3xl overflow-hidden">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-3">
-                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
+                <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Meta Nutricional Determinada</h3>
                 <div className="space-y-1">
-                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Metas Médicas:</p>
+                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Cálculos Baseados na OMS:</p>
                    <div className="flex flex-col gap-1">
-                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica (Mifflin): {calorieGoal} kcal</p>
-                     <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (2g/kg): {proteinGoal}g</p>
+                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica (Harris-Benedict): {calorieGoal} kcal</p>
+                     <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (1.8-2.2g/kg): {proteinGoalMin} - {proteinGoalMax}g</p>
                    </div>
                 </div>
               </div>
@@ -221,7 +222,7 @@ export default function RoutinePage() {
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária: {waterGoal.toFixed(1)}L</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária (35ml/kg): {waterGoal.toFixed(1)}L</p>
                 <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
               </div>
             </CardContent>
@@ -242,6 +243,10 @@ export default function RoutinePage() {
             </CardContent>
           </Card>
         </div>
+        
+        <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
+          Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
+        </p>
       </main>
     </div>
   );
