@@ -73,11 +73,12 @@ export function Navigation() {
                 <span className="text-sm font-headline font-bold text-white italic truncate max-w-[140px] tracking-tight">{user.displayName}</span>
               </div>
               <Button 
-                variant="outline" 
+                variant="ghost" 
+                size="icon"
                 onClick={() => logout(auth)} 
-                className="border-primary/20 text-primary hover:bg-primary/10 hover:text-primary-foreground font-black h-10 px-4 rounded-full flex items-center gap-2 uppercase italic text-xs transition-all shadow-[0_0_15px_rgba(255,0,0,0.1)]"
+                className="text-zinc-400 hover:text-white hover:bg-transparent transition-colors"
               >
-                <LogOut className="w-4 h-4" /> SAIR
+                <LogOut className="w-5 h-5" />
               </Button>
             </div>
           ) : (
