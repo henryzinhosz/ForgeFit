@@ -2,11 +2,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Modelo de Silo Absoluto: Dono do UID tem acesso total a tudo em /users/{userId}
+    // Modelo de Silo Absoluto: Dono do UID tem acesso total e irrestrito a tudo em /users/{userId}
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       
-      // Garante permissão recursiva para qualquer subcoleção ou documento aninhado
+      // Permissão recursiva absoluta para todas as subcoleções (metrics, workouts, water, meals, etc)
       match /{allPaths=**} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }

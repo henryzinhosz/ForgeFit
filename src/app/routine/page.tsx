@@ -206,7 +206,7 @@ export default function RoutinePage() {
               <div className="space-y-3">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
                 <div className="space-y-1">
-                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões Médicas Oficiais:</p>
+                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Metas Médicas Sugeridas:</p>
                    <div className="flex flex-col gap-1">
                      <p className="text-sm text-primary font-black uppercase italic">Meta Calórica (TDEE): {calorieGoal} kcal</p>
                      <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (2g/kg): {proteinGoal}g</p>

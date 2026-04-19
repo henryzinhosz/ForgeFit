@@ -87,9 +87,9 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  // Cálculos Médicos Oficiais
-  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
-  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
+  // Cálculos Oficiais (Sugestão Médica)
+  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4; // 50ml por kg
+  const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160; // 2g por kg
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
@@ -97,7 +97,7 @@ export default function Home() {
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      return Math.round(bmr * 1.6); // Fator de atividade intensa
+      return Math.round(bmr * 1.6); // Fator de atividade intensa/militar
     }
     return 2500;
   };
@@ -156,7 +156,7 @@ export default function Home() {
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl sm:max-w-md">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações de Saúde</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Estes dados definem suas metas oficiais de água, proteína e calorias.</DialogDescription>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Dados para metas oficiais de água, proteína e calorias.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -208,7 +208,7 @@ export default function Home() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">ATUALIZAR BIOMETRIA</Button>
+                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">ATUALIZAR PERFIL</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

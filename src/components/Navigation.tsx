@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Calendar, Database, LineChart, Apple, Home, LogIn, LogOut } from 'lucide-react';
+import { Calendar, Database, Apple, Home, LogIn, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useUser, signInWithGoogle, logout } from '@/firebase';
 import { Button } from './ui/button';
@@ -14,7 +14,6 @@ const navItems = [
   { href: '/', icon: Home, label: 'Início' },
   { href: '/planner', icon: Calendar, label: 'Agenda' },
   { href: '/database', icon: Database, label: 'Exercícios' },
-  { href: '/progress', icon: LineChart, label: 'Evolução' },
   { href: '/routine', icon: Apple, label: 'Rotina' },
 ];
 
