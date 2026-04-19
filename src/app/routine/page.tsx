@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -119,27 +118,8 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium text-sm">Acompanhe suas Calorias e Proteínas Oficiais.</p>
+          <p className="text-muted-foreground font-medium text-sm">Acompanhe suas Calorias e Proteínas Reais.</p>
         </header>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
-             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Peso</p>
-             <p className="text-xl font-black text-white italic">{userWeight || '--'} KG</p>
-          </Card>
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
-             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Altura</p>
-             <p className="text-xl font-black text-white italic">{userHeight || '--'} CM</p>
-          </Card>
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
-             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Idade</p>
-             <p className="text-xl font-black text-white italic">{userAge || '--'} ANOS</p>
-          </Card>
-          <Card className="bg-white/5 border-white/10 p-4 rounded-2xl">
-             <p className="text-[10px] font-black uppercase text-muted-foreground italic mb-1">Gênero</p>
-             <p className="text-xl font-black text-white italic uppercase tracking-tighter">{userGender}</p>
-          </Card>
-        </div>
 
         <section className="space-y-6">
           <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2">
@@ -206,9 +186,9 @@ export default function RoutinePage() {
               <div className="space-y-3">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
                 <div className="space-y-1">
-                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Metas Médicas Sugeridas:</p>
+                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Metas Médicas:</p>
                    <div className="flex flex-col gap-1">
-                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica (TDEE): {calorieGoal} kcal</p>
+                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica (Mifflin): {calorieGoal} kcal</p>
                      <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (2g/kg): {proteinGoal}g</p>
                    </div>
                 </div>
@@ -249,14 +229,14 @@ export default function RoutinePage() {
 
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="bg-white/5 pb-6 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Balanço de Energia</CardTitle>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Balanço Calórico</CardTitle>
             </CardHeader>
             <CardContent className="p-8">
               <div className="p-8 rounded-3xl bg-white/5 border border-white/5 text-center space-y-4">
                 <Flame className={cn("w-12 h-12 mx-auto", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
-                <h3 className="text-xl font-headline font-bold uppercase italic">Status Calórico</h3>
+                <h3 className="text-xl font-headline font-bold uppercase italic">Missão Nutricional</h3>
                 <p className="text-sm text-muted-foreground font-bold">
-                  Você atingiu {totalCalories} kcal de sua meta diária de {calorieGoal} kcal.
+                  Você consumiu {totalCalories} kcal de sua meta de {calorieGoal} kcal hoje.
                 </p>
               </div>
             </CardContent>

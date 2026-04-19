@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, Target, Calendar } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
@@ -87,7 +86,7 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  // Meta Médicas Oficiais
+  // Cálculos Médicos
   const calorieGoal = (() => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
       const bmr = userGender === 'Masculino'
@@ -154,7 +153,7 @@ export default function Home() {
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações Médicas</DialogTitle>
-                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Essencial para cálculos de calorias e proteínas.</DialogDescription>
+                <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Ajuste seu peso, altura e idade para metas precisas.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
@@ -187,7 +186,7 @@ export default function Home() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic">ATUALIZAR DADOS</Button>
+                <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic">ATUALIZAR PERFIL</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -214,7 +213,7 @@ export default function Home() {
                   </div>
                 )) : (
                   <div className="p-10 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                    <p className="text-[10px] font-bold uppercase text-muted-foreground italic">Monte seu treino na aba Agenda ou Exercícios.</p>
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground italic">Nenhuma missão alocada para hoje.</p>
                   </div>
                 )}
               </div>
@@ -240,17 +239,17 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <Target className="w-5 h-5" /> Metas Médicas
+                  <Target className="w-5 h-5" /> Metas de Saúde
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
                 <div className="bg-white/20 p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase italic">Metabolismo (TDEE)</span>
+                    <span className="text-[10px] font-black uppercase italic">Meta Calórica</span>
                     <span className="text-sm font-black italic">{calorieGoal} kcal</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase italic">Proteína (2g/kg)</span>
+                    <span className="text-[10px] font-black uppercase italic">Proteína Diária</span>
                     <span className="text-sm font-black italic">{proteinGoal}g</span>
                   </div>
                 </div>

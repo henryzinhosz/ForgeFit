@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -17,7 +16,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Info, Target, AlertCircle } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -35,7 +34,7 @@ export default function ProgressPage() {
   const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
 
-  // Referência ao Perfil Global do Usuário
+  // Referência ao Perfil Global
   const profileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
     return doc(db, 'users', user.uid);
@@ -43,7 +42,7 @@ export default function ProgressPage() {
 
   const { data: profile } = useDoc(profileRef);
 
-  // Consulta de Peso isolada por usuário
+  // Consulta de Peso (Silo do Usuário)
   const weightQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
@@ -54,7 +53,7 @@ export default function ProgressPage() {
     );
   }, [db, user]);
 
-  // Consulta de Recordes isolada por usuário e exercício
+  // Consulta de Recordes (Silo do Usuário)
   const loadQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
@@ -79,17 +78,15 @@ export default function ProgressPage() {
     label: new Date(l.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
   }));
 
-  // Lógica de Insights Baseada nos Dados Reais
+  // Lógica de Insights
   const getInsights = () => {
-    if (formattedLoads.length < 2) return ["Inicie o registro de suas cargas para receber uma análise técnica de evolução."];
-    
+    if (formattedLoads.length < 2) return ["Aguardando mais registros para gerar análise de performance."];
     const latest = formattedLoads[formattedLoads.length - 1].value;
     const previous = formattedLoads[formattedLoads.length - 2].value;
     const diff = latest - previous;
-
-    if (diff > 0) return [`Evolução Detectada: Recorde no ${selectedEx} aumentou ${diff}kg. Excelente progressão de força!`];
-    if (diff < 0) return [`Alerta de Performance: Redução de carga detectedada. Avalie sua recuperação e aporte proteico.`];
-    return [`Estabilidade: Carga mantida no ${selectedEx}. Ótimo para consolidação da técnica.`];
+    if (diff > 0) return [`Evolução de Força: Você aumentou ${diff}kg no ${selectedEx}! Continue assim.`];
+    if (diff < 0) return [`Alerta de Carga: Redução detectada. Verifique seu sono e nutrição.`];
+    return [`Estabilidade: Carga mantida. Ótimo para consolidação de técnica.`];
   };
 
   const handleAddWeight = () => {
@@ -97,7 +94,7 @@ export default function ProgressPage() {
       const weightValue = parseFloat(weightInput);
       const metricsRef = collection(db, 'users', user.uid, 'metrics');
 
-      // 1. Aloca os dados na "pasta" de métricas do usuário
+      // 1. Salva na subpasta de métricas
       addDocumentNonBlocking(metricsRef, {
         type: 'weight',
         value: weightValue,
@@ -105,7 +102,7 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
-      // 2. Registro Inteligente: Atualiza o perfil global para recalcular as metas do app
+      // 2. Sincroniza com Perfil Global para atualizar as metas do App
       setDocumentNonBlocking(profileRef, {
         weight: weightValue,
         updatedAt: new Date().toISOString()
@@ -129,7 +126,7 @@ export default function ProgressPage() {
     }
   };
 
-  // Cálculo de Metas Médicas (Mifflin-St Jeor)
+  // Metas Médicas (Mifflin-St Jeor)
   const userWeight = profile?.weight || 0;
   const userHeight = profile?.height || 0;
   const userAge = profile?.age || 0;
@@ -140,13 +137,12 @@ export default function ProgressPage() {
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      return Math.round(bmr * 1.6); // Fator de atividade militar
+      return Math.round(bmr * 1.6);
     }
     return 2500;
   })();
 
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
-  const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
 
   return (
     <div className="min-h-screen pb-32 pt-20 bg-black">
@@ -156,23 +152,22 @@ export default function ProgressPage() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
-            <p className="text-muted-foreground font-medium">Histórico alocado de forma segura no seu silo pessoal.</p>
+            <p className="text-muted-foreground font-medium">Dados alocados de forma segura no seu silo pessoal.</p>
           </div>
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
             <Target className="text-primary w-5 h-5" />
             <div className="space-y-0.5">
-              <span className="text-[10px] font-black uppercase text-white italic">Meta Atual</span>
+              <span className="text-[10px] font-black uppercase text-white italic">Metas Médicas</span>
               <p className="text-sm font-bold text-white">{calorieGoal} kcal | {proteinGoal}g Prot</p>
             </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Gráfico de Peso */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary italic uppercase">
-                <Scale className="w-6 h-6" /> Curva de Peso
+                <Scale className="w-6 h-6" /> Histórico de Peso
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -198,20 +193,17 @@ export default function ProgressPage() {
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
                     <TrendingUp className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">
-                      Ainda não há dados de peso.<br/>Registre seu peso atual para iniciar a curva.
-                    </p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">Ainda não há dados de peso.<br/>Registre seu peso para iniciar a curva.</p>
                   </div>
                 )}
               </div>
               <div className="flex gap-2">
                 <Input type="number" placeholder="Peso (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
-                <Button onClick={handleAddWeight} className="h-12 px-6 bg-primary text-white font-black rounded-xl uppercase italic shadow-lg">SALVAR</Button>
+                <Button onClick={handleAddWeight} className="h-12 px-6 bg-primary text-white font-black rounded-xl uppercase italic">SALVAR</Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Gráfico de Recordes */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
@@ -246,21 +238,18 @@ export default function ProgressPage() {
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
                     <Dumbbell className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">
-                      Sem recordes para {selectedEx}.<br/>Adicione sua carga máxima alcançada.
-                    </p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">Sem recordes para {selectedEx}.<br/>Adicione sua carga máxima.</p>
                   </div>
                 )}
               </div>
               <div className="flex gap-2">
                 <Input type="number" placeholder="Carga (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
-                <Button onClick={handleAddLoad} className="h-12 px-6 bg-accent text-white font-black rounded-xl uppercase italic shadow-lg">NOVO PR</Button>
+                <Button onClick={handleAddLoad} className="h-12 px-6 bg-accent text-white font-black rounded-xl uppercase italic">NOVO PR</Button>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Insights e Resumo Médico */}
         <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden">
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 p-10">
             <div className="space-y-6">
@@ -278,24 +267,20 @@ export default function ProgressPage() {
 
             <div className="space-y-6">
               <h4 className="text-primary font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <Target className="w-4 h-4" /> Metas Médicas Atuais
+                <Target className="w-4 h-4" /> Resumo Médico Atualizado
               </h4>
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Meta Calórica (Mifflin)</span>
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Metabolismo (Mifflin)</span>
                   <span className="text-lg font-black text-white italic">{calorieGoal} kcal</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
                   <span className="text-[10px] font-black uppercase italic text-muted-foreground">Proteína (2g/kg)</span>
                   <span className="text-lg font-black text-accent italic">{proteinGoal}g</span>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Hidratação (50ml/kg)</span>
-                  <span className="text-lg font-black text-primary italic">{waterGoal.toFixed(1)}L</span>
-                </div>
               </div>
               <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-                Dados: {userWeight}kg | {userHeight}cm | {userAge} anos | {userGender}
+                Dados Base: {userWeight}kg | {userHeight}cm | {userAge} anos | {userGender}
               </p>
             </div>
           </CardContent>
