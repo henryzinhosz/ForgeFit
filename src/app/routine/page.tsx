@@ -62,7 +62,7 @@ export default function RoutinePage() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
   
-  const waterGoal = userWeight > 0 ? (userWeight * 0.050) : 4; // Atualizado para 50ml/kg
+  const waterGoal = userWeight > 0 ? (userWeight * 0.050) : 4; 
   const proteinGoalMin = userWeight > 0 ? Math.round(userWeight * 1.8) : 130;
   const proteinGoalMax = userWeight > 0 ? Math.round(userWeight * 2.2) : 160;
 
@@ -189,7 +189,7 @@ export default function RoutinePage() {
                 <div className="space-y-1">
                    <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Cálculos Baseados na OMS:</p>
                    <div className="flex flex-col gap-1">
-                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica (Harris-Benedict): {calorieGoal} kcal</p>
+                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>
                      <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (1.8-2.2g/kg): {proteinGoalMin} - {proteinGoalMax}g</p>
                    </div>
                 </div>
@@ -245,7 +245,7 @@ export default function RoutinePage() {
         </div>
         
         <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-          Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
+          Lembrando, essas metas são baseadas em calculo de peso, altura e genero. Seguindo os parametros basicos da OMS, podendo variar de acordo com dietas reguladas
         </p>
       </main>
     </div>

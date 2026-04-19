@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Droplets, CheckCircle2, Settings2, Target, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 import {
@@ -258,7 +258,7 @@ export default function Home() {
               <CardContent className="pt-4 space-y-4">
                 <div className="bg-white/20 p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase italic">GET (Mifflin)</span>
+                    <span className="text-[10px] font-black uppercase italic">Meta Calórica</span>
                     <span className="text-sm font-black italic">{healthAssessment.get || 0} kcal</span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -271,7 +271,7 @@ export default function Home() {
                   </div>
                 </div>
                 <p className="text-[9px] font-bold uppercase italic opacity-70 text-center">
-                  Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
+                  Lembrando, essas metas são baseadas em calculo de peso, altura e genero. Seguindo os parametros basicos da OMS, podendo variar de acordo com dietas reguladas
                 </p>
               </CardContent>
             </Card>

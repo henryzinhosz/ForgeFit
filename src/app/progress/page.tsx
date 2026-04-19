@@ -140,7 +140,7 @@ export default function ProgressPage() {
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
             <Target className="text-primary w-5 h-5" />
             <div className="space-y-0.5">
-              <span className="text-[10px] font-black uppercase text-white italic">GET (Gasto Total)</span>
+              <span className="text-[10px] font-black uppercase text-white italic">Meta Calórica</span>
               <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
             </div>
           </div>
@@ -265,8 +265,8 @@ export default function ProgressPage() {
               </h4>
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">TMB (Harris-Benedict)</span>
-                  <span className="text-lg font-black text-white italic">{assessment.tmb} kcal</span>
+                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Meta Calórica</span>
+                  <span className="text-lg font-black text-white italic">{assessment.get} kcal</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
                   <span className="text-[10px] font-black uppercase italic text-muted-foreground">Proteína (1.8g - 2.2g/kg)</span>
@@ -278,7 +278,7 @@ export default function ProgressPage() {
                 </div>
               </div>
               <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-                Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas
+                Lembrando, essas metas são baseadas em calculo de peso, altura e genero. Seguindo os parametros basicos da OMS, podendo variar de acordo com dietas reguladas
               </p>
             </div>
           </CardContent>
