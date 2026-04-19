@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, CheckCircle2, Loader2, Info } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Info } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -24,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCollection, useFirestore, useUser, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
 
 export default function ProgressPage() {
@@ -34,7 +35,13 @@ export default function ProgressPage() {
   const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
 
-  // Queries otimizadas para o Silo de Dados do Usuário
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(profileRef);
+
   const weightQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
@@ -56,18 +63,15 @@ export default function ProgressPage() {
     );
   }, [db, user, selectedEx]);
 
-  const { data: rawWeights, isLoading: loadingWeight } = useCollection(weightQuery);
-  const { data: rawLoads, isLoading: loadingLoad } = useCollection(loadQuery);
+  const { data: weights, isLoading: loadingWeight } = useCollection(weightQuery);
+  const { data: loads, isLoading: loadingLoad } = useCollection(loadQuery);
 
-  const weights = rawWeights || [];
-  const loads = rawLoads || [];
-
-  const formattedWeights = weights.map(w => ({
+  const formattedWeights = (weights || []).map(w => ({
     ...w,
     label: new Date(w.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
   }));
 
-  const formattedLoads = loads.map(l => ({
+  const formattedLoads = (loads || []).map(l => ({
     ...l,
     label: new Date(l.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
   }));
@@ -84,12 +88,11 @@ export default function ProgressPage() {
     : ["Inicie o registro de cargas para ver sua análise."];
 
   const handleAddWeight = () => {
-    if (weightInput && db && user) {
+    if (weightInput && db && user && profileRef) {
       const weightValue = parseFloat(weightInput);
       const metricsRef = collection(db, 'users', user.uid, 'metrics');
-      const profileRef = doc(db, 'users', user.uid);
 
-      // 1. Registrar no histórico de métricas
+      // 1. Histórico
       addDocumentNonBlocking(metricsRef, {
         type: 'weight',
         value: weightValue,
@@ -97,7 +100,7 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
-      // 2. Sincronização Automática: Atualiza o perfil global para recalcular metas instantaneamente
+      // 2. Sincronização Global do Perfil (Força recálculo de metas)
       setDocumentNonBlocking(profileRef, {
         weight: weightValue,
         updatedAt: new Date().toISOString()
@@ -129,12 +132,12 @@ export default function ProgressPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
-              <p className="text-muted-foreground font-medium">Histórico sincronizado via Cloud Firestore em tempo real.</p>
+              <p className="text-muted-foreground font-medium">Histórico sincronizado Cloud Firestore.</p>
             </div>
             <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
               <Info className="text-primary w-5 h-5 shrink-0" />
               <p className="text-[10px] font-bold text-white uppercase leading-tight italic">
-                Aviso: Alterar o peso aqui atualiza automaticamente suas metas de saúde (água, proteína e calorias).
+                Alterar o peso aqui atualiza automaticamente metas de água, proteína e calorias.
               </p>
             </div>
           </div>
@@ -143,12 +146,9 @@ export default function ProgressPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div className="space-y-1">
-                <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
-                  <Scale className="w-6 h-6" /> Peso Corporal
-                </CardTitle>
-                <CardDescription className="text-muted-foreground uppercase text-[9px] font-bold">Monitoramento de massa e composição.</CardDescription>
-              </div>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
+                <Scale className="w-6 h-6" /> Peso Corporal
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="h-[250px] w-full">
@@ -175,7 +175,7 @@ export default function ProgressPage() {
                 )}
               </div>
               <div className="flex gap-2">
-                <Input type="number" placeholder="Peso (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
+                <Input type="number" placeholder="Novo peso (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
                 <Button onClick={handleAddWeight} className="h-12 px-8 bg-primary text-white font-black rounded-xl shadow-[0_0_15px_rgba(255,0,0,0.3)] uppercase italic">REGISTRAR</Button>
               </div>
             </CardContent>
@@ -183,12 +183,9 @@ export default function ProgressPage() {
 
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div className="space-y-1">
-                <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic">
-                  <Dumbbell className="w-6 h-6" /> Recordes de Carga (PR)
-                </CardTitle>
-                <CardDescription className="text-muted-foreground uppercase text-[9px] font-bold">Sua força bruta em tempo real.</CardDescription>
-              </div>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic">
+                <Dumbbell className="w-6 h-6" /> Recordes (PR)
+              </CardTitle>
               <Select value={selectedEx} onValueChange={setSelectedEx}>
                 <SelectTrigger className="w-[160px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
                   <SelectValue placeholder="Exercício" />
@@ -228,14 +225,11 @@ export default function ProgressPage() {
         </div>
 
         <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-8 opacity-5"><TrendingUp className="w-48 h-48 text-primary" /></div>
           <CardHeader>
             <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Análise de Campo</CardTitle>
-            <CardDescription className="text-muted-foreground uppercase font-bold text-xs tracking-tighter">Insights baseados na sua evolução física sincronizada.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
             <div className="space-y-4">
-              <h4 className="font-black text-primary flex items-center gap-2 uppercase tracking-tighter italic"><CheckCircle2 className="w-5 h-5" /> Tendências Atuais</h4>
               <div className="space-y-3">
                 {performanceInsights.map((insight, idx) => (
                   <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-sm text-zinc-300 leading-relaxed font-bold italic">"{insight}"</div>

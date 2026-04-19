@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Droplets, Utensils, Coffee, Sun, Moon, Clock, Trash2, Flame, User as UserIcon } from 'lucide-react';
+import { Droplets, Utensils, Coffee, Sun, Moon, Clock, Trash2, Flame, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -25,14 +26,8 @@ const MILITARY_FOOD_DB = [
   { id: '5', name: 'Sobrecoxa de Frango', portion: '1 unidade média', calories: 210, protein: 22 },
   { id: '6', name: 'Ovo Cozido', portion: '1 unidade', calories: 80, protein: 6 },
   { id: '7', name: 'Pão Francês', portion: '1 unidade (50g)', calories: 135, protein: 4 },
-  { id: '8', name: 'Manteiga/Margarina', portion: '1 ponta de faca', calories: 45, protein: 0 },
   { id: '9', name: 'Leite Integral', portion: '1 caneca (200ml)', calories: 120, protein: 6 },
-  { id: '10', name: 'Café com Açúcar', portion: '1 caneca (100ml)', calories: 40, protein: 0 },
-  { id: '11', name: 'Suco do Rancho', portion: '1 caneca (200ml)', calories: 80, protein: 0 },
   { id: '12', name: 'Salada Diversa', portion: 'À vontade', calories: 25, protein: 1 },
-  { id: '13', name: 'Queijo Prato/Mussarela', portion: '1 fatia média', calories: 85, protein: 6 },
-  { id: '14', name: 'Presunto', portion: '1 fatia média', calories: 35, protein: 4 },
-  { id: '15', name: 'Farofa', portion: '1 colher de sopa', calories: 70, protein: 1 },
 ];
 
 export default function RoutinePage() {
@@ -58,13 +53,10 @@ export default function RoutinePage() {
     return query(collection(db, 'users', user.uid, 'water'), where('date', '==', todayStr));
   }, [db, user, todayStr]);
 
-  const { data: rawMeals } = useCollection(mealQuery);
-  const { data: rawWater } = useCollection(waterQuery);
+  const { data: meals } = useCollection(mealQuery);
+  const { data: waterLogs } = useCollection(waterQuery);
 
-  const meals = rawMeals || [];
-  const waterLogs = rawWater || [];
-
-  const waterCount = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  const waterCount = (waterLogs || []).reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
   const userWeight = profile?.weight || 0;
   const userHeight = profile?.height || 0;
@@ -76,7 +68,6 @@ export default function RoutinePage() {
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
-      // Equação de Mifflin-St Jeor
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
@@ -87,8 +78,8 @@ export default function RoutinePage() {
   const calorieGoal = calculateCalorieGoal();
   
   const waterProgress = (waterCount / waterGoal) * 100;
-  const totalCalories = meals.reduce((acc, curr) => acc + (curr.calories || 0), 0);
-  const totalProtein = meals.reduce((acc, curr) => acc + (curr.protein || 0), 0);
+  const totalCalories = (meals || []).reduce((acc, curr) => acc + (curr.calories || 0), 0);
+  const totalProtein = (meals || []).reduce((acc, curr) => acc + (curr.protein || 0), 0);
 
   const mealSlots = [
     { key: 'café', label: 'Café da Manhã', icon: Coffee },
@@ -128,7 +119,7 @@ export default function RoutinePage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="space-y-2 text-center md:text-left">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
-          <p className="text-muted-foreground font-medium text-sm">Anote sua rotina e acompanhe suas Calorias e Proteínas oficiais.</p>
+          <p className="text-muted-foreground font-medium text-sm">Acompanhe suas Calorias e Proteínas Oficiais.</p>
         </header>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -157,7 +148,7 @@ export default function RoutinePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {mealSlots.map((slot) => {
-              const items = meals.filter(m => m.slot === slot.key);
+              const items = (meals || []).filter(m => m.slot === slot.key);
               return (
                 <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden">
                   <CardHeader className="p-4 bg-white/5 flex flex-row items-center justify-between space-y-0">
@@ -181,11 +172,11 @@ export default function RoutinePage() {
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button className="w-full h-10 bg-secondary hover:bg-white/10 text-white border-white/10 border text-[10px] font-black uppercase italic rounded-xl" onClick={() => setActiveSlot(slot.key)}>
-                          Adicionar Refeição
+                          Adicionar
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md rounded-3xl">
-                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio</DialogTitle></DialogHeader>
+                        <DialogHeader><DialogTitle className="font-headline italic text-primary uppercase text-2xl">Cardápio do Rancho</DialogTitle></DialogHeader>
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="grid gap-2">
                             {MILITARY_FOOD_DB.map((food) => (
@@ -216,18 +207,20 @@ export default function RoutinePage() {
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
                 <div className="space-y-1">
                    <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões Médicas Oficiais:</p>
-                   <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>
-                   <p className="text-sm text-accent font-black uppercase italic">Meta Proteica: {proteinGoal}g</p>
+                   <div className="flex flex-col gap-1">
+                     <p className="text-sm text-primary font-black uppercase italic">Meta Calórica (TDEE): {calorieGoal} kcal</p>
+                     <p className="text-sm text-accent font-black uppercase italic">Meta Proteica (2g/kg): {proteinGoal}g</p>
+                   </div>
                 </div>
               </div>
               <div className="flex gap-12">
                 <div className="text-center space-y-1">
                   <p className="text-4xl font-black text-primary italic leading-none">{totalCalories}</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Consumo (Kcal)</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Kcal Consumidas</p>
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-4xl font-black text-accent italic leading-none">{totalProtein}g</p>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Consumo (Prot)</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Proteína Consumida</p>
                 </div>
               </div>
             </CardContent>
@@ -256,14 +249,14 @@ export default function RoutinePage() {
 
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="bg-white/5 pb-6 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Aporte Calórico</CardTitle>
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic"><Flame className="w-7 h-7" /> Balanço de Energia</CardTitle>
             </CardHeader>
             <CardContent className="p-8">
               <div className="p-8 rounded-3xl bg-white/5 border border-white/5 text-center space-y-4">
                 <Flame className={cn("w-12 h-12 mx-auto", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
-                <h3 className="text-xl font-headline font-bold uppercase italic">Balanço do Dia</h3>
+                <h3 className="text-xl font-headline font-bold uppercase italic">Status Calórico</h3>
                 <p className="text-sm text-muted-foreground font-bold">
-                  Consumido: {totalCalories} kcal de {calorieGoal} kcal sugeridas.
+                  Você atingiu {totalCalories} kcal de sua meta diária de {calorieGoal} kcal.
                 </p>
               </div>
             </CardContent>

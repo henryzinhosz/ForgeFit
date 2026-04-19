@@ -67,23 +67,23 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "Documento raiz do usuário."
+      "description": "Silo de dados do usuário."
     },
     "/users/{userId}/workouts/{workoutId}": {
       "schema": { "$ref": "#/backend/entities/Workout" },
-      "description": "Lista de exercícios agendados."
+      "description": "Exercícios planejados."
     },
     "/users/{userId}/metrics/{metricId}": {
       "schema": { "$ref": "#/backend/entities/Metric" },
-      "description": "Registros de peso e recordes de carga."
+      "description": "Peso e recordes de carga."
     },
     "/users/{userId}/water/{waterId}": {
       "schema": { "$ref": "#/backend/entities/WaterLog" },
-      "description": "Histórico de hidratação."
+      "description": "Histórico de água."
     },
     "/users/{userId}/meals/{mealId}": {
       "schema": { "$ref": "#/backend/entities/Meal" },
-      "description": "Histórico de alimentação."
+      "description": "Histórico de refeições."
     }
   }
 }

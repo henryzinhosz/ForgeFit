@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, User as UserIcon, Flame, Target } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Flame, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
@@ -72,35 +73,31 @@ export default function Home() {
     return query(collection(db, 'users', user.uid, 'water'), where('date', '==', currentDate.str));
   }, [db, user, currentDate]);
 
-  const { data: rawExercises } = useCollection(workoutsQuery);
-  const { data: rawWater } = useCollection(waterQuery);
+  const { data: todaysExercises } = useCollection(workoutsQuery);
+  const { data: waterLogs } = useCollection(waterQuery);
 
-  const todaysExercises = rawExercises || [];
-  const waterLogs = rawWater || [];
-
-  const completedToday = todaysExercises.filter(ex => ex.completed).length;
-  const totalToday = todaysExercises.length;
+  const completedToday = (todaysExercises || []).filter(ex => ex.completed).length;
+  const totalToday = (todaysExercises || []).length;
   const progressPercent = totalToday > 0 ? (completedToday / totalToday) * 100 : 0;
   
-  const currentWater = waterLogs.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+  const currentWater = (waterLogs || []).reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
   const userWeight = profile?.weight || 0;
   const userHeight = profile?.height || 0;
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  // Cálculos Médicos Oficiais (Padrões de Saúde)
+  // Cálculos Médicos Oficiais
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
-      // Equação de Mifflin-St Jeor (Padrão Médico de Ouro)
+      // Equação de Mifflin-St Jeor
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      // Fator de atividade 1.6 para rotina ativa/militar
-      return Math.round(bmr * 1.6);
+      return Math.round(bmr * 1.6); // Fator de atividade intensa
     }
     return 2500;
   };
@@ -133,7 +130,7 @@ export default function Home() {
       setWeightInput(profile.weight?.toString() || '');
       setHeightInput(profile.height?.toString() || '');
       setAgeInput(profile.age?.toString() || '');
-      setGenderInput(profile.gender || '');
+      setGenderInput(profile.gender || 'Masculino');
     }
   }, [profile]);
 
@@ -209,12 +206,6 @@ export default function Home() {
                     </Select>
                   </div>
                 </div>
-
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <p className="text-[10px] text-muted-foreground uppercase font-medium leading-relaxed">
-                    Nota: O peso registrado aqui ou na tela de Evolução sincroniza automaticamente suas metas de saúde (Mifflin-St Jeor).
-                  </p>
-                </div>
               </div>
               <DialogFooter>
                 <Button onClick={handleSaveProfile} className="w-full h-14 bg-primary hover:bg-primary/90 rounded-2xl font-black uppercase italic shadow-2xl">ATUALIZAR BIOMETRIA</Button>
@@ -237,7 +228,7 @@ export default function Home() {
             <CardContent className="space-y-6">
               <Progress value={progressPercent} className="h-4 bg-secondary" />
               <div className="space-y-3">
-                {todaysExercises.length > 0 ? todaysExercises.map((ex) => (
+                {todaysExercises && todaysExercises.length > 0 ? todaysExercises.map((ex) => (
                   <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
                     <span className={cn("font-bold text-sm uppercase italic text-white", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
                     <span className="text-xs font-black text-primary/80 italic tracking-tighter">{ex.sets}x{ex.reps}</span>
@@ -270,24 +261,22 @@ export default function Home() {
             <Card className="bg-gradient-to-br from-primary to-accent text-white border-none shadow-[0_10px_30px_rgba(255,0,0,0.4)] rounded-3xl overflow-hidden">
               <CardHeader className="pb-0">
                 <CardTitle className="text-lg flex items-center gap-2 uppercase italic font-black">
-                  <Target className="w-5 h-5" /> Metas Médicas Atuais
+                  <Target className="w-5 h-5" /> Metas Oficiais
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
-                <div className="space-y-3">
-                  <div className="bg-white/20 p-4 rounded-2xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase italic">Proteína (2g/kg)</span>
-                      <span className="text-sm font-black italic">{proteinGoal}g</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase italic">Calorias (TDEE)</span>
-                      <span className="text-sm font-black italic">{calorieGoal} kcal</span>
-                    </div>
+                <div className="bg-white/20 p-4 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase italic">Meta Calórica (TDEE)</span>
+                    <span className="text-sm font-black italic">{calorieGoal} kcal</span>
                   </div>
-                  <div className="flex justify-between items-center px-2">
-                    <span className="text-[9px] font-bold uppercase italic opacity-80">{userWeight}kg | {userHeight}cm | {userAge} anos</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase italic">Proteína (2g/kg)</span>
+                    <span className="text-sm font-black italic">{proteinGoal}g</span>
                   </div>
+                </div>
+                <div className="flex justify-between items-center px-2">
+                  <span className="text-[9px] font-bold uppercase italic opacity-80">{userWeight}kg | {userHeight}cm | {userAge} anos</span>
                 </div>
               </CardContent>
             </Card>
