@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 
 export default function ProgressPage() {
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const [weightInput, setWeightInput] = useState('');
   const [loadInput, setLoadInput] = useState('');
@@ -41,14 +41,15 @@ export default function ProgressPage() {
     return doc(db, 'users', user.uid);
   }, [db, user]);
 
-  const { data: profile } = useDoc(profileRef);
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
 
   const metricsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return collection(db, 'users', user.uid, 'metrics');
   }, [db, user]);
 
-  const { data: rawMetrics, isLoading } = useCollection(metricsQuery);
+  // Estratégia de Filtragem no Cliente para evitar erros de permissão e índices complexos
+  const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
 
   const weightData = useMemo(() => {
     if (!rawMetrics) return [];
@@ -74,7 +75,6 @@ export default function ProgressPage() {
       }));
   }, [rawMetrics, selectedEx]);
 
-  // Avaliação de Saúde Determinística
   const assessment = useMemo(() => {
     const metrics: HealthMetrics = {
       weight: profile?.weight || 70,
@@ -120,6 +120,14 @@ export default function ProgressPage() {
     }
   };
 
+  if (isUserLoading || isProfileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pb-32 pt-20 bg-black">
       <Navigation />
@@ -148,7 +156,7 @@ export default function ProgressPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="h-[250px] w-full">
-                {isLoading ? (
+                {isMetricsLoading ? (
                   <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>
                 ) : weightData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -199,7 +207,7 @@ export default function ProgressPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="h-[250px] w-full">
-                {isLoading ? (
+                {isMetricsLoading ? (
                   <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-accent" /></div>
                 ) : loadData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -239,7 +247,7 @@ export default function ProgressPage() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-black uppercase italic text-primary">Classificação Médica (IMC OMS)</p>
-                    <p className="text-lg font-black italic text-white">{assessment.bmiClassification}</p>
+                    <p className="text-lg font-black italic text-white">{assessment.bmiClassification || 'Aguardando Perfil'}</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase italic">
                       Seu IMC: {assessment.bmi} | Ideal: 18.5 - 24.9
                     </p>

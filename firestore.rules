@@ -1,10 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // REGRA DE OURO DO SILO: Acesso total recursivo para o dono do ID.
-    // O uso de {document=**} elimina ambiguidades em consultas complexas (list).
-    match /users/{userId}/{document=**} {
+    // REGRA DE OURO: Silo absoluto para o usuário logado
+    // Garante que o dono do UID tenha acesso total a qualquer documento ou subcoleção dentro do seu caminho.
+    match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      match /{allPaths=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // Coleção pública de exercícios (apenas leitura)

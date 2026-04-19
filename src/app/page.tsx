@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, Target, AlertTriangle } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Target, AlertTriangle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
@@ -32,7 +32,7 @@ const DAYS_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'S
 const DAYS_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export default function Home() {
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   
   const [currentDate, setCurrentDate] = useState<{
@@ -61,7 +61,7 @@ export default function Home() {
     return doc(db, 'users', user.uid);
   }, [db, user]);
 
-  const { data: profile } = useDoc(profileRef);
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
 
   const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user || !currentDate) return null;
@@ -73,8 +73,8 @@ export default function Home() {
     return query(collection(db, 'users', user.uid, 'water'), where('date', '==', currentDate.str));
   }, [db, user, currentDate]);
 
-  const { data: todaysExercises } = useCollection(workoutsQuery);
-  const { data: waterLogs } = useCollection(waterQuery);
+  const { data: todaysExercises, isLoading: isWorkoutsLoading } = useCollection(workoutsQuery);
+  const { data: waterLogs, isLoading: isWaterLoading } = useCollection(waterQuery);
 
   const completedToday = (todaysExercises || []).filter(ex => ex.completed).length;
   const totalToday = (todaysExercises || []).length;
@@ -82,7 +82,6 @@ export default function Home() {
   
   const currentWater = (waterLogs || []).reduce((acc, curr) => acc + (curr.amount || 0), 0);
   
-  // Avaliação de Saúde Determinística
   const healthAssessment = useMemo(() => {
     const metrics: HealthMetrics = {
       weight: profile?.weight || 70,
@@ -123,6 +122,17 @@ export default function Home() {
       setGenderInput(profile.gender || 'Masculino');
     }
   }, [profile]);
+
+  if (isUserLoading || isProfileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <p className="text-primary font-black uppercase italic tracking-widest animate-pulse">Carregando Silo...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-24 md:pt-20 bg-background text-foreground">
@@ -188,7 +198,7 @@ export default function Home() {
         {!healthAssessment.isValid && (
           <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 text-red-500 mb-4">
             <AlertTriangle className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase italic">{healthAssessment.error || "Dados biométricos incompletos ou irreais."}</span>
+            <span className="text-xs font-bold uppercase italic">{healthAssessment.error || "Aguardando configuração do perfil biométrico."}</span>
           </div>
         )}
 
@@ -198,10 +208,10 @@ export default function Home() {
               <div className="space-y-1">
                 <CardTitle className="text-2xl font-headline uppercase italic text-white">Missões do Dia</CardTitle>
                 <CardDescription className="font-bold text-muted-foreground">
-                  {totalToday > 0 ? `${completedToday} de ${totalToday} exercícios prontos` : 'Nenhum treino agendado.'}
+                  {isWorkoutsLoading ? 'Sincronizando...' : totalToday > 0 ? `${completedToday} de ${totalToday} exercícios prontos` : 'Nenhum treino agendado.'}
                 </CardDescription>
               </div>
-              <CheckCircle2 className={cn("w-10 h-10", progressPercent === 100 ? "text-green-500" : "text-muted")} />
+              {isWorkoutsLoading ? <Loader2 className="w-8 h-8 animate-spin text-muted" /> : <CheckCircle2 className={cn("w-10 h-10", progressPercent === 100 ? "text-green-500" : "text-muted")} />}
             </CardHeader>
             <CardContent className="space-y-6">
               <Progress value={progressPercent} className="h-4 bg-secondary" />
@@ -211,7 +221,7 @@ export default function Home() {
                     <span className={cn("font-bold text-sm uppercase italic text-white", ex.completed && "line-through text-muted-foreground")}>{ex.title}</span>
                     <span className="text-xs font-black text-primary/80 italic">{ex.sets}x{ex.reps}</span>
                   </div>
-                )) : (
+                )) : !isWorkoutsLoading && (
                   <div className="p-10 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
                     <p className="text-[10px] font-bold uppercase text-muted-foreground italic">Nenhuma missão alocada para hoje.</p>
                   </div>
@@ -228,7 +238,7 @@ export default function Home() {
               <CardContent className="space-y-6">
                 <div className="flex items-end gap-2">
                   <span className="text-5xl font-black text-accent italic leading-none">{currentWater}</span>
-                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {healthAssessment.waterLiters}L</span>
+                  <span className="text-muted-foreground font-bold uppercase text-xs mb-1">/ {healthAssessment.waterLiters || 4}L</span>
                 </div>
                 <Button onClick={handleIncrementWater} className="w-full h-14 bg-accent/10 text-accent hover:bg-accent/20 border-accent/20 border-2 rounded-2xl font-black uppercase italic">
                   +1 LITRO <Droplets className="ml-2 w-5 h-5" />
@@ -245,20 +255,20 @@ export default function Home() {
               <CardContent className="pt-4 space-y-4">
                 <div className="bg-white/20 p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase italic">GET (Harris-Benedict)</span>
-                    <span className="text-sm font-black italic">{healthAssessment.get} kcal</span>
+                    <span className="text-[10px] font-black uppercase italic">GET (Mifflin)</span>
+                    <span className="text-sm font-black italic">{healthAssessment.get || 0} kcal</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase italic">Proteína Diária</span>
-                    <span className="text-sm font-black italic">{healthAssessment.proteinRange.min} - {healthAssessment.proteinRange.max}g</span>
+                    <span className="text-sm font-black italic">{healthAssessment.proteinRange.min || 0} - {healthAssessment.proteinRange.max || 0}g</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase italic">Classificação IMC</span>
-                    <span className="text-[10px] font-black italic uppercase">{healthAssessment.bmiClassification}</span>
+                    <span className="text-[10px] font-black italic uppercase">{healthAssessment.bmiClassification || '---'}</span>
                   </div>
                 </div>
                 <p className="text-[9px] font-bold uppercase italic opacity-70 text-center">
-                  Baseado em: {profile?.weight || 70}kg | {profile?.age || 25} anos | {profile?.gender || 'Masculino'}
+                  Baseado em: {profile?.weight || '---'}kg | {profile?.age || '---'} anos | {profile?.gender || '---'}
                 </p>
               </CardContent>
             </Card>
