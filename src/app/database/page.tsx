@@ -152,19 +152,19 @@ export default function DatabasePage() {
     <div className="min-h-screen pb-32 pt-20 bg-black">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-5">
-        <header className="space-y-3 text-center md:text-left">
+      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-3">
+        <header className="space-y-1.5 text-center md:text-left">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-[0_0_25px_rgba(255,0,0,0.4)]">
               <Plus className="text-white w-8 h-8" />
             </div>
-            <div className="space-y-1 text-center md:text-left">
-              <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter text-white italic">Banco de Exercícios</h1>
-              <p className="text-muted-foreground font-medium">Sincronização em tempo real via Cloud Firestore.</p>
+            <div className="space-y-0.5 text-center md:text-left">
+              <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter text-white italic leading-tight">Banco de Exercícios</h1>
+              <p className="text-muted-foreground font-medium text-sm">Sincronização em tempo real via Cloud Firestore.</p>
             </div>
           </div>
           
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4 pt-2">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input 

@@ -88,44 +88,56 @@ export default function RoutinePage() {
     <div className="min-h-screen pb-24 md:pt-20 bg-black">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-5">
-        <header className="space-y-2 text-center">
+      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-3">
+        <header className="space-y-1 text-center">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
           <p className="text-muted-foreground font-medium text-sm">Acompanhe seu balanço nutricional diário.</p>
         </header>
 
-        <section className="space-y-6">
+        <section className="space-y-4">
           <h2 className="text-2xl font-headline text-white italic uppercase flex items-center gap-2">
             <Utensils className="text-primary w-6 h-6" /> Alimentação Do Dia
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {mealSlots.map((slot) => {
               const items = (meals || []).filter(m => m.slot === slot.key);
               return (
-                <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden">
-                  <CardHeader className="p-4 bg-white/5 flex flex-row items-center justify-between space-y-0">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-primary/20 p-2 rounded-lg text-primary"><slot.icon className="w-5 h-5" /></div>
-                      <CardTitle className="text-xs font-bold text-white uppercase italic">{slot.label}</CardTitle>
+                <Card key={slot.key} className="bg-card/50 border-white/10 rounded-3xl overflow-hidden shadow-xl min-h-[300px] flex flex-col">
+                  <CardHeader className="p-6 bg-white/5 flex flex-row items-center justify-between space-y-0 border-b border-white/5">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-primary/20 p-3 rounded-xl text-primary"><slot.icon className="w-6 h-6" /></div>
+                      <CardTitle className="text-xl font-bold text-white uppercase italic">{slot.label}</CardTitle>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-4 space-y-4">
-                    <div className="space-y-2 min-h-[60px]">
-                      {items.map((food) => (
-                        <div key={food.id} className="flex items-center justify-between text-[10px] bg-white/5 p-2 rounded-lg border border-white/5">
-                          <span className="text-zinc-300 truncate font-bold uppercase">{food.name}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-primary font-black italic">{food.calories}kcal</span>
-                            <button onClick={() => handleRemoveFood(food.id)} className="text-zinc-500 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                  <CardContent className="p-6 flex-1 flex flex-col justify-between space-y-6">
+                    <div className="space-y-3">
+                      {items.length > 0 ? items.map((food) => (
+                        <div key={food.id} className="flex items-center justify-between text-xs bg-white/5 p-4 rounded-xl border border-white/5">
+                          <div className="flex flex-col">
+                            <span className="text-zinc-200 font-bold uppercase tracking-tight">{food.name}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase">{food.portion}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <span className="block text-primary font-black italic">{food.calories}kcal</span>
+                              <span className="block text-[10px] text-accent font-bold uppercase">{food.protein}g P</span>
+                            </div>
+                            <button onClick={() => handleRemoveFood(food.id)} className="text-zinc-500 hover:text-red-500 p-1">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
-                      ))}
+                      )) : (
+                        <div className="h-24 flex items-center justify-center border border-dashed border-white/10 rounded-xl">
+                          <p className="text-[10px] font-bold uppercase italic text-muted-foreground">Nenhum registro para esta refeição.</p>
+                        </div>
+                      )}
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="w-full h-10 bg-secondary hover:bg-white/10 text-white border-white/10 border text-[10px] font-black uppercase italic rounded-xl" onClick={() => setActiveSlot(slot.key)}>
-                          Adicionar
+                        <Button className="w-full h-14 bg-secondary hover:bg-white/10 text-white border-white/10 border text-xs font-black uppercase italic rounded-2xl" onClick={() => setActiveSlot(slot.key)}>
+                          Adicionar Alimento
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="bg-zinc-900 border-white/10 text-white max-w-md rounded-3xl">
@@ -156,7 +168,7 @@ export default function RoutinePage() {
 
           <Card className="bg-gradient-to-r from-zinc-900 to-black border-primary/20 shadow-2xl rounded-3xl overflow-hidden">
             <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="space-y-3">
+              <div className="space-y-3 text-center md:text-left">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Meta Nutricional Determinada</h3>
                 <div className="space-y-1">
                    <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Cálculos Baseados na OMS:</p>
