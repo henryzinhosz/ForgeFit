@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -102,7 +101,7 @@ export default function PlannerPage() {
     <div className="min-h-screen pb-24 md:pt-20 bg-background">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-4">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold uppercase italic tracking-tighter">Agenda Semanal</h1>

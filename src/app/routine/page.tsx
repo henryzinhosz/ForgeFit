@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -89,7 +88,7 @@ export default function RoutinePage() {
     <div className="min-h-screen pb-24 md:pt-20 bg-black">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
+      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-5">
         <header className="space-y-2 text-center">
           <h1 className="text-4xl font-headline font-bold text-white uppercase italic tracking-tighter">Rotina Alimentar</h1>
           <p className="text-muted-foreground font-medium text-sm">Acompanhe seu balanço nutricional diário.</p>

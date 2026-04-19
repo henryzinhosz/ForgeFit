@@ -138,7 +138,7 @@ export default function Home() {
     <div className="min-h-screen pb-24 md:pt-20 bg-background text-foreground">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-4">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Seja Bem-vindo</h1>

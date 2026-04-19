@@ -152,8 +152,8 @@ export default function DatabasePage() {
     <div className="min-h-screen pb-32 pt-20 bg-black">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
-        <header className="space-y-6 text-center md:text-left">
+      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-5">
+        <header className="space-y-3 text-center md:text-left">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-[0_0_25px_rgba(255,0,0,0.4)]">
               <Plus className="text-white w-8 h-8" />
