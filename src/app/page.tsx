@@ -141,7 +141,7 @@ export default function Home() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Quartel General</h1>
+            <h1 className="text-4xl font-headline font-bold uppercase tracking-tighter italic text-white">Seja Bem-vindo</h1>
             <p className="text-muted-foreground font-medium">
               Hoje é <span className="text-primary font-bold">{currentDate ? DAYS_PT[currentDate.index] : 'Carregando...'}</span>.
             </p>
@@ -149,13 +149,13 @@ export default function Home() {
           
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="rounded-2xl border-white/10 hover:bg-white/5 h-12 gap-2 uppercase font-black italic">
-                <Settings2 className="w-5 h-5" /> Perfil Biométrico
+              <Button variant="outline" className="rounded-2xl border-white/10 hover:bg-white/5 h-14 gap-2 uppercase font-black italic">
+                <Settings2 className="w-5 h-5" /> Perfil Corporal
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-white/10 text-white rounded-3xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações Biométricas</DialogTitle>
+                <DialogTitle className="text-2xl font-headline italic text-primary uppercase">Configurações do Perfil</DialogTitle>
                 <DialogDescription className="uppercase font-bold text-[10px] tracking-widest text-muted-foreground">Defina seu perfil para metas de precisão baseadas na OMS.</DialogDescription>
               </DialogHeader>
               <div className="py-6 space-y-6">
@@ -198,7 +198,7 @@ export default function Home() {
         {!healthAssessment.isValid && (
           <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3 text-red-500 mb-4">
             <AlertTriangle className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase italic">{healthAssessment.error || "Aguardando configuração do perfil biométrico."}</span>
+            <span className="text-xs font-bold uppercase italic">{healthAssessment.error || "Aguardando configuração do perfil corporal."}</span>
           </div>
         )}
 
@@ -206,7 +206,7 @@ export default function Home() {
           <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
-                <CardTitle className="text-2xl font-headline uppercase italic text-white">Missões do Dia</CardTitle>
+                <CardTitle className="text-2xl font-headline uppercase italic text-white">Treino do Dia</CardTitle>
                 <CardDescription className="font-bold text-muted-foreground">
                   {isWorkoutsLoading ? 'Sincronizando...' : totalToday > 0 ? `${completedToday} de ${totalToday} exercícios prontos` : 'Nenhum treino agendado.'}
                 </CardDescription>

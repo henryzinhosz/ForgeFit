@@ -134,7 +134,7 @@ export default function ProgressPage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-10">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
+            <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Corporal</h1>
             <p className="text-muted-foreground font-medium">Acompanhe seu progresso e metas de saúde.</p>
           </div>
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
