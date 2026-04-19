@@ -76,6 +76,7 @@ export default function RoutinePage() {
 
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
+      // Equação de Mifflin-St Jeor
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
@@ -214,7 +215,7 @@ export default function RoutinePage() {
               <div className="space-y-3">
                 <h3 className="text-3xl font-headline text-white italic uppercase tracking-widest">Resumo Nutricional</h3>
                 <div className="space-y-1">
-                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões Médicas (Mifflin-St Jeor):</p>
+                   <p className="text-[10px] text-muted-foreground font-bold uppercase italic">Sugestões Médicas Oficiais:</p>
                    <p className="text-sm text-primary font-black uppercase italic">Meta Calórica: {calorieGoal} kcal</p>
                    <p className="text-sm text-accent font-black uppercase italic">Meta Proteica: {proteinGoal}g</p>
                 </div>
@@ -247,7 +248,7 @@ export default function RoutinePage() {
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária Oficial: {waterGoal.toFixed(1)}L</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase italic mb-4">Meta Diária: {waterGoal.toFixed(1)}L</p>
                 <Button onClick={handleIncrementWater} className="w-full h-16 text-xl rounded-2xl bg-accent hover:bg-accent/90 font-black italic uppercase px-12">REGISTRAR +1 LITRO</Button>
               </div>
             </CardContent>
@@ -262,7 +263,7 @@ export default function RoutinePage() {
                 <Flame className={cn("w-12 h-12 mx-auto", totalCalories >= calorieGoal ? "text-orange-500" : "text-muted-foreground")} />
                 <h3 className="text-xl font-headline font-bold uppercase italic">Balanço do Dia</h3>
                 <p className="text-sm text-muted-foreground font-bold">
-                  Consumido: {totalCalories} kcal de {calorieGoal} kcal recomendadas.
+                  Consumido: {totalCalories} kcal de {calorieGoal} kcal sugeridas.
                 </p>
               </div>
             </CardContent>

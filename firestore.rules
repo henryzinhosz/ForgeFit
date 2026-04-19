@@ -3,48 +3,27 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * SILO DE DADOS DO USUÁRIO (ESTRUTURA EXPLÍCITA)
-     * Regras detalhadas para evitar erros de 'list' em subcoleções.
+     * SILO DE DADOS DO USUÁRIO (MODELO RECURSIVO ABSOLUTO)
+     * Garante que o dono do UID tenha acesso total (get, list, create, update, delete)
+     * a qualquer documento dentro do seu diretório /users/{userId}.
      */
     match /users/{userId} {
-      // Permissões para o documento de perfil do usuário
       allow read, write: if request.auth != null && request.auth.uid == userId;
       
-      // Permissões explícitas para subcoleções
-      // Isso garante que consultas (queries) de listagem funcionem corretamente
-      
-      match /workouts/{workoutId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      match /metrics/{metricId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      match /water/{waterId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      match /meals/{mealId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
-      // Fallback para qualquer outra subcoleção futura
-      match /{allSubcollections=**} {
+      // O curinga {document=**} permite que qualquer subcoleção (metrics, workouts, etc.)
+      // herde a permissão de leitura e escrita do dono do silo.
+      match /{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
 
     /**
-     * EXERCÍCIOS GLOBAIS (LEITURA PÚBLICA PARA AUTENTICADOS)
+     * EXERCÍCIOS GLOBAIS
      */
     match /exercises/{exerciseId} {
       allow read: if request.auth != null;
     }
 
-    /**
-     * EXERCÍCIOS PERSONALIZADOS
-     */
     match /custom_exercises/{exerciseId} {
       allow read, write: if request.auth != null;
     }

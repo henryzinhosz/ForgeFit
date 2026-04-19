@@ -89,7 +89,7 @@ export default function Home() {
   const userAge = profile?.age || 0;
   const userGender = profile?.gender || 'Masculino';
 
-  // Cálculos Médicos Oficiais (Standard Health Guidelines)
+  // Cálculos Médicos Oficiais (Padrões de Saúde)
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
@@ -99,7 +99,7 @@ export default function Home() {
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
-      // Fator de atividade 1.6 para rotina militar/ativa
+      // Fator de atividade 1.6 para rotina ativa/militar
       return Math.round(bmr * 1.6);
     }
     return 2500;
