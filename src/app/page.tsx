@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -7,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, Flame, Target, User } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Flame, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
@@ -90,11 +89,13 @@ export default function Home() {
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
+  // Meta Calórica Oficial (Mifflin-St Jeor)
   const calculateCalorieGoal = () => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
       const bmr = userGender === 'Masculino'
         ? (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) + 5
         : (10 * userWeight) + (6.25 * userHeight) - (5 * userAge) - 161;
+      // Multiplicado por fator de atividade 1.6 para militares em treinamento
       return Math.round(bmr * 1.6);
     }
     return 2500;
@@ -240,7 +241,7 @@ export default function Home() {
                   </div>
                 )) : (
                   <div className="p-10 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                    <p className="text-xs font-bold uppercase text-muted-foreground italic">Vá até o Banco de Exercícios para montar seu treino.</p>
+                    <p className="text-xs font-bold uppercase text-muted-foreground italic">Monte seu treino no Banco de Exercícios.</p>
                   </div>
                 )}
               </div>
@@ -272,10 +273,7 @@ export default function Home() {
               <CardContent className="pt-4 space-y-4">
                 <div className="bg-white/20 p-4 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <span className="text-[10px] font-black uppercase italic block">Meta Calórica (TDEE)</span>
-                      <span className="text-[8px] font-bold text-white/50 uppercase">Base: Mifflin-St Jeor</span>
-                    </div>
+                    <span className="text-[10px] font-black uppercase italic block">Meta Calórica (Mifflin)</span>
                     <span className="text-sm font-black italic">{calorieGoal} kcal</span>
                   </div>
                   <div className="flex items-center justify-between">

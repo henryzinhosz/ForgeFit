@@ -1,24 +1,10 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regra explícita para o documento de perfil do usuário
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Regras explícitas para subcoleções do usuário (Silo de Dados)
-    // Isso resolve o erro de 'Missing or insufficient permissions' em listagens filtradas
-    match /users/{userId}/metrics/{id} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    match /users/{userId}/workouts/{id} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    match /users/{userId}/water/{id} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    match /users/{userId}/meals/{id} {
+    // Silo de Dados do Usuário: Padrão Recursivo Absoluto
+    // Garante que o usuário autenticado tenha acesso total e exclusivo a TUDO 
+    // dentro do seu caminho /users/{userId}/, incluindo todas as subcoleções (metrics, workouts, etc.)
+    match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 

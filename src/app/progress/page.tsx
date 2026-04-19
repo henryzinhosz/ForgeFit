@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,7 +16,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Info, Flame, Target } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Info, Target } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -99,6 +98,7 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
 
+      // Sincronização Inteligente: Atualiza o peso no perfil global para recalcular todas as metas do app
       setDocumentNonBlocking(profileRef, {
         weight: weightValue,
         updatedAt: new Date().toISOString()
@@ -129,6 +129,7 @@ export default function ProgressPage() {
   const waterGoal = userWeight > 0 ? (userWeight * 0.05) : 4;
   const proteinGoal = userWeight > 0 ? Math.round(userWeight * 2) : 160;
 
+  // Meta Calórica Oficial (Mifflin-St Jeor)
   const calorieGoal = (() => {
     if (userWeight > 0 && userHeight > 0 && userAge > 0) {
       const bmr = userGender === 'Masculino'
@@ -148,12 +149,12 @@ export default function ProgressPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Biométrica</h1>
-              <p className="text-muted-foreground font-medium">Sincronização global com perfil médico oficial.</p>
+              <p className="text-muted-foreground font-medium">Dados alocados de forma segura em seu silo pessoal.</p>
             </div>
             <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
               <Info className="text-primary w-5 h-5 shrink-0" />
               <p className="text-[10px] font-bold text-white uppercase leading-tight italic">
-                O registro de peso aqui atualiza automaticamente suas metas de calorias, proteína e água.
+                O registro de peso aqui atualiza automaticamente seu Perfil e suas metas médicas globais.
               </p>
             </div>
           </div>
@@ -163,7 +164,7 @@ export default function ProgressPage() {
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary uppercase italic">
-                <Scale className="w-6 h-6" /> Peso Corporal
+                <Scale className="w-6 h-6" /> Monitor de Peso
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -187,7 +188,10 @@ export default function ProgressPage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 text-muted-foreground italic uppercase font-bold text-[10px]">Aguardando primeiro registro de peso...</div>
+                  <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 text-muted-foreground italic uppercase font-bold text-[10px] p-8 text-center">
+                    <TrendingUp className="w-8 h-8 mb-2 opacity-20" />
+                    Ainda não há dados de peso disponíveis.<br/>Inicie seu primeiro registro abaixo.
+                  </div>
                 )}
               </div>
               <div className="flex gap-2">
@@ -200,7 +204,7 @@ export default function ProgressPage() {
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent uppercase italic">
-                <Dumbbell className="w-6 h-6" /> Recordes (PR)
+                <Dumbbell className="w-6 h-6" /> Recordes Pessoais
               </CardTitle>
               <Select value={selectedEx} onValueChange={setSelectedEx}>
                 <SelectTrigger className="w-[160px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
@@ -229,12 +233,15 @@ export default function ProgressPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 text-muted-foreground italic uppercase font-bold text-[10px]">Registre sua carga em {selectedEx}</div>
+                  <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 text-muted-foreground italic uppercase font-bold text-[10px] p-8 text-center">
+                    <Dumbbell className="w-8 h-8 mb-2 opacity-20" />
+                    Sem recordes registrados para {selectedEx}.<br/>Adicione sua carga máxima abaixo.
+                  </div>
                 )}
               </div>
               <div className="flex gap-2">
                 <Input type="number" placeholder="Carga máx (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
-                <Button onClick={handleAddLoad} className="h-12 px-8 bg-accent text-white font-black rounded-xl shadow-[0_0_15px_rgba(255,165,0,0.3)] uppercase italic">NOVO PR</Button>
+                <Button onClick={handleAddLoad} className="h-12 px-8 bg-accent text-white font-black rounded-xl shadow-[0_0_15_rgba(255,165,0,0.3)] uppercase italic">NOVO PR</Button>
               </div>
             </CardContent>
           </Card>
@@ -242,12 +249,12 @@ export default function ProgressPage() {
 
         <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Relatório de Performance Médica</CardTitle>
+            <CardTitle className="text-3xl font-headline text-white italic uppercase tracking-widest">Metas Médicas e Performance</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
             <div className="space-y-6">
               <h4 className="text-accent font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" /> Insights de Evolução
+                <TrendingUp className="w-4 h-4" /> Análise de Performance
               </h4>
               <div className="space-y-4">
                 {performanceInsights.map((insight, idx) => (
@@ -260,27 +267,25 @@ export default function ProgressPage() {
 
             <div className="space-y-6">
               <h4 className="text-primary font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <Target className="w-4 h-4" /> Metas Oficiais Sugeridas
+                <Target className="w-4 h-4" /> Resumo de Metas Atuais
               </h4>
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Calorias (Mifflin-St Jeor)</span>
-                    <span className="text-xs font-bold text-white/40 uppercase">TDEE / Gasto Total</span>
+                    <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Gasto Calórico (TDEE)</span>
+                    <span className="text-xs font-bold text-white/40 uppercase">Mifflin-St Jeor</span>
                   </div>
                   <span className="text-lg font-black text-white italic">{calorieGoal} kcal</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Proteína Diária (2g/kg)</span>
-                    <span className="text-xs font-bold text-white/40 uppercase">Reconstrução Muscular</span>
+                    <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Meta Proteica (2g/kg)</span>
                   </div>
                   <span className="text-lg font-black text-accent italic">{proteinGoal}g</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
                   <div className="space-y-1">
                     <span className="text-[10px] font-black uppercase italic text-muted-foreground block">Hidratação (50ml/kg)</span>
-                    <span className="text-xs font-bold text-white/40 uppercase">Saúde e Performance</span>
                   </div>
                   <span className="text-lg font-black text-primary italic">{waterGoal.toFixed(1)}L</span>
                 </div>
