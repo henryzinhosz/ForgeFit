@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Target, ShieldCheck } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, ShieldCheck, BrainCircuit, Sparkles, Zap } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -28,13 +29,21 @@ import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocum
 import { collection, doc } from 'firebase/firestore';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 import { EXERCISE_DATABASE } from '@/lib/exercise-db';
+import { aiPerformanceAnalysis, AIPerformanceAnalysisOutput } from '@/ai/flows/ai-performance-analysis';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProgressPage() {
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
+  const { toast } = useToast();
+  
   const [weightInput, setWeightInput] = useState('');
   const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
+  
+  // Estados da IA
+  const [analysis, setAnalysis] = useState<AIPerformanceAnalysisOutput | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const profileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -48,7 +57,13 @@ export default function ProgressPage() {
     return collection(db, 'users', user.uid, 'metrics');
   }, [db, user]);
 
+  const logsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'users', user.uid, 'logs');
+  }, [db, user]);
+
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
+  const { data: rawLogs } = useCollection(logsQuery);
 
   const weightData = useMemo(() => {
     if (!rawMetrics) return [];
@@ -107,6 +122,7 @@ export default function ProgressPage() {
       }, { merge: true });
 
       setWeightInput('');
+      toast({ title: "Peso atualizado", description: "Registro salvo com sucesso." });
     }
   };
 
@@ -121,6 +137,36 @@ export default function ProgressPage() {
         createdAt: new Date().toISOString()
       });
       setLoadInput('');
+      toast({ title: "Novo recorde!", description: `Sua carga em ${selectedEx} foi registrada.` });
+    }
+  };
+
+  const runAIAnalysis = async () => {
+    if (!rawLogs || !rawMetrics) return;
+    setIsAnalyzing(true);
+    try {
+      const result = await aiPerformanceAnalysis({
+        historicalWorkouts: (rawLogs || []).map(l => ({
+          date: l.date.split('T')[0],
+          exercise: l.exerciseId, // Simplificado para o fluxo
+          sets: l.actualSets,
+          reps: l.actualReps,
+          weight: l.actualWeight
+        })),
+        performanceMetrics: (rawMetrics || []).map(m => ({
+          date: m.date.split('T')[0],
+          metricType: m.type as any,
+          value: m.value,
+          exerciseName: m.exerciseName
+        })),
+        goals: "Melhorar performance física e composição corporal."
+      });
+      setAnalysis(result);
+      toast({ title: "Análise Concluída", description: "A IA processou seus dados de treino." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Erro na IA", description: "Não foi possível gerar a análise agora." });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -140,10 +186,75 @@ export default function ProgressPage() {
       <Navigation />
       
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
-        <header className="space-y-1">
-          <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução de Performance</h1>
-          <p className="text-muted-foreground font-medium">Relatório baseado nos seus registros e padrões da OMS.</p>
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução de Performance</h1>
+            <p className="text-muted-foreground font-medium">Relatório baseado nos seus registros e padrões da OMS.</p>
+          </div>
+          <Button 
+            onClick={runAIAnalysis} 
+            disabled={isAnalyzing}
+            className="h-14 px-8 bg-gradient-to-r from-primary to-accent text-white font-black rounded-2xl uppercase italic shadow-[0_0_20px_rgba(255,0,0,0.4)]"
+          >
+            {isAnalyzing ? <Loader2 className="mr-2 animate-spin" /> : <BrainCircuit className="mr-2 w-5 h-5" />}
+            {isAnalyzing ? "Analisando..." : "Análise IA do Mês"}
+          </Button>
         </header>
+
+        {analysis && (
+          <section className="animate-in fade-in slide-in-from-top-4 duration-700">
+            <Card className="border-primary/30 bg-card/80 backdrop-blur-xl rounded-[2rem] overflow-hidden shadow-[0_0_40px_rgba(255,0,0,0.15)]">
+              <CardHeader className="bg-primary/5 border-b border-white/5 p-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+                    <Sparkles className="text-primary w-6 h-6" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-headline text-white uppercase italic">Insights da Inteligência ForgeFIT</CardTitle>
+                    <CardDescription className="font-bold text-primary/80 uppercase text-[10px] tracking-widest">Relatório gerado em tempo real</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h4 className="font-black text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-primary" /> Observações Principais
+                    </h4>
+                    <ul className="space-y-3">
+                      {analysis.insights.map((insight, idx) => (
+                        <li key={idx} className="bg-white/5 p-4 rounded-2xl border border-white/5 text-sm italic text-zinc-300 leading-relaxed">
+                          {insight}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {analysis.plateauDetected && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl space-y-2">
+                      <div className="flex items-center gap-2 text-red-500 font-black text-xs uppercase italic">
+                        <Zap className="w-4 h-4" /> Alerta de Estagnação Detectado
+                      </div>
+                      <p className="text-sm text-zinc-400 italic">{analysis.plateauDetails}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-black text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                    <Target className="w-4 h-4 text-accent" /> Recomendações Estratégicas
+                  </h4>
+                  <div className="grid gap-3">
+                    {analysis.recommendations.map((rec, idx) => (
+                      <div key={idx} className="flex gap-4 p-4 bg-accent/5 border border-accent/10 rounded-2xl items-start">
+                        <div className="mt-1 w-2 h-2 rounded-full bg-accent shrink-0" />
+                        <p className="text-sm italic text-zinc-300 leading-relaxed">{rec}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden shadow-2xl">
