@@ -26,7 +26,8 @@
         "sets": { "type": "string" },
         "reps": { "type": "string" },
         "day": { "type": "string" },
-        "completed": { "type": "boolean" }
+        "completed": { "type": "boolean" },
+        "notes": { "type": "string" }
       }
     },
     "WorkoutLog": {
@@ -42,7 +43,8 @@
         "actualWeight": { "type": "number" },
         "actualDistance": { "type": "number" },
         "actualDuration": { "type": "string" },
-        "restTime": { "type": "string" }
+        "restTime": { "type": "string" },
+        "notes": { "type": "string" }
       }
     },
     "Metric": {

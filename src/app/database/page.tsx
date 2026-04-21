@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -32,8 +33,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
-// Componente para carregar a imagem apenas quando visível
 function LazyExerciseImage({ ex, imgData }: { ex: Exercise, imgData: any }) {
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,7 +71,6 @@ function LazyExerciseImage({ ex, imgData }: { ex: Exercise, imgData: any }) {
             className="w-full h-full object-contain object-center transition-opacity duration-500 opacity-100"
             data-ai-hint={imgData.imageHint}
           />
-          {/* Marca d'água ForgeFIT */}
           <div className="absolute bottom-2 right-2 pointer-events-none select-none">
             <span className="text-[10px] font-black uppercase italic text-primary/30 tracking-tighter">ForgeFIT</span>
           </div>
@@ -99,6 +99,7 @@ export default function DatabasePage() {
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('12');
   const [time, setTime] = useState('');
+  const [notes, setNotes] = useState('');
 
   const filteredExercises = EXERCISE_DATABASE.filter(ex => {
     const matchesSearch = ex.title.toLowerCase().includes(search.toLowerCase());
@@ -115,6 +116,7 @@ export default function DatabasePage() {
         sets,
         reps,
         time,
+        notes,
         day: targetDay,
         completed: false,
         createdAt: new Date().toISOString()
@@ -129,6 +131,7 @@ export default function DatabasePage() {
 
       setIsDialogOpen(false);
       setSelectedExercise(null);
+      setNotes('');
     } else if (!user) {
       toast({
         variant: "destructive",
@@ -235,7 +238,6 @@ export default function DatabasePage() {
                               className="object-contain object-center"
                               data-ai-hint={imgData.imageHint}
                             />
-                            {/* Marca d'água ForgeFIT no Dialog */}
                             <div className="absolute bottom-3 right-3 pointer-events-none select-none">
                               <span className="text-[12px] font-black uppercase italic text-primary/30 tracking-tighter">ForgeFIT</span>
                             </div>
@@ -293,6 +295,10 @@ export default function DatabasePage() {
                 <div className="grid gap-2">
                   <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Tempo / Descanso (opcional)</Label>
                   <Input value={time} onChange={(e) => setTime(e.target.value)} placeholder="ex: 45s" className="bg-white/5 border-white/10 h-14 rounded-xl font-bold" />
+                </div>
+                <div className="grid gap-2">
+                  <Label className="text-white/80 font-bold uppercase tracking-widest text-xs">Observação</Label>
+                  <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Dica pessoal..." className="bg-white/5 border-white/10 min-h-[80px] rounded-xl" />
                 </div>
               </div>
               <DialogFooter>

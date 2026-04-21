@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trash2, Pencil, Plus, Loader2, Calendar, Activity, Dumbbell, Timer, Navigation as NavIcon, Clock, CheckCircle2 } from 'lucide-react';
+import { Trash2, Pencil, Plus, Loader2, Calendar, Activity, Dumbbell, Timer, Navigation as NavIcon, Clock, CheckCircle2, Info, Eye } from 'lucide-react';
 import { useCollection, useFirestore, useUser, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import {
@@ -21,10 +21,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { EXERCISE_DATABASE } from '@/lib/exercise-db';
+import { getPlaceholderById } from '@/lib/placeholder-images';
 
 export default function PlannerPage() {
   const { user } = useUser();
@@ -40,6 +43,7 @@ export default function PlannerPage() {
   const [editDuration, setEditDuration] = useState('');
   const [editDistance, setEditDistance] = useState('');
   const [editRest, setEditRest] = useState('');
+  const [editNotes, setEditNotes] = useState('');
   
   // Estados para Registro de Performance Real
   const [loggingExercise, setLoggingExercise] = useState<any | null>(null);
@@ -49,7 +53,9 @@ export default function PlannerPage() {
   const [actualDistance, setActualDistance] = useState('');
   const [actualDuration, setActualDuration] = useState('');
   const [actualRest, setActualRest] = useState('');
+  const [actualNotes, setActualNotes] = useState('');
 
+  const [viewingExercise, setViewingExercise] = useState<any | null>(null);
   const [isFinalizeDialogOpen, setIsFinalizeDialogOpen] = useState(false);
 
   const workoutsQuery = useMemoFirebase(() => {
@@ -87,6 +93,7 @@ export default function PlannerPage() {
     setEditDuration(ex.duration || '');
     setEditDistance(ex.distance || '');
     setEditRest(ex.rest || '');
+    setEditNotes(ex.notes || '');
   };
 
   const handleUpdateExercise = () => {
@@ -98,7 +105,8 @@ export default function PlannerPage() {
       weight: editWeight,
       duration: editDuration,
       distance: editDistance,
-      rest: editRest
+      rest: editRest,
+      notes: editNotes
     });
     toast({ title: "Plano atualizado", description: "As metas padrão foram salvas." });
     setEditingExercise(null);
@@ -118,6 +126,7 @@ export default function PlannerPage() {
       actualDistance: parseFloat(actualDistance) || 0,
       actualDuration: actualDuration,
       restTime: actualRest,
+      notes: actualNotes,
       createdAt: new Date().toISOString()
     };
 
@@ -168,8 +177,8 @@ export default function PlannerPage() {
     { key: 'Sunday', label: 'Domingo' }
   ];
 
-  const getCategory = (exerciseId: string) => {
-    return EXERCISE_DATABASE.find(e => e.id === exerciseId)?.category || 'Musculação';
+  const getExerciseData = (exerciseId: string) => {
+    return EXERCISE_DATABASE.find(e => e.id === exerciseId);
   };
 
   return (
@@ -234,57 +243,64 @@ export default function PlannerPage() {
                   <CardContent className="p-0">
                     {dayWorkouts.length > 0 ? (
                       <div className="divide-y divide-white/5">
-                        {dayWorkouts.map((ex) => (
-                          <div key={ex.id} className={cn(
-                            "flex flex-col md:flex-row md:items-center gap-4 p-4 md:p-6 transition-colors",
-                            ex.completed ? "bg-green-500/5" : "hover:bg-white/5"
-                          )}>
-                            <div className="flex items-center gap-4 flex-1">
-                              <Checkbox 
-                                checked={ex.completed} 
-                                onCheckedChange={() => toggleExercise(ex.id, ex.completed)}
-                                className="w-6 h-6 rounded-full border-primary/50 data-[state=checked]:bg-primary"
-                              />
-                              <div className="space-y-1">
-                                <h4 className={cn("text-lg font-bold uppercase italic", ex.completed && "line-through text-muted-foreground")}>
-                                  {ex.title}
-                                </h4>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-black text-muted-foreground italic uppercase">
-                                  {getCategory(ex.exerciseId) === 'Musculação' && <span>Meta: {ex.sets}x{ex.reps} {ex.weight && `- ${ex.weight}kg`}</span>}
-                                  {getCategory(ex.exerciseId) === 'Calistenia' && <span>Meta: {ex.sets}x{ex.reps} {ex.duration && `- ${ex.duration}`}</span>}
-                                  {getCategory(ex.exerciseId) === 'Cardio' && <span>Meta: {ex.duration} {ex.distance && `- ${ex.distance}km`}</span>}
-                                  {ex.rest && <span>Descanso: {ex.rest}</span>}
+                        {dayWorkouts.map((ex) => {
+                          const exInfo = getExerciseData(ex.exerciseId);
+                          return (
+                            <div key={ex.id} className={cn(
+                              "flex flex-col md:flex-row md:items-center gap-4 p-4 md:p-6 transition-colors",
+                              ex.completed ? "bg-green-500/5" : "hover:bg-white/5"
+                            )}>
+                              <div className="flex items-center gap-4 flex-1">
+                                <Checkbox 
+                                  checked={ex.completed} 
+                                  onCheckedChange={() => toggleExercise(ex.id, ex.completed)}
+                                  className="w-6 h-6 rounded-full border-primary/50 data-[state=checked]:bg-primary"
+                                />
+                                <div className="space-y-1">
+                                  <h4 className={cn("text-lg font-bold uppercase italic", ex.completed && "line-through text-muted-foreground")}>
+                                    {ex.title}
+                                  </h4>
+                                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-black text-muted-foreground italic uppercase">
+                                    {exInfo?.category === 'Musculação' && <span>Meta: {ex.sets}x{ex.reps} {ex.weight && `- ${ex.weight}kg`}</span>}
+                                    {exInfo?.category === 'Calistenia' && <span>Meta: {ex.sets}x{ex.reps} {ex.duration && `- ${ex.duration}`}</span>}
+                                    {exInfo?.category === 'Cardio' && <span>Meta: {ex.duration} {ex.distance && `- ${ex.distance}km`}</span>}
+                                    {ex.rest && <span>Descanso: {ex.rest}</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+                                <Button 
+                                  onClick={() => {
+                                    setLoggingExercise(ex);
+                                    setActualSets(ex.sets || '');
+                                    setActualReps(ex.reps || '');
+                                    setActualWeight(ex.weight || '');
+                                    setActualDistance(ex.distance || '');
+                                    setActualDuration(ex.duration || '');
+                                    setActualRest(ex.rest || '');
+                                    setActualNotes(ex.notes || '');
+                                  }}
+                                  className="bg-accent/10 hover:bg-accent/20 text-accent border border-accent/20 rounded-xl h-10 px-4 font-black uppercase italic text-xs flex-1 md:flex-none"
+                                >
+                                  <Activity className="mr-2 w-4 h-4" /> Registrar Performance
+                                </Button>
+                                
+                                <div className="flex items-center gap-1">
+                                  <Button variant="ghost" size="icon" onClick={() => setViewingExercise(ex)} className="text-accent hover:bg-accent/10 rounded-xl">
+                                    <Eye className="w-5 h-5" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(ex)} className="text-zinc-500 hover:text-white rounded-xl">
+                                    <Pencil className="w-5 h-5" />
+                                  </Button>
+                                  <Button variant="ghost" size="icon" onClick={() => removeExercise(ex.id)} className="text-destructive hover:bg-destructive/10 rounded-xl">
+                                    <Trash2 className="w-5 h-5" />
+                                  </Button>
                                 </div>
                               </div>
                             </div>
-                            
-                            <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
-                              <Button 
-                                onClick={() => {
-                                  setLoggingExercise(ex);
-                                  setActualSets(ex.sets || '');
-                                  setActualReps(ex.reps || '');
-                                  setActualWeight(ex.weight || '');
-                                  setActualDistance(ex.distance || '');
-                                  setActualDuration(ex.duration || '');
-                                  setActualRest(ex.rest || '');
-                                }}
-                                className="bg-accent/10 hover:bg-accent/20 text-accent border border-accent/20 rounded-xl h-10 px-4 font-black uppercase italic text-xs flex-1 md:flex-none"
-                              >
-                                <Activity className="mr-2 w-4 h-4" /> Registrar Performance
-                              </Button>
-                              
-                              <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon" onClick={() => openEditDialog(ex)} className="text-zinc-500 hover:text-white rounded-xl">
-                                  <Pencil className="w-5 h-5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => removeExercise(ex.id)} className="text-destructive hover:bg-destructive/10 rounded-xl">
-                                  <Trash2 className="w-5 h-5" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center py-20 px-4 text-center space-y-4">
@@ -302,6 +318,76 @@ export default function PlannerPage() {
           )}
         </Tabs>
 
+        {/* Modal de Visualização Detalhada */}
+        <Dialog open={!!viewingExercise} onOpenChange={(open) => !open && setViewingExercise(null)}>
+          <DialogContent className="sm:max-w-[500px] bg-card border-white/10 text-white rounded-3xl overflow-hidden p-0">
+            {viewingExercise && (() => {
+              const exInfo = getExerciseData(viewingExercise.exerciseId);
+              const imgData = getPlaceholderById(exInfo?.imageId || 'exercise-weights');
+              return (
+                <>
+                  <div className="aspect-video relative bg-white flex items-center justify-center border-b border-white/10">
+                    <Image 
+                      src={imgData.imageUrl} 
+                      alt={viewingExercise.title}
+                      fill
+                      unoptimized
+                      className="object-contain"
+                    />
+                    <div className="absolute bottom-2 right-2 pointer-events-none select-none">
+                      <span className="text-[10px] font-black uppercase italic text-primary/30 tracking-tighter">ForgeFIT</span>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <DialogHeader className="p-0 text-left">
+                      <DialogTitle className="text-3xl font-headline text-primary uppercase italic">{viewingExercise.title}</DialogTitle>
+                      <DialogDescription className="text-accent font-bold uppercase tracking-widest text-xs">{exInfo?.category}</DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <h4 className="font-bold text-sm text-white border-l-4 border-primary pl-3 uppercase italic">Instruções</h4>
+                        <p className="text-muted-foreground text-sm leading-relaxed bg-white/5 p-3 rounded-xl border border-white/5">{exInfo?.instructions}</p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {viewingExercise.sets && (
+                          <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                            <Label className="text-[10px] uppercase font-black text-muted-foreground">Séries</Label>
+                            <p className="text-xl font-black italic">{viewingExercise.sets}</p>
+                          </div>
+                        )}
+                        {viewingExercise.reps && (
+                          <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                            <Label className="text-[10px] uppercase font-black text-muted-foreground">Reps</Label>
+                            <p className="text-xl font-black italic">{viewingExercise.reps}</p>
+                          </div>
+                        )}
+                        {viewingExercise.time && (
+                          <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                            <Label className="text-[10px] uppercase font-black text-muted-foreground">Tempo/Descanso</Label>
+                            <p className="text-xl font-black italic">{viewingExercise.time}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {viewingExercise.notes && (
+                        <div className="space-y-2">
+                          <h4 className="font-bold text-sm text-accent border-l-4 border-accent pl-3 uppercase italic">Observação do Plano</h4>
+                          <p className="text-muted-foreground text-sm italic bg-accent/5 p-3 rounded-xl border border-accent/10">"{viewingExercise.notes}"</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <DialogFooter className="p-6 pt-0">
+                    <Button onClick={() => setViewingExercise(null)} className="w-full bg-primary hover:bg-primary/90 h-14 font-black uppercase italic rounded-2xl">FECHAR</Button>
+                  </DialogFooter>
+                </>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
+
         {/* Modal de Registro de Performance Real */}
         <Dialog open={!!loggingExercise} onOpenChange={(open) => !open && setLoggingExercise(null)}>
           <DialogContent className="sm:max-w-[425px] bg-card border-white/10 text-white rounded-3xl">
@@ -315,78 +401,74 @@ export default function PlannerPage() {
             {loggingExercise && (
               <div className="grid gap-6 py-4">
                 {(() => {
-                  const category = getCategory(loggingExercise.exerciseId);
+                  const exInfo = getExerciseData(loggingExercise.exerciseId);
+                  const category = exInfo?.category;
                   
-                  if (category === 'Musculação') {
-                    return (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Dumbbell className="w-3 h-3"/> Séries</Label>
-                            <Input value={actualSets} onChange={(e) => setActualSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                  return (
+                    <div className="space-y-4">
+                      {category === 'Musculação' && (
+                        <>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Dumbbell className="w-3 h-3"/> Séries</Label>
+                              <Input value={actualSets} onChange={(e) => setActualSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Activity className="w-3 h-3"/> Reps</Label>
+                              <Input value={actualReps} onChange={(e) => setActualReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                            </div>
                           </div>
                           <div className="space-y-2">
-                            <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Activity className="w-3 h-3"/> Reps</Label>
-                            <Input value={actualReps} onChange={(e) => setActualReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                            <Label className="uppercase font-black text-[10px] text-accent">Peso Utilizado (KG)</Label>
+                            <Input value={actualWeight} onChange={(e) => setActualWeight(e.target.value)} className="bg-white/5 border-white/10 h-14 text-2xl text-center font-black rounded-xl" />
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="uppercase font-black text-[10px] text-accent">Peso Utilizado (KG)</Label>
-                          <Input value={actualWeight} onChange={(e) => setActualWeight(e.target.value)} className="bg-white/5 border-white/10 h-14 text-2xl text-center font-black rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="uppercase font-black text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/> Tempo Descanso</Label>
-                          <Input value={actualRest} onChange={(e) => setActualRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                        </div>
-                      </div>
-                    );
-                  }
+                        </>
+                      )}
 
-                  if (category === 'Calistenia') {
-                    return (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="uppercase font-black text-[10px] text-accent">Séries</Label>
-                            <Input value={actualSets} onChange={(e) => setActualSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="uppercase font-black text-[10px] text-accent">Repetições</Label>
-                            <Input value={actualReps} onChange={(e) => setActualReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Timer className="w-3 h-3"/> Tempo Execução</Label>
-                          <Input value={actualDuration} onChange={(e) => setActualDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="uppercase font-black text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/> Tempo Descanso</Label>
-                          <Input value={actualRest} onChange={(e) => setActualRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  if (category === 'Cardio') {
-                    return (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><NavIcon className="w-3 h-3"/> Distância (KM)</Label>
-                            <Input value={actualDistance} onChange={(e) => setActualDistance(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                      {category === 'Calistenia' && (
+                        <>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="uppercase font-black text-[10px] text-accent">Séries</Label>
+                              <Input value={actualSets} onChange={(e) => setActualSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="uppercase font-black text-[10px] text-accent">Repetições</Label>
+                              <Input value={actualReps} onChange={(e) => setActualReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                            </div>
                           </div>
                           <div className="space-y-2">
                             <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Timer className="w-3 h-3"/> Tempo Execução</Label>
                             <Input value={actualDuration} onChange={(e) => setActualDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="uppercase font-black text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/> Tempo Descanso</Label>
-                          <Input value={actualRest} onChange={(e) => setActualRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                        </div>
+                        </>
+                      )}
+
+                      {category === 'Cardio' && (
+                        <>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><NavIcon className="w-3 h-3"/> Distância (KM)</Label>
+                              <Input value={actualDistance} onChange={(e) => setActualDistance(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Timer className="w-3 h-3"/> Tempo Execução</Label>
+                              <Input value={actualDuration} onChange={(e) => setActualDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      <div className="space-y-2">
+                        <Label className="uppercase font-black text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/> Tempo Descanso</Label>
+                        <Input value={actualRest} onChange={(e) => setActualRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
                       </div>
-                    );
-                  }
+                      <div className="space-y-2">
+                        <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1">Observação</Label>
+                        <Textarea value={actualNotes} onChange={(e) => setActualNotes(e.target.value)} className="bg-white/5 border-white/10 min-h-[80px] rounded-xl" placeholder="Como foi a execução?" />
+                      </div>
+                    </div>
+                  );
                 })()}
               </div>
             )}
@@ -410,78 +492,74 @@ export default function PlannerPage() {
             </DialogHeader>
             <div className="grid gap-6 py-4">
               {editingExercise && (() => {
-                const category = getCategory(editingExercise.exerciseId);
+                const exInfo = getExerciseData(editingExercise.exerciseId);
+                const category = exInfo?.category;
                 
-                if (category === 'Musculação') {
-                  return (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
-                          <Input value={editSets} onChange={(e) => setEditSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                return (
+                  <div className="space-y-4">
+                    {category === 'Musculação' && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
+                            <Input value={editSets} onChange={(e) => setEditSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
+                            <Input value={editReps} onChange={(e) => setEditReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
-                          <Input value={editReps} onChange={(e) => setEditReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Peso Alvo (KG)</Label>
+                          <Input value={editWeight} onChange={(e) => setEditWeight(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Peso Alvo (KG)</Label>
-                        <Input value={editWeight} onChange={(e) => setEditWeight(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Descanso</Label>
-                        <Input value={editRest} onChange={(e) => setEditRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                      </div>
-                    </div>
-                  );
-                }
+                      </>
+                    )}
 
-                if (category === 'Calistenia') {
-                  return (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
-                          <Input value={editSets} onChange={(e) => setEditSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                    {category === 'Calistenia' && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
+                            <Input value={editSets} onChange={(e) => setEditSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
+                            <Input value={editReps} onChange={(e) => setEditReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
-                          <Input value={editReps} onChange={(e) => setEditReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Execução</Label>
+                          <Input value={editDuration} onChange={(e) => setEditDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Execução</Label>
-                        <Input value={editDuration} onChange={(e) => setEditDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Descanso</Label>
-                        <Input value={editRest} onChange={(e) => setEditRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                      </div>
-                    </div>
-                  );
-                }
+                      </>
+                    )}
 
-                if (category === 'Cardio') {
-                  return (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Distância (KM)</Label>
-                          <Input value={editDistance} onChange={(e) => setEditDistance(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                    {category === 'Cardio' && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Distância (KM)</Label>
+                            <Input value={editDistance} onChange={(e) => setEditDistance(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Alvo</Label>
+                            <Input value={editDuration} onChange={(e) => setEditDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Alvo</Label>
-                          <Input value={editDuration} onChange={(e) => setEditDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Descanso</Label>
-                        <Input value={editRest} onChange={(e) => setEditRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                      </div>
+                      </>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Descanso</Label>
+                      <Input value={editRest} onChange={(e) => setEditRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
                     </div>
-                  );
-                }
+                    <div className="space-y-2">
+                      <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Observação</Label>
+                      <Textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} className="bg-white/5 border-white/10 min-h-[80px] rounded-xl" />
+                    </div>
+                  </div>
+                );
               })()}
             </div>
             <DialogFooter>
