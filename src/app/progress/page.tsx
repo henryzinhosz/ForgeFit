@@ -15,11 +15,9 @@ import {
   Tooltip, 
   ResponsiveContainer,
   AreaChart,
-  Area,
-  BarChart,
-  Bar
+  Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Activity, Target, ShieldCheck, Info } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, ShieldCheck, History } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -30,6 +28,7 @@ import {
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
+import { EXERCISE_DATABASE } from '@/lib/exercise-db';
 
 export default function ProgressPage() {
   const { user, isUserLoading } = useUser();
@@ -50,7 +49,13 @@ export default function ProgressPage() {
     return collection(db, 'users', user.uid, 'metrics');
   }, [db, user]);
 
+  const logsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'users', user.uid, 'logs');
+  }, [db, user]);
+
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
+  const { data: rawLogs, isLoading: isLogsLoading } = useCollection(logsQuery);
 
   const weightData = useMemo(() => {
     if (!rawMetrics) return [];
@@ -65,16 +70,46 @@ export default function ProgressPage() {
   }, [rawMetrics]);
 
   const loadData = useMemo(() => {
-    if (!rawMetrics) return [];
-    return rawMetrics
-      .filter(m => m.type === 'maxLoad' && m.exerciseName === selectedEx)
+    const combinedData: any[] = [];
+    
+    // Adiciona dados das métricas manuais
+    if (rawMetrics) {
+      rawMetrics
+        .filter(m => m.type === 'maxLoad' && m.exerciseName === selectedEx)
+        .forEach(m => combinedData.push({
+          date: m.date,
+          value: m.value,
+          source: 'manual'
+        }));
+    }
+
+    // Adiciona dados dos logs automáticos
+    if (rawLogs) {
+      rawLogs
+        .filter(log => {
+          const ex = EXERCISE_DATABASE.find(e => e.id === log.exerciseId);
+          return ex?.title === selectedEx && log.actualWeight > 0;
+        })
+        .forEach(log => combinedData.push({
+          date: log.date,
+          value: log.actualWeight,
+          source: 'auto'
+        }));
+    }
+
+    return combinedData
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(-15)
-      .map(l => ({
-        ...l,
-        label: new Date(l.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
+      .slice(-20)
+      .map(d => ({
+        ...d,
+        label: new Date(d.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
       }));
-  }, [rawMetrics, selectedEx]);
+  }, [rawMetrics, rawLogs, selectedEx]);
+
+  const personalRecord = useMemo(() => {
+    if (loadData.length === 0) return 0;
+    return Math.max(...loadData.map(d => d.value));
+  }, [loadData]);
 
   const assessment = useMemo(() => {
     const metrics: HealthMetrics = {
@@ -121,10 +156,13 @@ export default function ProgressPage() {
     }
   };
 
-  if (isUserLoading || isProfileLoading) {
+  if (isUserLoading || isProfileLoading || isMetricsLoading || isLogsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-primary animate-spin" />
+          <p className="text-primary font-black uppercase italic tracking-widest animate-pulse">Sincronizando Dados...</p>
+        </div>
       </div>
     );
   }
@@ -135,8 +173,8 @@ export default function ProgressPage() {
       
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <header className="space-y-1">
-          <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Análise Médica & Performance</h1>
-          <p className="text-muted-foreground font-medium">Relatório biométrico baseado nos padrões da Organização Mundial da Saúde.</p>
+          <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução de Performance</h1>
+          <p className="text-muted-foreground font-medium">Relatório automatizado baseado nos seus registros e padrões da OMS.</p>
         </header>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -172,7 +210,7 @@ export default function ProgressPage() {
                   <p className="text-2xl font-black text-white italic">{assessment.get} kcal</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Proteína (1.8g - 2.2g/kg)</span>
+                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Proteína Diária</span>
                   <p className="text-2xl font-black text-accent italic">{assessment.proteinRange.min} - {assessment.proteinRange.max}g</p>
                 </div>
                 <div className="space-y-1">
@@ -226,21 +264,32 @@ export default function ProgressPage() {
           </Card>
 
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <CardHeader className="p-8 flex flex-row items-center justify-between">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
-                <Dumbbell className="w-6 h-6" /> Recordes (PR)
-              </CardTitle>
-              <Select value={selectedEx} onValueChange={setSelectedEx}>
-                <SelectTrigger className="w-[160px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
-                  <SelectValue placeholder="Exercício" />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                  <SelectItem value="Supino Reto">Supino</SelectItem>
-                  <SelectItem value="Agachamento Livre">Agachamento</SelectItem>
-                  <SelectItem value="Levantamento Terra">Terra</SelectItem>
-                  <SelectItem value="Desenvolvimento Militar">Militar</SelectItem>
-                </SelectContent>
-              </Select>
+            <CardHeader className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
+                  <Dumbbell className="w-6 h-6" /> Recordes (PR)
+                </CardTitle>
+                <CardDescription className="flex items-center gap-2 text-white/80 font-bold uppercase text-[10px] tracking-widest">
+                  <History className="w-3 h-3 text-accent" /> Baseado em Logs Automáticos
+                </CardDescription>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <Select value={selectedEx} onValueChange={setSelectedEx}>
+                  <SelectTrigger className="w-[180px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
+                    <SelectValue placeholder="Exercício" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                    {EXERCISE_DATABASE.filter(e => e.category === 'Musculação').map(ex => (
+                      <SelectItem key={ex.id} value={ex.title}>{ex.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {personalRecord > 0 && (
+                  <div className="bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+                    <span className="text-[10px] font-black text-accent uppercase italic">MELHOR CARGA: {personalRecord}kg</span>
+                  </div>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="p-8 pt-0 space-y-8">
               <div className="h-[250px] w-full">
@@ -250,16 +299,41 @@ export default function ProgressPage() {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
                       <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} dy={10} />
                       <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
-                      <Tooltip contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}} />
-                      <Line type="monotone" dataKey="value" stroke="hsl(var(--accent))" strokeWidth={4} dot={{ r: 6, fill: 'hsl(var(--accent))', strokeWidth: 2, stroke: '#000' }} />
+                      <Tooltip 
+                        contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}}
+                        formatter={(value, name, props) => [`${value} kg`, props.payload.source === 'auto' ? 'Log de Treino' : 'Manual']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="hsl(var(--accent))" 
+                        strokeWidth={4} 
+                        dot={(props) => {
+                          const { cx, cy, payload } = props;
+                          return (
+                            <circle 
+                              key={props.key}
+                              cx={cx} 
+                              cy={cy} 
+                              r={6} 
+                              fill={payload.source === 'auto' ? "hsl(var(--accent))" : "white"} 
+                              stroke="#000" 
+                              strokeWidth={2} 
+                            />
+                          );
+                        }} 
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center opacity-20"><TrendingUp className="w-12 h-12" /></div>
+                  <div className="h-full flex flex-col items-center justify-center opacity-20 gap-2">
+                    <TrendingUp className="w-12 h-12" />
+                    <p className="text-[10px] font-black uppercase italic">Nenhum dado registrado</p>
+                  </div>
                 )}
               </div>
               <div className="flex gap-3">
-                <Input type="number" placeholder="Carga (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-2xl h-14 bg-white/5 border-white/10 text-white font-bold" />
+                <Input type="number" placeholder="Carga Manual (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-2xl h-14 bg-white/5 border-white/10 text-white font-bold" />
                 <Button onClick={handleAddLoad} className="h-14 px-8 bg-accent text-white font-black rounded-2xl uppercase italic">NOVO RECORDE</Button>
               </div>
             </CardContent>
