@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
@@ -14,9 +15,11 @@ import {
   Tooltip, 
   ResponsiveContainer,
   AreaChart,
-  Area
+  Area,
+  BarChart,
+  Bar
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info, CalendarCheck, Activity } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -50,6 +53,7 @@ export default function ProgressPage() {
 
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
 
+  // Dados de Peso
   const weightData = useMemo(() => {
     if (!rawMetrics) return [];
     return rawMetrics
@@ -62,6 +66,7 @@ export default function ProgressPage() {
       }));
   }, [rawMetrics]);
 
+  // Dados de Recordes (PRs)
   const loadData = useMemo(() => {
     if (!rawMetrics) return [];
     return rawMetrics
@@ -73,6 +78,38 @@ export default function ProgressPage() {
         label: new Date(l.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
       }));
   }, [rawMetrics, selectedEx]);
+
+  // Estatísticas de Sessões (Treinos Finalizados)
+  const sessionStats = useMemo(() => {
+    if (!rawMetrics) return { totalThisMonth: 0, totalExercises: 0, chartData: [] };
+    
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const sessions = rawMetrics.filter(m => m.type === 'session_completed');
+    
+    const thisMonthSessions = sessions.filter(s => {
+      const d = new Date(s.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    const totalExercises = thisMonthSessions.reduce((acc, curr) => acc + (curr.exerciseCount || 0), 0);
+
+    // Agrupar por semana para o gráfico
+    const chartData = thisMonthSessions
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(s => ({
+        date: new Date(s.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        count: s.exerciseCount || 0
+      }));
+
+    return {
+      totalThisMonth: thisMonthSessions.length,
+      totalExercises,
+      chartData
+    };
+  }, [rawMetrics]);
 
   const assessment = useMemo(() => {
     const metrics: HealthMetrics = {
@@ -131,20 +168,78 @@ export default function ProgressPage() {
     <div className="min-h-screen pb-32 pt-20 bg-black">
       <Navigation />
       
-      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-5">
+      <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-8">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Corporal</h1>
-            <p className="text-muted-foreground font-medium">Acompanhe seu progresso e metas de saúde.</p>
+            <p className="text-muted-foreground font-medium">Acompanhe seu progresso, metas e consistência.</p>
           </div>
-          <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
-            <Target className="text-primary w-5 h-5" />
-            <div className="space-y-0.5">
-              <span className="text-[10px] font-black uppercase text-white italic">Meta Calórica</span>
-              <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
+          <div className="flex gap-4">
+            <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
+              <Target className="text-primary w-5 h-5" />
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase text-white italic">Meta Calórica</span>
+                <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
+              </div>
             </div>
           </div>
         </header>
+
+        {/* Dash de Consistência Mensal */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-white/10 bg-gradient-to-br from-card to-black rounded-3xl overflow-hidden shadow-2xl md:col-span-2">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl font-headline flex items-center gap-2 text-white italic uppercase">
+                    <CalendarCheck className="w-6 h-6 text-primary" /> Consistência Mensal
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Atividade de treino registrada no silo</CardDescription>
+                </div>
+                <div className="text-right">
+                  <span className="text-4xl font-black text-primary italic leading-none">{sessionStats.totalThisMonth}</span>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Treinos no Mês</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[200px] w-full mt-4">
+                {sessionStats.chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={sessionStats.chartData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
+                      <YAxis hide />
+                      <Tooltip 
+                        contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}}
+                        cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                      />
+                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Exercícios" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
+                    <Activity className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
+                    <p className="text-xs font-bold text-muted-foreground uppercase italic">Nenhum treino finalizado este mês.</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-white/10 bg-primary/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-center p-8 text-center space-y-6">
+             <div className="space-y-2">
+               <span className="text-6xl font-black text-white italic leading-none">{sessionStats.totalExercises}</span>
+               <p className="text-xs font-bold text-primary uppercase tracking-widest">Total de Exercícios</p>
+               <p className="text-muted-foreground text-[10px] font-medium uppercase">Executados com sucesso este mês</p>
+             </div>
+             <div className="pt-4 border-t border-white/5">
+                <p className="text-[10px] text-zinc-500 font-bold uppercase italic leading-relaxed">
+                  "A constância é a única via para a forja do corpo ideal. Mantenha o silo atualizado."
+                </p>
+             </div>
+          </Card>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
