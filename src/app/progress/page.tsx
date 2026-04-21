@@ -17,7 +17,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Target, ShieldCheck, BrainCircuit, Sparkles, Zap, Activity, CalendarDays, Weight } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, ShieldCheck, Activity, CalendarDays, Weight } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -29,7 +29,6 @@ import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocum
 import { collection, doc } from 'firebase/firestore';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 import { EXERCISE_DATABASE } from '@/lib/exercise-db';
-import { aiPerformanceAnalysis, AIPerformanceAnalysisOutput } from '@/ai/flows/ai-performance-analysis';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -41,10 +40,6 @@ export default function ProgressPage() {
   const [weightInput, setWeightInput] = useState('');
   const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
-  
-  // Estados da IA
-  const [analysis, setAnalysis] = useState<AIPerformanceAnalysisOutput | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const profileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -66,9 +61,9 @@ export default function ProgressPage() {
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
   const { data: rawLogs } = useCollection(logsQuery);
 
-  // Estatísticas de Consistência e Volume
+  // Estatísticas de Consistência e Execução
   const stats = useMemo(() => {
-    if (!rawMetrics || !rawLogs) return { sessions: 0, volume: 0, consistency: 0 };
+    if (!rawMetrics || !rawLogs) return { sessions: 0, exercises: 0, consistency: 0 };
     
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -80,14 +75,11 @@ export default function ProgressPage() {
       return m.type === 'session_completed' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
     });
 
-    // Calcula Volume Total (Peso * Reps * Sets) dos logs do mês atual
-    const volumeInMonth = rawLogs.reduce((acc, log) => {
+    // Filtra total de exercícios executados no mês atual
+    const exercisesInMonth = rawLogs.filter(log => {
       const d = new Date(log.date);
-      if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
-        return acc + ((log.actualWeight || 0) * (log.actualReps || 0) * (log.actualSets || 0));
-      }
-      return acc;
-    }, 0);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }).length;
 
     // Consistência: Dias com treino no mês / Dias passados no mês
     const uniqueDays = new Set(sessionsInMonth.map(s => s.date.split('T')[0])).size;
@@ -96,7 +88,7 @@ export default function ProgressPage() {
 
     return {
       sessions: sessionsInMonth.length,
-      volume: volumeInMonth,
+      exercises: exercisesInMonth,
       consistency: Math.round(consistency)
     };
   }, [rawMetrics, rawLogs]);
@@ -177,35 +169,6 @@ export default function ProgressPage() {
     }
   };
 
-  const runAIAnalysis = async () => {
-    if (!rawLogs || !rawMetrics) return;
-    setIsAnalyzing(true);
-    try {
-      const result = await aiPerformanceAnalysis({
-        historicalWorkouts: (rawLogs || []).map(l => ({
-          date: l.date.split('T')[0],
-          exercise: l.exerciseId,
-          sets: l.actualSets,
-          reps: l.actualReps,
-          weight: l.actualWeight
-        })),
-        performanceMetrics: (rawMetrics || []).map(m => ({
-          date: m.date.split('T')[0],
-          metricType: m.type as any,
-          value: m.value,
-          exerciseName: m.exerciseName
-        })),
-        goals: "Melhorar performance física e composição corporal."
-      });
-      setAnalysis(result);
-      toast({ title: "Análise Concluída", description: "A IA processou seus dados de treino." });
-    } catch (e) {
-      toast({ variant: "destructive", title: "Erro na IA", description: "Não foi possível gerar a análise agora." });
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
   if (isUserLoading || isProfileLoading || isMetricsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
@@ -227,62 +190,7 @@ export default function ProgressPage() {
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução de Performance</h1>
             <p className="text-muted-foreground font-medium">Análise biométrica e estatística do seu progresso.</p>
           </div>
-          <Button 
-            onClick={runAIAnalysis} 
-            disabled={isAnalyzing}
-            className="h-14 px-8 bg-gradient-to-r from-primary to-accent text-white font-black rounded-2xl uppercase italic shadow-[0_0_20px_rgba(255,0,0,0.4)]"
-          >
-            {isAnalyzing ? <Loader2 className="mr-2 animate-spin" /> : <BrainCircuit className="mr-2 w-5 h-5" />}
-            {isAnalyzing ? "Analisando..." : "Análise IA do Mês"}
-          </Button>
         </header>
-
-        {analysis && (
-          <section className="animate-in fade-in slide-in-from-top-4 duration-700">
-            <Card className="border-primary/30 bg-card/80 backdrop-blur-xl rounded-[2rem] overflow-hidden shadow-[0_0_40px_rgba(255,0,0,0.15)]">
-              <CardHeader className="bg-primary/5 border-b border-white/5 p-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-                    <Sparkles className="text-primary w-6 h-6" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl font-headline text-white uppercase italic">Insights da Inteligência ForgeFIT</CardTitle>
-                    <CardDescription className="font-bold text-primary/80 uppercase text-[10px] tracking-widest">Relatório gerado em tempo real</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <h4 className="font-black text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-primary" /> Observações Principais
-                    </h4>
-                    <ul className="space-y-3">
-                      {analysis.insights.map((insight, idx) => (
-                        <li key={idx} className="bg-white/5 p-4 rounded-2xl border border-white/5 text-sm italic text-zinc-300 leading-relaxed">
-                          {insight}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="font-black text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    <Target className="w-4 h-4 text-accent" /> Recomendações Estratégicas
-                  </h4>
-                  <div className="grid gap-3">
-                    {analysis.recommendations.map((rec, idx) => (
-                      <div key={idx} className="flex gap-4 p-4 bg-accent/5 border border-accent/10 rounded-2xl items-start">
-                        <div className="mt-1 w-2 h-2 rounded-full bg-accent shrink-0" />
-                        <p className="text-sm italic text-zinc-300 leading-relaxed">{rec}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        )}
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Card Unificado: Biométrico & Nutricional */}
@@ -324,7 +232,7 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
 
-          {/* NOVO: Painel de Estatísticas de Sessão */}
+          {/* Painel de Estatísticas de Sessão */}
           <Card className="border-white/10 bg-gradient-to-br from-zinc-900 to-black rounded-3xl overflow-hidden shadow-2xl flex flex-col">
             <CardHeader className="bg-accent/10 border-b border-white/5 p-6">
               <CardTitle className="text-2xl font-headline text-accent uppercase italic flex items-center gap-3">
@@ -346,11 +254,11 @@ export default function ProgressPage() {
                   
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(255,0,0,0.2)]">
-                      <Weight className="text-primary w-8 h-8" />
+                      <Dumbbell className="text-primary w-8 h-8" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Carga Total (Volume)</p>
-                      <p className="text-4xl font-black text-white italic">{(stats.volume / 1000).toFixed(1)} <span className="text-xl">TON</span></p>
+                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Exercícios Executados</p>
+                      <p className="text-4xl font-black text-white italic">{stats.exercises}</p>
                     </div>
                   </div>
                 </div>
@@ -388,7 +296,7 @@ export default function ProgressPage() {
               </div>
 
               <p className="text-[10px] font-bold uppercase italic text-muted-foreground/60 text-center">
-                Volume calculado com base no histórico de execuções (Peso x Repetições x Séries).
+                Estatísticas calculadas com base no histórico de execuções registradas na sua agenda.
               </p>
             </CardContent>
           </Card>
