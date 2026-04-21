@@ -19,7 +19,7 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info, CalendarCheck, Activity } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info, CalendarCheck, Activity, Zap } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -31,6 +31,8 @@ import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocum
 import { collection, doc } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
+import { MuscleMap } from '@/components/MuscleMap';
+import { EXERCISE_MUSCLE_MAP, MuscleGroup } from '@/lib/muscle-mapping';
 
 export default function ProgressPage() {
   const { user, isUserLoading } = useUser();
@@ -51,7 +53,33 @@ export default function ProgressPage() {
     return collection(db, 'users', user.uid, 'metrics');
   }, [db, user]);
 
+  const logsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'users', user.uid, 'logs');
+  }, [db, user]);
+
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
+  const { data: rawLogs } = useCollection(logsQuery);
+
+  // Cálculo de Intensidade Muscular
+  const muscleIntensities = useMemo(() => {
+    const intensity: Record<MuscleGroup, number> = {
+      peito: 0, costas: 0, ombros: 0, biceps: 0, triceps: 0,
+      antebraco: 0, core: 0, quadriceps: 0, isquios: 0, gluteos: 0, panturrilha: 0
+    };
+
+    if (!rawLogs) return intensity;
+
+    rawLogs.forEach(log => {
+      const muscles = EXERCISE_MUSCLE_MAP[log.exerciseId] || [];
+      muscles.forEach(m => {
+        // Cada log adiciona 5% de intensidade, capado em 100%
+        intensity[m] = Math.min(100, intensity[m] + 5);
+      });
+    });
+
+    return intensity;
+  }, [rawLogs]);
 
   // Dados de Peso
   const weightData = useMemo(() => {
@@ -79,7 +107,7 @@ export default function ProgressPage() {
       }));
   }, [rawMetrics, selectedEx]);
 
-  // Estatísticas de Sessões (Treinos Finalizados)
+  // Estatísticas de Sessões
   const sessionStats = useMemo(() => {
     if (!rawMetrics) return { totalThisMonth: 0, totalExercises: 0, chartData: [] };
     
@@ -96,7 +124,6 @@ export default function ProgressPage() {
 
     const totalExercises = thisMonthSessions.reduce((acc, curr) => acc + (curr.exerciseCount || 0), 0);
 
-    // Agrupar por semana para o gráfico
     const chartData = thisMonthSessions
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map(s => ({
@@ -174,73 +201,82 @@ export default function ProgressPage() {
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Corporal</h1>
             <p className="text-muted-foreground font-medium">Acompanhe seu progresso, metas e consistência.</p>
           </div>
-          <div className="flex gap-4">
-            <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
-              <Target className="text-primary w-5 h-5" />
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-black uppercase text-white italic">Meta Calórica</span>
-                <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
-              </div>
+          <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
+            <Target className="text-primary w-5 h-5" />
+            <div className="space-y-0.5">
+              <span className="text-[10px] font-black uppercase text-white italic">Meta Calórica</span>
+              <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
             </div>
           </div>
         </header>
 
-        {/* Dash de Consistência Mensal */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-white/10 bg-gradient-to-br from-card to-black rounded-3xl overflow-hidden shadow-2xl md:col-span-2">
+        {/* Dash de Consistência e Mapa Muscular */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-1 border-white/10 bg-gradient-to-br from-card to-black rounded-3xl overflow-hidden shadow-2xl flex flex-col">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary italic uppercase">
+                <Zap className="w-6 h-6" /> Análise Muscular
+              </CardTitle>
+              <CardDescription className="text-muted-foreground uppercase text-[10px] font-bold">Frequência de recrutamento por grupo</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 flex items-center justify-center">
+              <MuscleMap intensities={muscleIntensities} className="w-full max-w-sm" />
+            </CardContent>
+          </Card>
+
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden shadow-2xl">
+              <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl font-headline flex items-center gap-2 text-white italic uppercase">
                     <CalendarCheck className="w-6 h-6 text-primary" /> Consistência Mensal
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Atividade de treino registrada no silo</CardDescription>
+                  <CardDescription className="text-muted-foreground uppercase text-[10px] font-bold">Volume de treino registrado</CardDescription>
                 </div>
                 <div className="text-right">
                   <span className="text-4xl font-black text-primary italic leading-none">{sessionStats.totalThisMonth}</span>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase">Treinos no Mês</p>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[200px] w-full mt-4">
-                {sessionStats.chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={sessionStats.chartData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
-                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
-                      <YAxis hide />
-                      <Tooltip 
-                        contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}}
-                        cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                      />
-                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Exercícios" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
-                    <Activity className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic">Nenhum treino finalizado este mês.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[250px] w-full mt-4">
+                  {sessionStats.chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={sessionStats.chartData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
+                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
+                        <YAxis hide />
+                        <Tooltip 
+                          contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}}
+                          cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                        />
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Exercícios" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
+                      <Activity className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
+                      <p className="text-xs font-bold text-muted-foreground uppercase italic">Nenhum treino finalizado este mês.</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="border-white/10 bg-primary/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-center p-8 text-center space-y-6">
-             <div className="space-y-2">
-               <span className="text-6xl font-black text-white italic leading-none">{sessionStats.totalExercises}</span>
-               <p className="text-xs font-bold text-primary uppercase tracking-widest">Total de Exercícios</p>
-               <p className="text-muted-foreground text-[10px] font-medium uppercase">Executados com sucesso este mês</p>
-             </div>
-             <div className="pt-4 border-t border-white/5">
-                <p className="text-[10px] text-zinc-500 font-bold uppercase italic leading-relaxed">
-                  "A constância é a única via para a forja do corpo ideal. Mantenha o silo atualizado."
-                </p>
-             </div>
-          </Card>
+            <div className="grid grid-cols-2 gap-4">
+               <Card className="bg-primary/5 border-white/10 p-6 rounded-3xl flex flex-col items-center justify-center text-center">
+                  <span className="text-5xl font-black text-white italic leading-none">{sessionStats.totalExercises}</span>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-2">Total de Exercícios</p>
+               </Card>
+               <Card className="bg-accent/5 border-white/10 p-6 rounded-3xl flex flex-col items-center justify-center text-center">
+                  <span className="text-5xl font-black text-white italic leading-none">{weightData[weightData.length-1]?.value || '--'}</span>
+                  <p className="text-[10px] font-black text-accent uppercase tracking-widest mt-2">Peso Atual (KG)</p>
+               </Card>
+            </div>
+          </div>
         </section>
 
+        {/* Gráficos de PR e Peso */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -271,7 +307,7 @@ export default function ProgressPage() {
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
                     <TrendingUp className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">Aguardando primeiro registro...</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase italic">Aguardando registro...</p>
                   </div>
                 )}
               </div>
@@ -316,7 +352,7 @@ export default function ProgressPage() {
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
                     <Dumbbell className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic leading-relaxed">Sem recordes para {selectedEx}.</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase italic">Sem recordes.</p>
                   </div>
                 )}
               </div>
@@ -327,57 +363,6 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
         </div>
-
-        <Card className="bg-gradient-to-br from-zinc-900 to-black border-white/10 shadow-2xl rounded-3xl overflow-hidden">
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 p-10">
-            <div className="space-y-6">
-              <h4 className="text-accent font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" /> Análise Médica & Performance
-              </h4>
-              <div className="space-y-4">
-                <div className="p-5 rounded-2xl bg-white/5 border-l-4 border-l-primary flex items-start gap-4">
-                  <div className="bg-primary/20 p-2 rounded-lg">
-                    <Info className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-black uppercase italic text-primary">Classificação Médica (IMC OMS)</p>
-                    <p className="text-lg font-black italic text-white">{assessment.bmiClassification || 'Aguardando Perfil'}</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase italic">
-                      Seu IMC: {assessment.bmi} | Ideal: 18.5 - 24.9
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-white/5 border-l-4 border-l-accent text-sm text-zinc-300 leading-relaxed font-bold italic">
-                  "Sua taxa metabólica basal é de {assessment.tmb} kcal. Com o fator de atividade 1.55, seu gasto diário total é de {assessment.get} kcal."
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <h4 className="text-primary font-black uppercase text-xs italic tracking-widest flex items-center gap-2">
-                <Target className="w-4 h-4" /> Meta Nutricional Determinada
-              </h4>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Meta Calórica</span>
-                  <span className="text-lg font-black text-white italic">{assessment.get} kcal</span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Proteína (1.8g - 2.2g/kg)</span>
-                  <span className="text-lg font-black text-accent italic">{assessment.proteinRange.min} - {assessment.proteinRange.max}g</span>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                  <span className="text-[10px] font-black uppercase italic text-muted-foreground">Água Diária (50ml/kg)</span>
-                  <span className="text-lg font-black text-blue-400 italic">{assessment.waterLiters}L</span>
-                </div>
-              </div>
-              <p className="text-[9px] font-bold uppercase italic text-center opacity-40">
-                Lembrando, essas metas são baseadas em calculo de peso, altura e genero. Seguindo os parametros basicos da OMS, podendo variar de acordo com dietas reguladas
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </main>
     </div>
   );
