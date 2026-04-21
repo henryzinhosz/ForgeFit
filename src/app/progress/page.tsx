@@ -19,7 +19,7 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info, CalendarCheck, Activity, Zap, Cpu } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Activity, Zap, Cpu, CalendarCheck } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/select";
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
-import { cn } from '@/lib/utils';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 import { MuscleMap } from '@/components/MuscleMap';
 import { EXERCISE_MUSCLE_MAP, MuscleGroup } from '@/lib/muscle-mapping';
@@ -63,7 +62,6 @@ export default function ProgressPage() {
 
   /**
    * Lógica de Score de Frequência Muscular (MuscleHeatMap)
-   * Integração Firestore para calcular intensidade de 0 a 100.
    */
   const muscleIntensities = useMemo(() => {
     const intensity: Record<MuscleGroup, number> = {
@@ -73,7 +71,6 @@ export default function ProgressPage() {
 
     if (!rawLogs) return intensity;
 
-    // Filtra logs dos últimos 30 dias para uma análise de frequência dinâmica
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -83,8 +80,6 @@ export default function ProgressPage() {
 
       const muscles = EXERCISE_MUSCLE_MAP[log.exerciseId] || [];
       muscles.forEach(m => {
-        // Incrementa intensidade por treino (máximo 100)
-        // Um Score de 1.0 (100%) é atingido com aprox. 10 sessões mensais por grupo
         intensity[m] = Math.min(100, intensity[m] + 10);
       });
     });
@@ -92,7 +87,6 @@ export default function ProgressPage() {
     return intensity;
   }, [rawLogs]);
 
-  // Dados de Peso
   const weightData = useMemo(() => {
     if (!rawMetrics) return [];
     return rawMetrics
@@ -105,7 +99,6 @@ export default function ProgressPage() {
       }));
   }, [rawMetrics]);
 
-  // Dados de Recordes (PRs)
   const loadData = useMemo(() => {
     if (!rawMetrics) return [];
     return rawMetrics
@@ -118,7 +111,6 @@ export default function ProgressPage() {
       }));
   }, [rawMetrics, selectedEx]);
 
-  // Estatísticas de Sessões
   const sessionStats = useMemo(() => {
     if (!rawMetrics) return { totalThisMonth: 0, totalExercises: 0, chartData: [] };
     
@@ -212,8 +204,8 @@ export default function ProgressPage() {
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Corporal</h1>
             <p className="text-muted-foreground font-medium">Análise de performance via Cloud Firestore Sync.</p>
           </div>
-          <div className="bg-cyan-500/10 border border-cyan-500/20 p-4 rounded-2xl flex items-center gap-3">
-            <Cpu className="text-cyan-400 w-5 h-5 animate-pulse" />
+          <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
+            <Cpu className="text-primary w-5 h-5 animate-pulse" />
             <div className="space-y-0.5">
               <span className="text-[10px] font-black uppercase text-white italic tracking-widest">Sistema Biométrico</span>
               <p className="text-sm font-bold text-white uppercase italic">{assessment.bmiClassification}</p>
@@ -221,12 +213,11 @@ export default function ProgressPage() {
           </div>
         </header>
 
-        {/* Mapa de Calor Muscular (Muscle Heatmap) - Centralizado */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-2 border-white/5 bg-gradient-to-br from-zinc-900/80 to-black rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl">
             <CardHeader className="p-10 pb-0">
-              <CardTitle className="text-3xl font-headline flex items-center gap-3 text-cyan-400 italic uppercase tracking-tighter">
-                <Zap className="w-8 h-8" /> Biometria Muscular
+              <CardTitle className="text-3xl font-headline flex items-center gap-3 text-primary italic uppercase tracking-tighter">
+                <Zap className="w-8 h-8" /> Atividade Muscular
               </CardTitle>
               <CardDescription className="text-muted-foreground uppercase text-[10px] font-black tracking-[0.2em]">Mapa de Calor Dinâmico • Sincronizado</CardDescription>
             </CardHeader>
@@ -239,7 +230,7 @@ export default function ProgressPage() {
             <Card className="border-white/5 bg-card/40 backdrop-blur-md rounded-[2.5rem] overflow-hidden shadow-2xl">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-headline flex items-center gap-2 text-white italic uppercase">
-                  <CalendarCheck className="w-6 h-6 text-cyan-400" /> Consistência
+                  <CalendarCheck className="w-6 h-6 text-primary" /> Consistência
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-0">
@@ -247,7 +238,7 @@ export default function ProgressPage() {
                   {sessionStats.chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={sessionStats.chartData}>
-                        <Bar dataKey="count" fill="#22d3ee" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
@@ -260,11 +251,11 @@ export default function ProgressPage() {
                 <div className="grid grid-cols-1 gap-4">
                    <div className="bg-white/5 p-6 rounded-3xl text-center border border-white/5">
                       <span className="text-5xl font-black text-white italic leading-none">{sessionStats.totalThisMonth}</span>
-                      <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mt-2">Treinos no Mês</p>
+                      <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-2">Treinos no Mês</p>
                    </div>
                    <div className="bg-white/5 p-6 rounded-3xl text-center border border-white/5">
                       <span className="text-5xl font-black text-white italic leading-none">{sessionStats.totalExercises}</span>
-                      <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mt-2">Missões Concluídas</p>
+                      <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-2">Missões Concluídas</p>
                    </div>
                 </div>
               </CardContent>
@@ -272,7 +263,6 @@ export default function ProgressPage() {
           </div>
         </section>
 
-        {/* Gráficos de PR e Peso */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="border-white/5 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
             <CardHeader className="p-8 flex flex-row items-center justify-between">
