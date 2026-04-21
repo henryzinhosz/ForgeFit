@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trash2, Pencil, Plus, Loader2, Calendar, Activity, Dumbbell, Timer, Navigation as NavIcon, Clock } from 'lucide-react';
+import { Trash2, Pencil, Plus, Loader2, Calendar, Activity, Dumbbell, Timer, Navigation as NavIcon, Clock, CheckCircle2 } from 'lucide-react';
 import { useCollection, useFirestore, useUser, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import {
