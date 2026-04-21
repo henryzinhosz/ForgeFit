@@ -1,15 +1,16 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { DayOfWeek } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trash2, Pencil, Plus, Loader2, Calendar, Activity, Dumbbell, Timer, Navigation as NavIcon, Clock, CheckCircle2, Info, Eye } from 'lucide-react';
+import { Trash2, Pencil, Plus, Loader2, Calendar, Activity, Dumbbell, Timer, Navigation as NavIcon, Clock, CheckCircle2, Info, Eye, AlertCircle } from 'lucide-react';
 import { useCollection, useFirestore, useUser, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, query, where } from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
@@ -28,44 +29,62 @@ import { useToast } from '@/hooks/use-toast';
 import { EXERCISE_DATABASE } from '@/lib/exercise-db';
 import { getPlaceholderById } from '@/lib/placeholder-images';
 
+const DAYS_EN: DayOfWeek[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 export default function PlannerPage() {
   const { user } = useUser();
   const db = useFirestore();
   const { toast } = useToast();
-  const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
   
-  // Estados para Edição do Plano Padrão
+  const todayIndex = new Date().getDay();
+  const todayName = DAYS_EN[todayIndex];
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const [selectedDay, setSelectedDay] = useState<DayOfWeek>(todayName);
+  
   const [editingExercise, setEditingExercise] = useState<any | null>(null);
   const [editSets, setEditSets] = useState('');
   const [editReps, setEditReps] = useState('');
-  const [editWeight, setEditWeight] = useState('');
-  const [editDuration, setEditDuration] = useState('');
-  const [editDistance, setEditDistance] = useState('');
-  const [editRest, setEditRest] = useState('');
   const [editNotes, setEditNotes] = useState('');
   
-  // Estados para Registro de Performance Real
   const [loggingExercise, setLoggingExercise] = useState<any | null>(null);
   const [actualSets, setActualSets] = useState('');
   const [actualReps, setActualReps] = useState('');
   const [actualWeight, setActualWeight] = useState('');
-  const [actualDistance, setActualDistance] = useState('');
-  const [actualDuration, setActualDuration] = useState('');
-  const [actualRest, setActualRest] = useState('');
   const [actualNotes, setActualNotes] = useState('');
 
   const [viewingExercise, setViewingExercise] = useState<any | null>(null);
   const [isFinalizeDialogOpen, setIsFinalizeDialogOpen] = useState(false);
 
+  // Consulta de treinos planejados
   const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return collection(db, 'users', user.uid, 'workouts');
   }, [db, user]);
 
-  const { data: rawWorkouts, loading } = useCollection(workoutsQuery);
-  const workouts = rawWorkouts || [];
+  // Consulta de métricas para verificar se já foi finalizado hoje
+  const metricsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'users', user.uid, 'metrics'),
+      where('type', '==', 'session_completed'),
+      where('day', '==', selectedDay)
+    );
+  }, [db, user, selectedDay]);
 
+  const { data: rawWorkouts, isLoading: loading } = useCollection(workoutsQuery);
+  const { data: rawMetrics } = useCollection(metricsQuery);
+
+  const workouts = rawWorkouts || [];
   const dayWorkouts = workouts.filter(w => w.day === selectedDay);
+  
+  // Verifica se já existe uma finalização para HOJE (data ISO YYYY-MM-DD)
+  const isAlreadyFinalizedToday = useMemo(() => {
+    if (!rawMetrics) return false;
+    return rawMetrics.some(m => m.date.startsWith(todayStr));
+  }, [rawMetrics, todayStr]);
+
+  const isToday = selectedDay === todayName;
   const isAllCompleted = dayWorkouts.length > 0 && dayWorkouts.every(w => w.completed);
 
   const toggleExercise = (workoutId: string, currentStatus: boolean) => {
@@ -88,10 +107,6 @@ export default function PlannerPage() {
     setEditingExercise(ex);
     setEditSets(ex.sets || '');
     setEditReps(ex.reps || '');
-    setEditWeight(ex.weight || '');
-    setEditDuration(ex.duration || '');
-    setEditDistance(ex.distance || '');
-    setEditRest(ex.rest || '');
     setEditNotes(ex.notes || '');
   };
 
@@ -101,10 +116,6 @@ export default function PlannerPage() {
     updateDocumentNonBlocking(docRef, { 
       sets: editSets, 
       reps: editReps, 
-      weight: editWeight,
-      duration: editDuration,
-      distance: editDistance,
-      rest: editRest,
       notes: editNotes
     });
     toast({ title: "Plano atualizado", description: "As metas padrão foram salvas." });
@@ -122,9 +133,6 @@ export default function PlannerPage() {
       actualSets: parseInt(actualSets) || 0,
       actualReps: parseInt(actualReps) || 0,
       actualWeight: parseFloat(actualWeight) || 0,
-      actualDistance: parseFloat(actualDistance) || 0,
-      actualDuration: actualDuration,
-      restTime: actualRest,
       notes: actualNotes,
       createdAt: new Date().toISOString()
     };
@@ -144,6 +152,16 @@ export default function PlannerPage() {
 
   const executeFinalize = () => {
     if (!db || !user) return;
+    
+    if (isAlreadyFinalizedToday) {
+      toast({
+        variant: "destructive",
+        title: "Treino já finalizado",
+        description: "Você já registrou a conclusão deste treino hoje.",
+      });
+      return;
+    }
+
     const sessionsRef = collection(db, 'users', user.uid, 'metrics');
     addDocumentNonBlocking(sessionsRef, {
       type: 'session_completed',
@@ -152,6 +170,7 @@ export default function PlannerPage() {
       date: new Date().toISOString(),
       createdAt: new Date().toISOString()
     });
+
     toast({ title: "Treino Finalizado!", description: "Missão cumprida! Progresso registrado." });
     setIsFinalizeDialogOpen(false);
   };
@@ -177,7 +196,7 @@ export default function PlannerPage() {
       <main className="max-w-screen-xl mx-auto px-4 py-8 space-y-4">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-4xl font-headline font-bold uppercase italic tracking-tighter">Agenda Semanal</h1>
+            <h1 className="text-4xl font-headline font-bold uppercase italic tracking-tighter text-white">Agenda Semanal</h1>
             <p className="text-muted-foreground font-medium">Configure seu plano padrão e registre sua execução real.</p>
           </div>
           <Button asChild className="shadow-xl h-12 px-8 rounded-full bg-primary hover:bg-primary/90 font-black uppercase italic">
@@ -187,7 +206,7 @@ export default function PlannerPage() {
           </Button>
         </header>
 
-        <Tabs defaultValue="Monday" className="w-full" onValueChange={(v) => setSelectedDay(v as DayOfWeek)}>
+        <Tabs defaultValue={todayName} className="w-full" onValueChange={(v) => setSelectedDay(v as DayOfWeek)}>
           <div className="flex justify-center mb-8">
             <TabsList className="bg-secondary/30 p-1 h-auto flex flex-wrap justify-center gap-1 md:gap-2 border border-white/5 rounded-2xl">
               {days.map((day) => (
@@ -210,23 +229,40 @@ export default function PlannerPage() {
             days.map((day) => (
               <TabsContent key={day.key} value={day.key} className="space-y-6">
                 <Card className="border-white/10 bg-card/60 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-primary/5 border-b border-white/5 p-6 flex flex-row items-center justify-between">
+                  <CardHeader className="bg-primary/5 border-b border-white/5 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                       <CardTitle className="text-3xl font-headline text-primary uppercase italic">{day.label}</CardTitle>
                       <CardDescription className="font-bold text-muted-foreground uppercase text-xs">
                         {dayWorkouts.length} exercícios planejados
                       </CardDescription>
                     </div>
+                    
                     {dayWorkouts.length > 0 && (
-                      <Button 
-                        onClick={() => isAllCompleted ? executeFinalize() : setIsFinalizeDialogOpen(true)}
-                        className={cn(
-                          "h-12 px-6 rounded-2xl font-black uppercase italic transition-all",
-                          isAllCompleted ? "bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(255,0,0,0.5)]" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      <div className="flex flex-col items-center sm:items-end gap-2">
+                        {isToday ? (
+                          isAlreadyFinalizedToday ? (
+                            <div className="flex items-center gap-2 text-green-500 bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20">
+                              <CheckCircle2 className="w-5 h-5" />
+                              <span className="text-[10px] font-black uppercase italic">Treino Finalizado Hoje</span>
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => isAllCompleted ? executeFinalize() : setIsFinalizeDialogOpen(true)}
+                              className={cn(
+                                "h-12 px-6 rounded-2xl font-black uppercase italic transition-all",
+                                isAllCompleted ? "bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(255,0,0,0.5)]" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                              )}
+                            >
+                              <CheckCircle2 className="mr-2 w-5 h-5" /> Finalizar Treino
+                            </Button>
+                          )
+                        ) : (
+                          <div className="flex items-center gap-2 text-muted-foreground bg-white/5 px-4 py-2 rounded-xl border border-white/10 italic">
+                            <AlertCircle className="w-4 h-4" />
+                            <span className="text-[10px] font-bold uppercase">Finalização disponível apenas no dia {day.label}</span>
+                          </div>
                         )}
-                      >
-                        <CheckCircle2 className="mr-2 w-5 h-5" /> Finalizar Treino
-                      </Button>
+                      </div>
                     )}
                   </CardHeader>
                   <CardContent className="p-0">
@@ -251,9 +287,8 @@ export default function PlannerPage() {
                                   </h4>
                                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-black text-muted-foreground italic uppercase">
                                     {exInfo?.category === 'Musculação' && <span>Meta: {ex.sets}x{ex.reps} {ex.weight && `- ${ex.weight}kg`}</span>}
-                                    {exInfo?.category === 'Calistenia' && <span>Meta: {ex.sets}x{ex.reps} {ex.duration && `- ${ex.duration}`}</span>}
-                                    {exInfo?.category === 'Cardio' && <span>Meta: {ex.duration} {ex.distance && `- ${ex.distance}km`}</span>}
-                                    {ex.rest && <span>Descanso: {ex.rest}</span>}
+                                    {exInfo?.category === 'Calistenia' && <span>Meta: {ex.sets}x{ex.reps}</span>}
+                                    {exInfo?.category === 'Cardio' && <span>Meta: {ex.duration}</span>}
                                   </div>
                                 </div>
                               </div>
@@ -265,9 +300,6 @@ export default function PlannerPage() {
                                     setActualSets(ex.sets || '');
                                     setActualReps(ex.reps || '');
                                     setActualWeight(ex.weight || '');
-                                    setActualDistance(ex.distance || '');
-                                    setActualDuration(ex.duration || '');
-                                    setActualRest(ex.rest || '');
                                     setActualNotes(ex.notes || '');
                                   }}
                                   className="bg-accent/10 hover:bg-accent/20 text-accent border border-accent/20 rounded-xl h-10 px-4 font-black uppercase italic text-xs flex-1 md:flex-none"
@@ -294,7 +326,7 @@ export default function PlannerPage() {
                     ) : (
                       <div className="flex flex-col items-center justify-center py-20 px-4 text-center space-y-4">
                         <div className="bg-white/5 p-6 rounded-full"><Calendar className="w-12 h-12 text-muted-foreground" /></div>
-                        <h3 className="text-xl font-headline font-bold uppercase italic">Dia de Descanso?</h3>
+                        <h3 className="text-xl font-headline font-bold uppercase italic text-white">Dia de Descanso?</h3>
                         <Button asChild variant="outline" className="rounded-full border-primary text-primary hover:bg-primary/10 h-12 px-8 font-black uppercase italic">
                           <Link href="/database">Explorar Exercícios</Link>
                         </Button>
@@ -348,12 +380,6 @@ export default function PlannerPage() {
                           </div>
                         )}
                       </div>
-                      {viewingExercise.notes && (
-                        <div className="space-y-2">
-                          <h4 className="font-bold text-sm text-accent border-l-4 border-accent pl-3 uppercase italic">Observação do Plano</h4>
-                          <p className="text-muted-foreground text-sm italic bg-accent/5 p-3 rounded-xl border border-accent/10">"{viewingExercise.notes}"</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                   <DialogFooter className="p-6 pt-0">
