@@ -19,7 +19,7 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info, CalendarCheck, Activity, Zap } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, AlertCircle, Info, CalendarCheck, Activity, Zap, Cpu } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -61,7 +61,10 @@ export default function ProgressPage() {
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
   const { data: rawLogs } = useCollection(logsQuery);
 
-  // Cálculo de Intensidade Muscular
+  /**
+   * Lógica de Score de Frequência Muscular (MuscleHeatMap)
+   * Integração Firestore para calcular intensidade de 0 a 100.
+   */
   const muscleIntensities = useMemo(() => {
     const intensity: Record<MuscleGroup, number> = {
       peito: 0, costas: 0, ombros: 0, biceps: 0, triceps: 0,
@@ -70,11 +73,19 @@ export default function ProgressPage() {
 
     if (!rawLogs) return intensity;
 
+    // Filtra logs dos últimos 30 dias para uma análise de frequência dinâmica
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     rawLogs.forEach(log => {
+      const logDate = new Date(log.date);
+      if (logDate < thirtyDaysAgo) return;
+
       const muscles = EXERCISE_MUSCLE_MAP[log.exerciseId] || [];
       muscles.forEach(m => {
-        // Cada log adiciona 5% de intensidade, capado em 100%
-        intensity[m] = Math.min(100, intensity[m] + 5);
+        // Incrementa intensidade por treino (máximo 100)
+        // Um Score de 1.0 (100%) é atingido com aprox. 10 sessões mensais por grupo
+        intensity[m] = Math.min(100, intensity[m] + 10);
       });
     });
 
@@ -199,96 +210,79 @@ export default function ProgressPage() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Corporal</h1>
-            <p className="text-muted-foreground font-medium">Acompanhe seu progresso, metas e consistência.</p>
+            <p className="text-muted-foreground font-medium">Análise de performance via Cloud Firestore Sync.</p>
           </div>
-          <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
-            <Target className="text-primary w-5 h-5" />
+          <div className="bg-cyan-500/10 border border-cyan-500/20 p-4 rounded-2xl flex items-center gap-3">
+            <Cpu className="text-cyan-400 w-5 h-5 animate-pulse" />
             <div className="space-y-0.5">
-              <span className="text-[10px] font-black uppercase text-white italic">Meta Calórica</span>
-              <p className="text-sm font-bold text-white">{assessment.get} kcal/dia</p>
+              <span className="text-[10px] font-black uppercase text-white italic tracking-widest">Sistema Biométrico</span>
+              <p className="text-sm font-bold text-white uppercase italic">{assessment.bmiClassification}</p>
             </div>
           </div>
         </header>
 
-        {/* Dash de Consistência e Mapa Muscular */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-1 border-white/10 bg-gradient-to-br from-card to-black rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary italic uppercase">
-                <Zap className="w-6 h-6" /> Análise Muscular
+        {/* Mapa de Calor Muscular (Muscle Heatmap) - Centralizado */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <Card className="lg:col-span-2 border-white/5 bg-gradient-to-br from-zinc-900/80 to-black rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl">
+            <CardHeader className="p-10 pb-0">
+              <CardTitle className="text-3xl font-headline flex items-center gap-3 text-cyan-400 italic uppercase tracking-tighter">
+                <Zap className="w-8 h-8" /> Biometria Muscular
               </CardTitle>
-              <CardDescription className="text-muted-foreground uppercase text-[10px] font-bold">Frequência de recrutamento por grupo</CardDescription>
+              <CardDescription className="text-muted-foreground uppercase text-[10px] font-black tracking-[0.2em]">Mapa de Calor Dinâmico • Sincronizado</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center">
-              <MuscleMap intensities={muscleIntensities} className="w-full max-w-sm" />
+            <CardContent className="p-10 flex items-center justify-center">
+              <MuscleMap intensities={muscleIntensities} className="w-full" />
             </CardContent>
           </Card>
 
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden shadow-2xl">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl font-headline flex items-center gap-2 text-white italic uppercase">
-                    <CalendarCheck className="w-6 h-6 text-primary" /> Consistência Mensal
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground uppercase text-[10px] font-bold">Volume de treino registrado</CardDescription>
-                </div>
-                <div className="text-right">
-                  <span className="text-4xl font-black text-primary italic leading-none">{sessionStats.totalThisMonth}</span>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Treinos no Mês</p>
-                </div>
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="border-white/5 bg-card/40 backdrop-blur-md rounded-[2.5rem] overflow-hidden shadow-2xl">
+              <CardHeader className="p-8">
+                <CardTitle className="text-2xl font-headline flex items-center gap-2 text-white italic uppercase">
+                  <CalendarCheck className="w-6 h-6 text-cyan-400" /> Consistência
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="h-[250px] w-full mt-4">
+              <CardContent className="p-8 pt-0">
+                <div className="h-[200px] w-full mb-6">
                   {sessionStats.chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={sessionStats.chartData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
-                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
-                        <YAxis hide />
-                        <Tooltip 
-                          contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}}
-                          cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                        />
-                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Exercícios" />
+                        <Bar dataKey="count" fill="#22d3ee" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
-                      <Activity className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                      <p className="text-xs font-bold text-muted-foreground uppercase italic">Nenhum treino finalizado este mês.</p>
+                    <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 p-8 text-center">
+                      <Activity className="w-8 h-8 mb-2 opacity-20 text-muted-foreground" />
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase italic">Sem dados mensais.</p>
                     </div>
                   )}
                 </div>
+                <div className="grid grid-cols-1 gap-4">
+                   <div className="bg-white/5 p-6 rounded-3xl text-center border border-white/5">
+                      <span className="text-5xl font-black text-white italic leading-none">{sessionStats.totalThisMonth}</span>
+                      <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mt-2">Treinos no Mês</p>
+                   </div>
+                   <div className="bg-white/5 p-6 rounded-3xl text-center border border-white/5">
+                      <span className="text-5xl font-black text-white italic leading-none">{sessionStats.totalExercises}</span>
+                      <p className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mt-2">Missões Concluídas</p>
+                   </div>
+                </div>
               </CardContent>
             </Card>
-
-            <div className="grid grid-cols-2 gap-4">
-               <Card className="bg-primary/5 border-white/10 p-6 rounded-3xl flex flex-col items-center justify-center text-center">
-                  <span className="text-5xl font-black text-white italic leading-none">{sessionStats.totalExercises}</span>
-                  <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-2">Total de Exercícios</p>
-               </Card>
-               <Card className="bg-accent/5 border-white/10 p-6 rounded-3xl flex flex-col items-center justify-center text-center">
-                  <span className="text-5xl font-black text-white italic leading-none">{weightData[weightData.length-1]?.value || '--'}</span>
-                  <p className="text-[10px] font-black text-accent uppercase tracking-widest mt-2">Peso Atual (KG)</p>
-               </Card>
-            </div>
           </div>
         </section>
 
         {/* Gráficos de PR e Peso */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
-            <CardHeader className="flex flex-row items-center justify-between">
+          <Card className="border-white/5 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <CardHeader className="p-8 flex flex-row items-center justify-between">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary italic uppercase">
-                <Scale className="w-6 h-6" /> Monitor de Peso
+                <Scale className="w-6 h-6" /> Balanço de Peso
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-8 pt-0 space-y-8">
               <div className="h-[250px] w-full">
-                {isMetricsLoading ? (
-                  <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>
-                ) : weightData.length > 0 ? (
+                {weightData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={weightData}>
                       <defs>
@@ -305,26 +299,23 @@ export default function ProgressPage() {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
-                    <TrendingUp className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic">Aguardando registro...</p>
-                  </div>
+                  <div className="h-full flex items-center justify-center opacity-20"><Scale className="w-12 h-12" /></div>
                 )}
               </div>
-              <div className="flex gap-2">
-                <Input type="number" placeholder="Peso (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
-                <Button onClick={handleAddWeight} className="h-12 px-6 bg-primary text-white font-black rounded-xl uppercase italic">SALVAR</Button>
+              <div className="flex gap-3">
+                <Input type="number" placeholder="Peso (kg)" value={weightInput} onChange={(e) => setWeightInput(e.target.value)} className="rounded-2xl h-14 bg-white/5 border-white/10 text-white font-bold" />
+                <Button onClick={handleAddWeight} className="h-14 px-8 bg-primary text-white font-black rounded-2xl uppercase italic">ATUALIZAR</Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
-            <CardHeader className="flex flex-row items-center justify-between">
+          <Card className="border-white/5 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <CardHeader className="p-8 flex flex-row items-center justify-between">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
-                <Dumbbell className="w-6 h-6" /> Gráfico de PRs
+                <Dumbbell className="w-6 h-6" /> Recordes (PR)
               </CardTitle>
               <Select value={selectedEx} onValueChange={setSelectedEx}>
-                <SelectTrigger className="w-[140px] rounded-full bg-white/5 border-white/10 text-white h-9 uppercase font-black text-[10px] italic">
+                <SelectTrigger className="w-[160px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
                   <SelectValue placeholder="Exercício" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-900 border-white/10 text-white">
@@ -335,11 +326,9 @@ export default function ProgressPage() {
                 </SelectContent>
               </Select>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-8 pt-0 space-y-8">
               <div className="h-[250px] w-full">
-                {isMetricsLoading ? (
-                  <div className="h-full flex items-center justify-center"><Loader2 className="animate-spin text-accent" /></div>
-                ) : loadData.length > 0 ? (
+                {loadData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={loadData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
@@ -350,15 +339,12 @@ export default function ProgressPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-8 text-center">
-                    <Dumbbell className="w-10 h-10 mb-2 opacity-20 text-muted-foreground" />
-                    <p className="text-xs font-bold text-muted-foreground uppercase italic">Sem recordes.</p>
-                  </div>
+                  <div className="h-full flex items-center justify-center opacity-20"><TrendingUp className="w-12 h-12" /></div>
                 )}
               </div>
-              <div className="flex gap-2">
-                <Input type="number" placeholder="Carga (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold" />
-                <Button onClick={handleAddLoad} className="h-12 px-6 bg-accent text-white font-black rounded-xl uppercase italic">NOVO PR</Button>
+              <div className="flex gap-3">
+                <Input type="number" placeholder="Carga (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-2xl h-14 bg-white/5 border-white/10 text-white font-bold" />
+                <Button onClick={handleAddLoad} className="h-14 px-8 bg-accent text-white font-black rounded-2xl uppercase italic">NOVO RECORDE</Button>
               </div>
             </CardContent>
           </Card>
