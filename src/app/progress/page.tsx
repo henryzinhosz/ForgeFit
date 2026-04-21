@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { Scale, Dumbbell, TrendingUp, Loader2, Target, ShieldCheck, BrainCircuit, Sparkles, Zap } from 'lucide-react';
+import { Scale, Dumbbell, TrendingUp, Loader2, Target, ShieldCheck, BrainCircuit, Sparkles, Zap, Activity, CalendarDays, Weight } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -31,6 +31,7 @@ import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
 import { EXERCISE_DATABASE } from '@/lib/exercise-db';
 import { aiPerformanceAnalysis, AIPerformanceAnalysisOutput } from '@/ai/flows/ai-performance-analysis';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 export default function ProgressPage() {
   const { user, isUserLoading } = useUser();
@@ -64,6 +65,41 @@ export default function ProgressPage() {
 
   const { data: rawMetrics, isLoading: isMetricsLoading } = useCollection(metricsQuery);
   const { data: rawLogs } = useCollection(logsQuery);
+
+  // Estatísticas de Consistência e Volume
+  const stats = useMemo(() => {
+    if (!rawMetrics || !rawLogs) return { sessions: 0, volume: 0, consistency: 0 };
+    
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    // Filtra sessões do mês atual
+    const sessionsInMonth = rawMetrics.filter(m => {
+      const d = new Date(m.date);
+      return m.type === 'session_completed' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    // Calcula Volume Total (Peso * Reps * Sets) dos logs do mês atual
+    const volumeInMonth = rawLogs.reduce((acc, log) => {
+      const d = new Date(log.date);
+      if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+        return acc + ((log.actualWeight || 0) * (log.actualReps || 0) * (log.actualSets || 0));
+      }
+      return acc;
+    }, 0);
+
+    // Consistência: Dias com treino no mês / Dias passados no mês
+    const uniqueDays = new Set(sessionsInMonth.map(s => s.date.split('T')[0])).size;
+    const daysPassed = now.getDate();
+    const consistency = daysPassed > 0 ? (uniqueDays / daysPassed) * 100 : 0;
+
+    return {
+      sessions: sessionsInMonth.length,
+      volume: volumeInMonth,
+      consistency: Math.round(consistency)
+    };
+  }, [rawMetrics, rawLogs]);
 
   const weightData = useMemo(() => {
     if (!rawMetrics) return [];
@@ -148,7 +184,7 @@ export default function ProgressPage() {
       const result = await aiPerformanceAnalysis({
         historicalWorkouts: (rawLogs || []).map(l => ({
           date: l.date.split('T')[0],
-          exercise: l.exerciseId, // Simplificado para o fluxo
+          exercise: l.exerciseId,
           sets: l.actualSets,
           reps: l.actualReps,
           weight: l.actualWeight
@@ -189,7 +225,7 @@ export default function ProgressPage() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução de Performance</h1>
-            <p className="text-muted-foreground font-medium">Relatório baseado nos seus registros e padrões da OMS.</p>
+            <p className="text-muted-foreground font-medium">Análise biométrica e estatística do seu progresso.</p>
           </div>
           <Button 
             onClick={runAIAnalysis} 
@@ -229,14 +265,6 @@ export default function ProgressPage() {
                       ))}
                     </ul>
                   </div>
-                  {analysis.plateauDetected && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl space-y-2">
-                      <div className="flex items-center gap-2 text-red-500 font-black text-xs uppercase italic">
-                        <Zap className="w-4 h-4" /> Alerta de Estagnação Detectado
-                      </div>
-                      <p className="text-sm text-zinc-400 italic">{analysis.plateauDetails}</p>
-                    </div>
-                  )}
                 </div>
                 <div className="space-y-4">
                   <h4 className="font-black text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
@@ -257,56 +285,117 @@ export default function ProgressPage() {
         )}
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden shadow-2xl">
+          {/* Card Unificado: Biométrico & Nutricional */}
+          <Card className="border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden shadow-2xl flex flex-col">
             <CardHeader className="bg-primary/10 border-b border-white/5 p-6">
               <CardTitle className="text-2xl font-headline text-primary uppercase italic flex items-center gap-3">
-                <ShieldCheck className="w-7 h-7" /> Classificação Médica (IMC OMS)
+                <ShieldCheck className="w-7 h-7" /> Perfil Biométrico & Nutricional
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              <div className="space-y-2">
-                <span className="text-4xl font-black text-white italic uppercase">{assessment.bmiClassification}</span>
-                <p className="text-lg font-bold text-muted-foreground">
-                  Seu IMC: <span className="text-primary">{assessment.bmi}</span> | Ideal: <span className="text-white">18.5 - 24.9</span>
-                </p>
+            <CardContent className="p-8 flex-1 flex flex-col justify-between space-y-8">
+              <div className="space-y-4">
+                <div className="flex flex-col">
+                  <span className="text-5xl font-black text-white italic uppercase leading-none">{assessment.bmiClassification}</span>
+                  <p className="text-lg font-bold text-muted-foreground mt-2">
+                    Seu IMC: <span className="text-primary">{assessment.bmi}</span> | Ideal: <span className="text-white">18.5 - 24.9</span>
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-white/5">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Meta Calórica</span>
+                    <p className="text-2xl font-black text-white italic">{assessment.get} kcal</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Proteína (1.8-2.2g/kg)</span>
+                    <p className="text-2xl font-black text-accent italic">{assessment.proteinRange.min}-{assessment.proteinRange.max}g</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Água (50ml/kg)</span>
+                    <p className="text-2xl font-black text-blue-500 italic">{assessment.waterLiters}L</p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-white/5 p-6 rounded-2xl border border-white/5 leading-relaxed text-muted-foreground italic">
-                "Sua taxa metabólica basal é de <span className="text-white font-bold">{assessment.tmb} kcal</span>. Com o fator de atividade 1.55, seu gasto diário total é de <span className="text-primary font-bold">{assessment.get} kcal</span>."
+
+              <div className="bg-white/5 p-4 rounded-2xl border border-white/5 text-[11px] leading-relaxed text-muted-foreground italic text-center">
+                Cálculos baseados na Taxa Metabólica de Harris-Benedict e parâmetros da OMS.
+                As metas podem variar conforme prescrição profissional individualizada.
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-gradient-to-br from-zinc-900 to-black rounded-3xl overflow-hidden shadow-2xl">
+          {/* NOVO: Painel de Estatísticas de Sessão */}
+          <Card className="border-white/10 bg-gradient-to-br from-zinc-900 to-black rounded-3xl overflow-hidden shadow-2xl flex flex-col">
             <CardHeader className="bg-accent/10 border-b border-white/5 p-6">
               <CardTitle className="text-2xl font-headline text-accent uppercase italic flex items-center gap-3">
-                <Target className="w-7 h-7" /> Meta Nutricional Determinada
+                <Activity className="w-7 h-7" /> Dashboard de Consistência
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Meta Calórica</span>
-                  <p className="text-2xl font-black text-white italic">{assessment.get} kcal</p>
+            <CardContent className="p-8 flex-1 flex flex-col justify-between space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-accent/20 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(255,165,0,0.2)]">
+                      <CalendarDays className="text-accent w-8 h-8" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Treinos no Mês</p>
+                      <p className="text-4xl font-black text-white italic">{stats.sessions}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(255,0,0,0.2)]">
+                      <Weight className="text-primary w-8 h-8" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Carga Total (Volume)</p>
+                      <p className="text-4xl font-black text-white italic">{(stats.volume / 1000).toFixed(1)} <span className="text-xl">TON</span></p>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Proteína Diária</span>
-                  <p className="text-2xl font-black text-accent italic">{assessment.proteinRange.min} - {assessment.proteinRange.max}g</p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Água Diária (50ml/kg)</span>
-                  <p className="text-2xl font-black text-blue-500 italic">{assessment.waterLiters}L</p>
+
+                <div className="flex flex-col items-center justify-center bg-white/5 rounded-3xl p-6 border border-white/5">
+                  <div className="relative w-32 h-32 flex items-center justify-center">
+                    <svg className="w-full h-full -rotate-90">
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="58"
+                        fill="transparent"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        className="text-white/5"
+                      />
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="58"
+                        fill="transparent"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        strokeDasharray={2 * Math.PI * 58}
+                        strokeDashoffset={2 * Math.PI * 58 * (1 - stats.consistency / 100)}
+                        className="text-accent transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-black text-white italic">{stats.consistency}%</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mt-4">Frequência Mensal</p>
                 </div>
               </div>
-              <div className="pt-4 border-t border-white/5">
-                <p className="text-[10px] font-bold uppercase italic text-muted-foreground/60 text-center">
-                  Lembrando, essas metas são baseadas em cálculo de peso, altura e gênero. Seguindo os parâmetros básicos da OMS, podendo variar de acordo com dietas reguladas.
-                </p>
-              </div>
+
+              <p className="text-[10px] font-bold uppercase italic text-muted-foreground/60 text-center">
+                Volume calculado com base no histórico de execuções (Peso x Repetições x Séries).
+              </p>
             </CardContent>
           </Card>
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Gráfico de Peso */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
             <CardHeader className="p-8 flex flex-row items-center justify-between">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-primary italic uppercase">
@@ -342,6 +431,7 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
 
+          {/* Gráfico de Recordes (PR) */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
             <CardHeader className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
