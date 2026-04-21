@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -131,16 +130,6 @@ export default function PlannerPage() {
     };
 
     addDocumentNonBlocking(logsRef, performanceData);
-
-    if (actualWeight) {
-      const metricsRef = collection(db, 'users', user.uid, 'metrics');
-      addDocumentNonBlocking(metricsRef, {
-        type: 'maxLoad',
-        exerciseName: loggingExercise.title,
-        value: parseFloat(actualWeight),
-        date: new Date().toISOString()
-      });
-    }
 
     const workoutRef = doc(db, 'users', user.uid, 'workouts', loggingExercise.id);
     updateDocumentNonBlocking(workoutRef, { completed: true });
@@ -334,22 +323,17 @@ export default function PlannerPage() {
                       unoptimized
                       className="object-contain"
                     />
-                    <div className="absolute bottom-2 right-2 pointer-events-none select-none">
-                      <span className="text-[10px] font-black uppercase italic text-primary/30 tracking-tighter">ForgeFIT</span>
-                    </div>
                   </div>
                   <div className="p-6 space-y-6">
                     <DialogHeader className="p-0 text-left">
                       <DialogTitle className="text-3xl font-headline text-primary uppercase italic">{viewingExercise.title}</DialogTitle>
                       <DialogDescription className="text-accent font-bold uppercase tracking-widest text-xs">{exInfo?.category}</DialogDescription>
                     </DialogHeader>
-                    
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <h4 className="font-bold text-sm text-white border-l-4 border-primary pl-3 uppercase italic">Instruções</h4>
                         <p className="text-muted-foreground text-sm leading-relaxed bg-white/5 p-3 rounded-xl border border-white/5">{exInfo?.instructions}</p>
                       </div>
-
                       <div className="grid grid-cols-2 gap-3">
                         {viewingExercise.sets && (
                           <div className="bg-white/5 p-3 rounded-xl border border-white/5">
@@ -363,14 +347,7 @@ export default function PlannerPage() {
                             <p className="text-xl font-black italic">{viewingExercise.reps}</p>
                           </div>
                         )}
-                        {viewingExercise.time && (
-                          <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-                            <Label className="text-[10px] uppercase font-black text-muted-foreground">Tempo/Descanso</Label>
-                            <p className="text-xl font-black italic">{viewingExercise.time}</p>
-                          </div>
-                        )}
                       </div>
-
                       {viewingExercise.notes && (
                         <div className="space-y-2">
                           <h4 className="font-bold text-sm text-accent border-l-4 border-accent pl-3 uppercase italic">Observação do Plano</h4>
@@ -397,82 +374,28 @@ export default function PlannerPage() {
                 Registre o que você realmente fez em {loggingExercise?.title}
               </DialogDescription>
             </DialogHeader>
-
             {loggingExercise && (
               <div className="grid gap-6 py-4">
-                {(() => {
-                  const exInfo = getExerciseData(loggingExercise.exerciseId);
-                  const category = exInfo?.category;
-                  
-                  return (
-                    <div className="space-y-4">
-                      {category === 'Musculação' && (
-                        <>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Dumbbell className="w-3 h-3"/> Séries</Label>
-                              <Input value={actualSets} onChange={(e) => setActualSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Activity className="w-3 h-3"/> Reps</Label>
-                              <Input value={actualReps} onChange={(e) => setActualReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="uppercase font-black text-[10px] text-accent">Peso Utilizado (KG)</Label>
-                            <Input value={actualWeight} onChange={(e) => setActualWeight(e.target.value)} className="bg-white/5 border-white/10 h-14 text-2xl text-center font-black rounded-xl" />
-                          </div>
-                        </>
-                      )}
-
-                      {category === 'Calistenia' && (
-                        <>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="uppercase font-black text-[10px] text-accent">Séries</Label>
-                              <Input value={actualSets} onChange={(e) => setActualSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="uppercase font-black text-[10px] text-accent">Repetições</Label>
-                              <Input value={actualReps} onChange={(e) => setActualReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Timer className="w-3 h-3"/> Tempo Execução</Label>
-                            <Input value={actualDuration} onChange={(e) => setActualDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                          </div>
-                        </>
-                      )}
-
-                      {category === 'Cardio' && (
-                        <>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><NavIcon className="w-3 h-3"/> Distância (KM)</Label>
-                              <Input value={actualDistance} onChange={(e) => setActualDistance(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1"><Timer className="w-3 h-3"/> Tempo Execução</Label>
-                              <Input value={actualDuration} onChange={(e) => setActualDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                            </div>
-                          </div>
-                        </>
-                      )}
-
-                      <div className="space-y-2">
-                        <Label className="uppercase font-black text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/> Tempo Descanso</Label>
-                        <Input value={actualRest} onChange={(e) => setActualRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="uppercase font-black text-[10px] text-accent flex items-center gap-1">Observação</Label>
-                        <Textarea value={actualNotes} onChange={(e) => setActualNotes(e.target.value)} className="bg-white/5 border-white/10 min-h-[80px] rounded-xl" placeholder="Como foi a execução?" />
-                      </div>
-                    </div>
-                  );
-                })()}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] text-accent">Séries</Label>
+                    <Input value={actualSets} onChange={(e) => setActualSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="uppercase font-black text-[10px] text-accent">Reps</Label>
+                    <Input value={actualReps} onChange={(e) => setActualReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="uppercase font-black text-[10px] text-accent">Peso (KG)</Label>
+                  <Input value={actualWeight} onChange={(e) => setActualWeight(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="uppercase font-black text-[10px] text-accent">Observação</Label>
+                  <Textarea value={actualNotes} onChange={(e) => setActualNotes(e.target.value)} className="bg-white/5 border-white/10 min-h-[80px] rounded-xl" placeholder="Como foi a execução?" />
+                </div>
               </div>
             )}
-
             <DialogFooter>
               <Button onClick={handleLogPerformance} className="w-full bg-accent hover:bg-accent/90 h-16 text-xl font-black rounded-2xl shadow-2xl uppercase italic">
                 REGISTRAR NO SILO
@@ -491,76 +414,20 @@ export default function PlannerPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-6 py-4">
-              {editingExercise && (() => {
-                const exInfo = getExerciseData(editingExercise.exerciseId);
-                const category = exInfo?.category;
-                
-                return (
-                  <div className="space-y-4">
-                    {category === 'Musculação' && (
-                      <>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
-                            <Input value={editSets} onChange={(e) => setEditSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
-                            <Input value={editReps} onChange={(e) => setEditReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Peso Alvo (KG)</Label>
-                          <Input value={editWeight} onChange={(e) => setEditWeight(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                        </div>
-                      </>
-                    )}
-
-                    {category === 'Calistenia' && (
-                      <>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
-                            <Input value={editSets} onChange={(e) => setEditSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
-                            <Input value={editReps} onChange={(e) => setEditReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Execução</Label>
-                          <Input value={editDuration} onChange={(e) => setEditDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                        </div>
-                      </>
-                    )}
-
-                    {category === 'Cardio' && (
-                      <>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Distância (KM)</Label>
-                            <Input value={editDistance} onChange={(e) => setEditDistance(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Alvo</Label>
-                            <Input value={editDuration} onChange={(e) => setEditDuration(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Tempo Descanso</Label>
-                      <Input value={editRest} onChange={(e) => setEditRest(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Observação</Label>
-                      <Textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} className="bg-white/5 border-white/10 min-h-[80px] rounded-xl" />
-                    </div>
-                  </div>
-                );
-              })()}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Séries</Label>
+                  <Input value={editSets} onChange={(e) => setEditSets(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Reps</Label>
+                  <Input value={editReps} onChange={(e) => setEditReps(e.target.value)} className="bg-white/5 border-white/10 h-12 rounded-xl text-center font-bold" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/80 font-bold uppercase tracking-widest text-[10px]">Observação</Label>
+                <Textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} className="bg-white/5 border-white/10 min-h-[80px] rounded-xl" />
+              </div>
             </div>
             <DialogFooter>
               <Button onClick={handleUpdateExercise} className="w-full bg-primary hover:bg-primary/90 h-16 text-xl font-black rounded-2xl shadow-2xl uppercase italic">
