@@ -2,142 +2,22 @@
 {
   "placeholderImages": [
     {
+      "id": "body-base-front",
+      "description": "Base anatômica frontal cinza",
+      "imageUrl": "https://i.pinimg.com/736x/8a/8a/6c/8a8a6c8a8a8a8a8a8a8a8a8a8a8a8a8a.jpg",
+      "imageHint": "anatomical body front gray"
+    },
+    {
+      "id": "body-base-back",
+      "description": "Base anatômica posterior cinza",
+      "imageUrl": "https://i.pinimg.com/736x/9b/9b/7d/9b9b7d9b9b9b9b9b9b9b9b9b9b9b9b9b.jpg",
+      "imageHint": "anatomical body back gray"
+    },
+    {
       "id": "app-logo-neon",
       "description": "Logotipo ForgeFit Barra de Navegação",
       "imageUrl": "https://i.pinimg.com/736x/f9/b8/35/f9b8355b2c013ca14f88648800b571a9.jpg",
       "imageHint": "ForgeFit Nav Logo"
-    },
-    {
-      "id": "flexao-gif",
-      "description": "Imagem de Flexão de braço",
-      "imageUrl": "https://i.pinimg.com/736x/62/a1/11/62a11153d9abda7ad404d91a939293ee.jpg",
-      "imageHint": "Pushup Exercise"
-    },
-    {
-      "id": "supino-gif",
-      "description": "GIF de Supino Reto",
-      "imageUrl": "https://i.pinimg.com/originals/c9/8a/37/c98a37a436ac78308d44533aa04fdee8.gif",
-      "imageHint": "Bench Press"
-    },
-    {
-      "id": "agachamento-gif",
-      "description": "GIF de Agachamento Livre",
-      "imageUrl": "https://i.pinimg.com/originals/c4/53/9f/c4539fddb77d7660ee8fc1bc6ceac79f.gif",
-      "imageHint": "Squat Exercise"
-    },
-    {
-      "id": "terra-gif",
-      "description": "GIF de Levantamento Terra",
-      "imageUrl": "https://i.pinimg.com/originals/9e/05/96/9e0596eaff8188a0a08d8a0212e2c009.gif",
-      "imageHint": "Deadlift Exercise"
-    },
-    {
-      "id": "militar-gif",
-      "description": "GIF de Desenvolvimento Militar",
-      "imageUrl": "https://i.pinimg.com/originals/0d/e1/98/0de1986e80eba3c85cf3853c8fc0b8d7.gif",
-      "imageHint": "Military Press"
-    },
-    {
-      "id": "remada-gif",
-      "description": "GIF de Remada Curvada",
-      "imageUrl": "https://i.pinimg.com/originals/c6/f7/47/c6f7479b3c35d406e71e8575e7df528d.gif",
-      "imageHint": "Bent Over Row"
-    },
-    {
-      "id": "rosca-gif",
-      "description": "GIF de Rosca Direta",
-      "imageUrl": "https://i.pinimg.com/originals/9b/0c/71/9b0c7154b4493000fe199dae00a4644c.gif",
-      "imageHint": "Bicep Curl"
-    },
-    {
-      "id": "prancha-img",
-      "description": "Imagem de Prancha",
-      "imageUrl": "https://i.pinimg.com/736x/37/aa/9c/37aa9cb866d10d09a93ce9587e2a4835.jpg",
-      "imageHint": "Plank Exercise"
-    },
-    {
-      "id": "remador-gif",
-      "description": "GIF de Abdominal Remador",
-      "imageUrl": "https://i.pinimg.com/originals/ff/1e/6a/ff1e6a64b1e7533fb18f96a754eb38f8.gif",
-      "imageHint": "Situp Exercise"
-    },
-    {
-      "id": "corrida-img",
-      "description": "Imagem de Corrida Contínua",
-      "imageUrl": "https://i.pinimg.com/736x/07/68/0d/07680d94a75c4bbd189dab20590a7e00.jpg",
-      "imageHint": "Continuous Running"
-    },
-    {
-      "id": "corrida-tfm-gif",
-      "description": "GIF de Corrida Alternada",
-      "imageUrl": "https://i.pinimg.com/736x/b7/89/a9/b789a92c4c170bd6ac2ef3a63e1fb3b3.jpg",
-      "imageHint": "Running TFM"
-    },
-    {
-      "id": "ciclismo-gif",
-      "description": "Imagem de Ciclismo",
-      "imageUrl": "https://i.pinimg.com/736x/47/2d/86/472d86154f14e30dabf4455ba2bbe6d3.jpg",
-      "imageHint": "Cycling Exercise"
-    },
-    {
-      "id": "forca-superior-gif",
-      "description": "GIF de Força Superior (Negativas)",
-      "imageUrl": "https://i.pinimg.com/originals/e0/a0/0b/e0a00bdb854f75c72f2bf2a33f192964.gif",
-      "imageHint": "Pull up Negative"
-    },
-    {
-      "id": "flexao-joelho-img",
-      "description": "Flexão de braço com apoio dos joelhos",
-      "imageUrl": "https://www.lyfta.app/thumbnails/32111201.jpg",
-      "imageHint": "Knee Pushup"
-    },
-    {
-      "id": "isometria-barra-gif",
-      "description": "Imagem de Isometria na barra fixa",
-      "imageUrl": "https://static.wixstatic.com/media/2edbed_60c206e178ad4eb3801f4f47fc6523df~mv2.webp/v1/fill/w_350,h_375,al_c,q_80,enc_avif,quality_auto/2edbed_60c206e178ad4eb3801f4f47fc6523df~mv2.webp",
-      "imageHint": "Pullup Isometric"
-    },
-    {
-      "id": "flexao-aberta-gif",
-      "description": "GIF de Flexão Aberta",
-      "imageUrl": "https://www.hipertrofia.org/blog/wp-content/uploads/2023/11/wide-hand-push-up.gif",
-      "imageHint": "Wide Pushup"
-    },
-    {
-      "id": "abdominal-supra-gif",
-      "description": "Imagem de Abdominal Supra",
-      "imageUrl": "https://i.pinimg.com/736x/76/dd/0d/76dd0d08c57ce2b0815a516ece5220f8.jpg",
-      "imageHint": "Abdominal Supra"
-    },
-    {
-      "id": "sprint-tiros-gif",
-      "description": "Imagem de Sprint (Tiros)",
-      "imageUrl": "https://i.pinimg.com/736x/b7/89/a9/b789a92c4c170bd6ac2ef3a63e1fb3b3.jpg",
-      "imageHint": "Sprint Running"
-    },
-    {
-      "id": "pendurar-barra-gif",
-      "description": "Imagem de Suspensão na barra fixa",
-      "imageUrl": "https://i.pinimg.com/736x/fe/2c/b2/fe2cb2ee03dd3b85fa57b16788307958.jpg",
-      "imageHint": "Hanging bar"
-    },
-    {
-      "id": "flexao-banco-gif",
-      "description": "GIF de Flexão no banco",
-      "imageUrl": "https://i.pinimg.com/originals/5a/69/79/5a6979535284a51d7184a5131f2a17d0.gif",
-      "imageHint": "Bench Pushup"
-    },
-    {
-      "id": "elevacao-perna-img",
-      "description": "GIF de Elevação de perna",
-      "imageUrl": "https://i.pinimg.com/originals/e7/c1/e5/e7c1e5cdd690a2e5bcd108f57e38e5bd.gif",
-      "imageHint": "Leg Raise"
-    },
-    {
-      "id": "simulado-taf-img",
-      "description": "Imagem Simulado TAF",
-      "imageUrl": "https://i.pinimg.com/1200x/c8/8d/77/c88d7761afe655c9149687e7da364615.jpg",
-      "imageHint": "TAF Training"
     }
   ]
 }

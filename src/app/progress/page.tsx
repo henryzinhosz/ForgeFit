@@ -30,7 +30,7 @@ import {
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
-import { MuscleMap } from '@/components/MuscleMap';
+import { LayeredMuscleMap } from '@/components/LayeredMuscleMap';
 import { EXERCISE_MUSCLE_MAP, MuscleGroup } from '@/lib/muscle-mapping';
 
 export default function ProgressPage() {
@@ -61,7 +61,7 @@ export default function ProgressPage() {
   const { data: rawLogs } = useCollection(logsQuery);
 
   /**
-   * Lógica de Score de Frequência Muscular (MuscleHeatMap)
+   * Lógica de Score de Frequência Muscular (Layered Image Mapping)
    */
   const muscleIntensities = useMemo(() => {
     const intensity: Record<MuscleGroup, number> = {
@@ -71,16 +71,17 @@ export default function ProgressPage() {
 
     if (!rawLogs) return intensity;
 
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     rawLogs.forEach(log => {
       const logDate = new Date(log.date);
-      if (logDate < thirtyDaysAgo) return;
+      if (logDate < sevenDaysAgo) return;
 
       const muscles = EXERCISE_MUSCLE_MAP[log.exerciseId] || [];
       muscles.forEach(m => {
-        intensity[m] = Math.min(100, intensity[m] + 10);
+        // Incrementa o score (máximo 100)
+        intensity[m] = Math.min(100, intensity[m] + 25);
       });
     });
 
@@ -202,7 +203,7 @@ export default function ProgressPage() {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-headline font-bold text-white uppercase tracking-tighter italic">Evolução Corporal</h1>
-            <p className="text-muted-foreground font-medium">Análise de performance via Cloud Firestore Sync.</p>
+            <p className="text-muted-foreground font-medium">Análise de performance via Layered Image Mapping.</p>
           </div>
           <div className="bg-primary/10 border border-primary/20 p-4 rounded-2xl flex items-center gap-3">
             <Cpu className="text-primary w-5 h-5 animate-pulse" />
@@ -215,14 +216,14 @@ export default function ProgressPage() {
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-2 border-white/5 bg-gradient-to-br from-zinc-900/80 to-black rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl">
-            <CardHeader className="p-10 pb-0">
-              <CardTitle className="text-3xl font-headline flex items-center gap-3 text-primary italic uppercase tracking-tighter">
-                <Zap className="w-8 h-8" /> Atividade Muscular
+            <CardHeader className="p-10 pb-0 text-center">
+              <CardTitle className="text-3xl font-headline flex items-center justify-center gap-3 text-primary italic uppercase tracking-tighter">
+                <Zap className="w-8 h-8" /> Atividade Muscular (7 Dias)
               </CardTitle>
-              <CardDescription className="text-muted-foreground uppercase text-[10px] font-black tracking-[0.2em]">Mapa de Calor Dinâmico • Sincronizado</CardDescription>
+              <CardDescription className="text-muted-foreground uppercase text-[10px] font-black tracking-[0.2em]">Layered Stack Technology • Firebase Sync</CardDescription>
             </CardHeader>
-            <CardContent className="p-10 flex items-center justify-center">
-              <MuscleMap intensities={muscleIntensities} className="w-full" />
+            <CardContent className="p-10">
+              <LayeredMuscleMap intensities={muscleIntensities} className="w-full" />
             </CardContent>
           </Card>
 
