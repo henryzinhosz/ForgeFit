@@ -259,7 +259,7 @@ export default function PlannerPage() {
                         ) : (
                           <div className="flex items-center gap-2 text-muted-foreground bg-white/5 px-4 py-2 rounded-xl border border-white/10 italic">
                             <AlertCircle className="w-4 h-4" />
-                            <span className="text-[10px] font-bold uppercase">Finalização disponível apenas no dia {day.label}</span>
+                            <span className="text-[10px] font-bold uppercase">Finalização apenas no dia correto</span>
                           </div>
                         )}
                       </div>
