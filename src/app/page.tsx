@@ -7,11 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Droplets, CheckCircle2, Settings2, Target, AlertTriangle, Loader2 } from 'lucide-react';
+import { Droplets, CheckCircle2, Settings2, Target, AlertTriangle, Loader2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore, useUser, useDoc, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
 import { getHealthAssessment, HealthMetrics } from '@/lib/health-utils';
+import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -206,7 +207,7 @@ export default function Home() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden">
+          <Card className="md:col-span-2 shadow-2xl border-white/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
                 <CardTitle className="text-2xl font-headline uppercase italic text-white">Treino do Dia</CardTitle>
@@ -216,7 +217,7 @@ export default function Home() {
               </div>
               {isWorkoutsLoading ? <Loader2 className="w-8 h-8 animate-spin text-muted" /> : <CheckCircle2 className={cn("w-10 h-10", progressPercent === 100 ? "text-green-500" : "text-muted")} />}
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 flex-1">
               <Progress value={progressPercent} className="h-4 bg-secondary" />
               <div className="space-y-3">
                 {todaysExercises && todaysExercises.length > 0 ? todaysExercises.map((ex) => (
@@ -231,6 +232,13 @@ export default function Home() {
                 )}
               </div>
             </CardContent>
+            <div className="p-6 pt-0 mt-auto">
+              <Button asChild className="w-full h-14 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl font-black uppercase italic tracking-widest gap-2">
+                <Link href="/planner">
+                  Analisar Treino <ArrowRight className="w-5 h-5" />
+                </Link>
+              </Button>
+            </div>
           </Card>
 
           <div className="space-y-6">

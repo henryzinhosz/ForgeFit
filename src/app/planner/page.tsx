@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -7,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trash2, Pencil, Plus, Loader2, Calendar, Info } from 'lucide-react';
-import { useCollection, useFirestore, useUser, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { Trash2, Pencil, Plus, Loader2, Calendar, Info, CheckCircle2 } from 'lucide-react';
+import { useCollection, useFirestore, useUser, useMemoFirebase, updateDocumentNonBlocking, deleteDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import {
   Dialog,
@@ -38,6 +39,8 @@ export default function PlannerPage() {
   const [editSets, setEditSets] = useState('');
   const [editReps, setEditReps] = useState('');
   const [editTime, setEditTime] = useState('');
+  
+  const [isFinalizeDialogOpen, setIsFinalizeDialogOpen] = useState(false);
 
   const workoutsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -46,6 +49,9 @@ export default function PlannerPage() {
 
   const { data: rawWorkouts, loading } = useCollection(workoutsQuery);
   const workouts = rawWorkouts || [];
+
+  const dayWorkouts = workouts.filter(w => w.day === selectedDay);
+  const isAllCompleted = dayWorkouts.length > 0 && dayWorkouts.every(w => w.completed);
 
   const toggleExercise = (workoutId: string, currentStatus: boolean) => {
     if (!db || !user) return;
@@ -85,6 +91,37 @@ export default function PlannerPage() {
       description: "As alterações foram salvas com sucesso.",
     });
     setEditingExercise(null);
+  };
+
+  const handleFinalizeWorkout = () => {
+    if (!db || !user || dayWorkouts.length === 0) return;
+
+    if (!isAllCompleted) {
+      setIsFinalizeDialogOpen(true);
+    } else {
+      executeFinalize();
+    }
+  };
+
+  const executeFinalize = () => {
+    if (!db || !user) return;
+    
+    // Registrar sessão para análise futura
+    const sessionsRef = collection(db, 'users', user.uid, 'metrics');
+    addDocumentNonBlocking(sessionsRef, {
+      type: 'session_completed',
+      day: selectedDay,
+      exerciseCount: dayWorkouts.length,
+      date: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    });
+
+    toast({
+      title: "Treino Finalizado!",
+      description: "Missão cumprida! Seu progresso foi registrado no silo.",
+    });
+    
+    setIsFinalizeDialogOpen(false);
   };
 
   const days: { key: DayOfWeek; label: string }[] = [
@@ -137,18 +174,29 @@ export default function PlannerPage() {
             days.map((day) => (
               <TabsContent key={day.key} value={day.key} className="space-y-6">
                 <Card className="border-white/10 bg-card/60 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden">
-                  <CardHeader className="bg-primary/5 border-b border-white/5 p-6">
+                  <CardHeader className="bg-primary/5 border-b border-white/5 p-6 flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="text-3xl font-headline text-primary uppercase italic">{day.label}</CardTitle>
                       <CardDescription className="font-bold text-muted-foreground uppercase text-xs">
-                        {workouts.filter(w => w.day === day.key).length} exercícios planejados
+                        {dayWorkouts.length} exercícios planejados
                       </CardDescription>
                     </div>
+                    {dayWorkouts.length > 0 && (
+                      <Button 
+                        onClick={handleFinalizeWorkout}
+                        className={cn(
+                          "h-12 px-6 rounded-2xl font-black uppercase italic transition-all",
+                          isAllCompleted ? "bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(255,0,0,0.5)]" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        )}
+                      >
+                        <CheckCircle2 className="mr-2 w-5 h-5" /> Finalizar Treino
+                      </Button>
+                    )}
                   </CardHeader>
                   <CardContent className="p-0">
-                    {workouts.filter(w => w.day === day.key).length > 0 ? (
+                    {dayWorkouts.length > 0 ? (
                       <div className="divide-y divide-white/5">
-                        {workouts.filter(w => w.day === day.key).map((ex) => {
+                        {dayWorkouts.map((ex) => {
                           const exerciseData = EXERCISE_DATABASE.find(e => e.id === ex.exerciseId);
                           const imgData = exerciseData ? getPlaceholderById(exerciseData.imageId) : null;
                           
@@ -251,6 +299,7 @@ export default function PlannerPage() {
           )}
         </Tabs>
 
+        {/* Modal de Edição */}
         <Dialog open={!!editingExercise} onOpenChange={(open) => !open && setEditingExercise(null)}>
           <DialogContent className="sm:max-w-[425px] bg-card border-white/10 text-white rounded-3xl">
             <DialogHeader className="text-left">
@@ -293,6 +342,33 @@ export default function PlannerPage() {
             <DialogFooter>
               <Button onClick={handleUpdateExercise} className="w-full bg-primary hover:bg-primary/90 h-16 text-xl font-black rounded-2xl shadow-2xl uppercase italic">
                 SALVAR ALTERAÇÕES
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Finalização Incompleta */}
+        <Dialog open={isFinalizeDialogOpen} onOpenChange={setIsFinalizeDialogOpen}>
+          <DialogContent className="bg-card border-white/10 text-white rounded-3xl max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-headline text-primary uppercase italic">Treino Incompleto</DialogTitle>
+              <DialogDescription className="text-muted-foreground font-bold">
+                Você ainda não realizou todos os exercícios de hoje, deseja realmente finalizar o treino?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-col gap-2 sm:flex-row">
+              <Button 
+                onClick={executeFinalize}
+                className="flex-1 h-14 bg-primary hover:bg-primary/90 font-black uppercase italic rounded-2xl"
+              >
+                SIM
+              </Button>
+              <Button 
+                onClick={() => setIsFinalizeDialogOpen(false)}
+                variant="outline"
+                className="flex-1 h-14 border-white/10 hover:bg-white/5 font-black uppercase italic rounded-2xl"
+              >
+                NÃO
               </Button>
             </DialogFooter>
           </DialogContent>
