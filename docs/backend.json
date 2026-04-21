@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -18,7 +19,7 @@
     "Workout": {
       "title": "Workout",
       "type": "object",
-      "description": "Exercício agendado na rotina semanal.",
+      "description": "Exercício agendado na rotina semanal (Plano Padrão).",
       "properties": {
         "exerciseId": { "type": "string" },
         "title": { "type": "string" },
@@ -28,12 +29,28 @@
         "completed": { "type": "boolean" }
       }
     },
+    "WorkoutLog": {
+      "title": "WorkoutLog",
+      "type": "object",
+      "description": "Registro real de execução de um exercício.",
+      "properties": {
+        "workoutId": { "type": "string" },
+        "exerciseId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "actualSets": { "type": "number" },
+        "actualReps": { "type": "number" },
+        "actualWeight": { "type": "number" },
+        "actualDistance": { "type": "number" },
+        "actualDuration": { "type": "string" },
+        "restTime": { "type": "string" }
+      }
+    },
     "Metric": {
       "title": "Metric",
       "type": "object",
       "description": "Dados de progresso (peso e cargas máximas).",
       "properties": {
-        "type": { "type": "string", "enum": ["weight", "maxLoad"] },
+        "type": { "type": "string", "enum": ["weight", "maxLoad", "session_completed"] },
         "value": { "type": "number" },
         "exerciseName": { "type": "string" },
         "date": { "type": "string", "format": "date-time" }
@@ -71,7 +88,11 @@
     },
     "/users/{userId}/workouts/{workoutId}": {
       "schema": { "$ref": "#/backend/entities/Workout" },
-      "description": "Exercícios planejados."
+      "description": "Exercícios planejados (Plano Padrão)."
+    },
+    "/users/{userId}/logs/{logId}": {
+      "schema": { "$ref": "#/backend/entities/WorkoutLog" },
+      "description": "Histórico de execução real."
     },
     "/users/{userId}/metrics/{metricId}": {
       "schema": { "$ref": "#/backend/entities/Metric" },
