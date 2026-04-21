@@ -21,31 +21,31 @@ export function MuscleMap({ intensities, className }: MuscleMapProps) {
     const score = intensities[group] || 0;
     const frequency = score / 100;
 
-    // Escala: Cinza Escuro -> Vermelho Vivo (Identity Color)
+    // Escala: Cinza Escuro -> Vermelho Vivo (ForgeFIT Primary)
     const h = 0; // Vermelho
     const s = frequency > 0 ? 100 : 0;
-    const l = frequency > 0 ? (20 + (frequency * 40)) : 10;
-    const opacity = frequency > 0 ? (0.3 + (frequency * 0.7)) : 0.1;
+    const l = frequency > 0 ? (25 + (frequency * 45)) : 15;
+    const opacity = frequency > 0 ? (0.4 + (frequency * 0.6)) : 0.15;
 
     return {
       fill: `hsla(${h}, ${s}%, ${l}%, ${opacity})`,
-      stroke: frequency > 0 ? `hsla(${h}, ${s}%, 60%, 0.6)` : '#1f1f23',
-      strokeWidth: frequency > 0 ? '0.6' : '0.3',
-      filter: frequency > 0.7 ? `drop-shadow(0 0 4px hsla(${h}, ${s}%, 50%, 0.5))` : 'none',
-      transition: 'all 0.5s ease'
+      stroke: frequency > 0 ? `hsla(${h}, ${s}%, 60%, 0.8)` : '#27272a',
+      strokeWidth: frequency > 0 ? '0.8' : '0.5',
+      filter: frequency > 0.6 ? `drop-shadow(0 0 6px hsla(${h}, ${s}%, 50%, 0.6))` : 'none',
+      transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
     };
   };
 
   return (
-    <div className={cn("flex flex-col items-center gap-8", className)}>
-      <div className="flex flex-row items-start justify-center gap-10 p-8 bg-zinc-950/40 rounded-[2.5rem] border border-white/5 backdrop-blur-3xl shadow-2xl">
+    <div className={cn("flex flex-col items-center gap-10", className)}>
+      <div className="flex flex-row items-start justify-center gap-4 sm:gap-20 p-6 sm:p-12 bg-zinc-950/60 rounded-[3rem] border border-white/5 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-full max-w-5xl">
         
         {/* VISTA FRONTAL */}
-        <div className="flex flex-col items-center">
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 mb-6 italic">Vista Frontal</span>
-          <svg viewBox="0 0 100 220" className="w-full h-auto max-w-[160px]">
-            {/* Silhueta Base / Cabeça */}
-            <path d="M43 15 Q50 5 57 15 L55 30 Q50 32 45 30 Z" fill="#09090b" stroke="#18181b" strokeWidth="0.4" />
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 mb-8 italic">Vista Frontal</span>
+          <svg viewBox="0 0 100 220" className="w-full h-auto max-w-[280px] drop-shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+            {/* Cabeça */}
+            <path d="M43 15 Q50 5 57 15 L55 30 Q50 32 45 30 Z" fill="#0c0c0e" stroke="#27272a" strokeWidth="0.5" />
             
             {/* Peitorais */}
             <path id="chest_l" d="M50 42 L35 38 Q30 45 32 65 L50 72 Z" style={getStyle('peito')} />
@@ -77,11 +77,11 @@ export function MuscleMap({ intensities, className }: MuscleMapProps) {
         </div>
 
         {/* VISTA POSTERIOR */}
-        <div className="flex flex-col items-center">
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 mb-6 italic">Vista Posterior</span>
-          <svg viewBox="0 0 100 220" className="w-full h-auto max-w-[160px]">
+        <div className="flex flex-col items-center flex-1">
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60 mb-8 italic">Vista Posterior</span>
+          <svg viewBox="0 0 100 220" className="w-full h-auto max-w-[280px] drop-shadow-[0_0_30px_rgba(0,0,0,0.5)]">
             {/* Cabeça */}
-            <path d="M43 15 Q50 5 57 15 L55 30 Q50 32 45 30 Z" fill="#09090b" stroke="#18181b" strokeWidth="0.4" />
+            <path d="M43 15 Q50 5 57 15 L55 30 Q50 32 45 30 Z" fill="#0c0c0e" stroke="#27272a" strokeWidth="0.5" />
             
             {/* Costas */}
             <path d="M35 55 Q25 90 40 115 L50 110 L50 55 Z" style={getStyle('costas')} />
@@ -107,18 +107,21 @@ export function MuscleMap({ intensities, className }: MuscleMapProps) {
       </div>
 
       {/* LEGENDA */}
-      <div className="flex items-center gap-4 bg-zinc-950 p-3 rounded-full border border-white/5">
-        <span className="text-[10px] font-black text-white/30 uppercase italic">Baixa Atividade</span>
-        <div className="flex gap-1">
+      <div className="flex items-center gap-6 bg-zinc-950 px-8 py-4 rounded-full border border-white/10 shadow-xl">
+        <span className="text-[10px] font-black text-white/40 uppercase italic tracking-widest">Baixa Atividade</span>
+        <div className="flex gap-1.5">
           {[0.2, 0.4, 0.6, 0.8, 1.0].map((v) => (
             <div 
               key={v} 
-              className="w-8 h-1 rounded-full"
-              style={{ backgroundColor: `hsla(0, 100%, ${20 + (v * 40)}%, ${0.2 + (v * 0.8)})` }}
+              className="w-10 h-1.5 rounded-full"
+              style={{ 
+                backgroundColor: `hsla(0, 100%, ${25 + (v * 45)}%, ${0.3 + (v * 0.7)})`,
+                boxShadow: v > 0.6 ? `0 0 10px hsla(0, 100%, 50%, ${v * 0.5})` : 'none'
+              }}
             />
           ))}
         </div>
-        <span className="text-[10px] font-black text-primary uppercase italic">Atividade Alta</span>
+        <span className="text-[10px] font-black text-primary uppercase italic tracking-widest">Foco Máximo</span>
       </div>
     </div>
   );
