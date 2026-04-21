@@ -16,115 +16,117 @@ interface MuscleMapProps {
 export function MuscleMap({ intensities, className }: MuscleMapProps) {
   const getStyle = (group: MuscleGroup) => {
     const intensity = intensities[group] || 0;
-    const opacity = intensity === 0 ? 0.15 : 0.3 + (intensity / 100) * 0.7;
+    const opacity = intensity === 0 ? 0.08 : 0.2 + (intensity / 100) * 0.8;
     return {
-      fill: intensity > 0 ? `hsla(var(--primary), ${opacity})` : '#1c1c1e',
-      stroke: intensity > 0 ? 'hsla(var(--primary), 0.6)' : '#2c2c2e',
+      fill: intensity > 0 ? `hsla(var(--primary), ${opacity})` : '#1a1a1c',
+      stroke: intensity > 0 ? 'hsla(var(--primary), 0.5)' : '#2a2a2c',
       strokeWidth: '0.4',
-      transition: 'all 1s cubic-bezier(0.4, 0, 0.2, 1)'
+      transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
     };
   };
 
   return (
-    <div className={cn("flex flex-col items-center gap-8", className)}>
-      <div className="grid grid-cols-2 gap-8 md:gap-16 items-start justify-center p-6 bg-black/40 rounded-[3rem] border border-white/5 backdrop-blur-xl">
+    <div className={cn("flex flex-col items-center gap-10", className)}>
+      <div className="grid grid-cols-2 gap-10 md:gap-20 items-start justify-center p-8 bg-zinc-950/50 rounded-[3.5rem] border border-white/5 backdrop-blur-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         
-        {/* VISTA FRONTAL - SILHUETA REALISTA */}
+        {/* VISTA FRONTAL - ANATOMIA DETALHADA */}
         <div className="flex flex-col items-center">
-          <span className="text-[10px] font-black uppercase italic text-primary/40 mb-6 tracking-[0.2em]">Anterior View</span>
-          <svg viewBox="0 0 100 210" className="w-full h-auto max-w-[160px] drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <span className="text-[9px] font-black uppercase italic text-primary/30 mb-8 tracking-[0.3em] border-b border-primary/10 pb-1">Anatomia Anterior</span>
+          <svg viewBox="0 0 100 220" className="w-full h-auto max-w-[180px] filter drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]">
             {/* Cabeça e Pescoço */}
-            <path d="M44 12 Q50 2 56 12 L54 28 L46 28 Z" fill="#1c1c1e" stroke="#2c2c2e" strokeWidth="0.4" />
+            <path d="M42 15 Q50 2 58 15 L56 30 Q50 32 44 30 Z" fill="#141416" stroke="#2a2a2c" strokeWidth="0.4" />
             
             {/* OMBROS (Deltoide Frontal e Lateral) */}
-            <path d="M30 32 Q25 35 28 55 L38 52 Q40 32 30 32" style={getStyle('ombros')} />
-            <path d="M70 32 Q75 35 72 55 L62 52 Q60 32 70 32" style={getStyle('ombros')} />
+            <path d="M30 35 Q24 38 27 60 L37 58 Q40 38 30 35" style={getStyle('ombros')} />
+            <path d="M70 35 Q76 38 73 60 L63 58 Q60 38 70 35" style={getStyle('ombros')} />
             
-            {/* PEITO (Grande Peitoral - Clavicular e Esternal) */}
-            <path d="M50 35 L38 32 Q32 40 35 58 L50 62 Z" style={getStyle('peito')} />
-            <path d="M50 35 L62 32 Q68 40 65 58 L50 62 Z" style={getStyle('peito')} />
+            {/* PEITO (Pectoralis Major - Clavicular e Esternal) */}
+            <path d="M50 38 L38 35 Q30 45 34 65 L50 70 Z" style={getStyle('peito')} />
+            <path d="M50 38 L62 35 Q70 45 66 65 L50 70 Z" style={getStyle('peito')} />
             
-            {/* BRAÇOS (Bíceps e Braquial) */}
-            <path d="M26 58 Q22 75 28 92 L34 90 Q32 70 34 55 Z" style={getStyle('biceps')} />
-            <path d="M74 58 Q78 75 72 92 L66 90 Q68 70 66 55 Z" style={getStyle('biceps')} />
+            {/* BRAÇOS (Bíceps) */}
+            <path d="M25 62 Q20 80 27 98 L34 95 Q32 75 34 60 Z" style={getStyle('biceps')} />
+            <path d="M75 62 Q80 80 73 98 L66 95 Q68 75 66 60 Z" style={getStyle('biceps')} />
             
-            {/* ANTEBRAÇO (Braquiorradial e Flexores) */}
-            <path d="M28 95 Q22 110 26 130 L34 125 Q36 105 34 95 Z" style={getStyle('antebraco')} />
-            <path d="M72 95 Q78 110 74 130 L66 125 Q64 105 66 95 Z" style={getStyle('antebraco')} />
+            {/* ANTEBRAÇO */}
+            <path d="M26 102 Q18 120 25 145 L35 140 Q38 120 34 102 Z" style={getStyle('antebraco')} />
+            <path d="M74 102 Q82 120 75 145 L65 140 Q62 120 66 102 Z" style={getStyle('antebraco')} />
             
-            {/* CORE (Abdominais e Serrátil) */}
-            <path d="M42 65 L58 65 L58 75 L42 75 Z" style={getStyle('core')} />
-            <path d="M42 78 L58 78 L58 88 L42 88 Z" style={getStyle('core')} />
-            <path d="M42 91 L58 91 L58 101 L42 101 Z" style={getStyle('core')} />
-            <path d="M36 65 Q32 80 35 105 L40 105 L40 65 Z" style={getStyle('core')} /> {/* Oblíquos */}
-            <path d="M64 65 Q68 80 65 105 L60 105 L60 65 Z" style={getStyle('core')} />
+            {/* CORE (Rectus Abdominis - Segmentos) */}
+            <path d="M43 75 Q50 74 57 75 L57 84 Q50 85 43 84 Z" style={getStyle('core')} /> {/* Upper abs */}
+            <path d="M43 86 Q50 85 57 86 L57 95 Q50 96 43 95 Z" style={getStyle('core')} /> {/* Mid abs */}
+            <path d="M43 97 Q50 96 57 97 L57 106 Q50 107 43 106 Z" style={getStyle('core')} /> {/* Lower abs */}
+            <path d="M45 108 Q50 107 55 108 L55 118 Q50 119 45 118 Z" style={getStyle('core')} /> {/* Bottom abs */}
             
-            {/* QUADRÍCEPS (Vasto Lateral, Medial e Reto Femoral) */}
-            <path d="M32 110 Q25 130 30 160 L42 158 Q46 130 46 110 Z" style={getStyle('quadriceps')} />
-            <path d="M68 110 Q75 130 70 160 L58 158 Q54 130 54 110 Z" style={getStyle('quadriceps')} />
-            <path d="M45 140 Q48 155 50 160 Q52 155 55 140 Z" style={getStyle('quadriceps')} /> {/* Vasto Medial */}
+            {/* CORE (Oblíquos e Serrátil) */}
+            <path d="M37 72 Q33 85 36 115 L41 115 L41 72 Z" style={getStyle('core')} />
+            <path d="M63 72 Q67 85 64 115 L59 115 L59 72 Z" style={getStyle('core')} />
             
-            {/* PANTURRILHA (Ventral/Tibial) */}
-            <path d="M32 170 Q30 185 36 205 L44 205 Q46 185 44 170 Z" style={getStyle('panturrilha')} />
-            <path d="M68 170 Q70 185 64 205 L56 205 Q54 185 56 170 Z" style={getStyle('panturrilha')} />
+            {/* QUADRÍCEPS (Anatomia Realista) */}
+            <path d="M30 120 Q22 145 28 175 L44 170 Q48 140 48 120 Z" style={getStyle('quadriceps')} />
+            <path d="M70 120 Q78 145 72 175 L56 170 Q52 140 52 120 Z" style={getStyle('quadriceps')} />
+            <path d="M45 155 Q48 170 50 175 Q52 170 55 155 Z" style={getStyle('quadriceps')} /> {/* Vasto Medial */}
+            
+            {/* PANTURRILHA (Frente) */}
+            <path d="M30 185 Q28 200 35 215 L45 215 Q48 200 45 185 Z" style={getStyle('panturrilha')} />
+            <path d="M70 185 Q72 200 65 215 L55 215 Q52 200 55 185 Z" style={getStyle('panturrilha')} />
           </svg>
         </div>
 
-        {/* VISTA POSTERIOR - SILHUETA REALISTA */}
+        {/* VISTA POSTERIOR - ANATOMIA DETALHADA */}
         <div className="flex flex-col items-center">
-          <span className="text-[10px] font-black uppercase italic text-primary/40 mb-6 tracking-[0.2em]">Posterior View</span>
-          <svg viewBox="0 0 100 210" className="w-full h-auto max-w-[160px] drop-shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          <span className="text-[9px] font-black uppercase italic text-primary/30 mb-8 tracking-[0.3em] border-b border-primary/10 pb-1">Anatomia Posterior</span>
+          <svg viewBox="0 0 100 220" className="w-full h-auto max-w-[180px] filter drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]">
             {/* Cabeça e Pescoço */}
-            <path d="M44 12 Q50 2 56 12 L54 28 L46 28 Z" fill="#1c1c1e" stroke="#2c2c2e" strokeWidth="0.4" />
+            <path d="M42 15 Q50 2 58 15 L56 30 Q50 32 44 30 Z" fill="#141416" stroke="#2a2a2c" strokeWidth="0.4" />
 
-            {/* COSTAS (Trapézio e Latíssimo) */}
-            <path d="M50 28 L38 32 Q42 45 50 50 L50 28" style={getStyle('costas')} /> {/* Trapézio Esq */}
-            <path d="M50 28 L62 32 Q58 45 50 50 L50 28" style={getStyle('costas')} /> {/* Trapézio Dir */}
-            <path d="M35 45 Q30 70 38 100 L50 95 L50 52 Z" style={getStyle('costas')} /> {/* Lats Esq */}
-            <path d="M65 45 Q70 70 62 100 L50 95 L50 52 Z" style={getStyle('costas')} /> {/* Lats Dir */}
+            {/* COSTAS (Trapézio Superior e Médio) */}
+            <path d="M50 30 L38 35 Q44 45 50 48 L50 30" style={getStyle('costas')} />
+            <path d="M50 30 L62 35 Q56 45 50 48 L50 30" style={getStyle('costas')} />
+            
+            {/* COSTAS (Latíssimo do Dorso) */}
+            <path d="M35 48 Q28 80 38 105 L50 100 L50 55 Z" style={getStyle('costas')} />
+            <path d="M65 48 Q72 80 62 105 L50 100 L50 55 Z" style={getStyle('costas')} />
             
             {/* OMBROS POSTERIORES */}
-            <path d="M30 32 Q25 35 28 45 L36 45 Q38 35 30 32" style={getStyle('ombros')} />
-            <path d="M70 32 Q75 35 72 45 L64 45 Q62 35 70 32" style={getStyle('ombros')} />
+            <path d="M28 35 Q22 38 25 50 L35 50 Q38 38 28 35" style={getStyle('ombros')} />
+            <path d="M72 35 Q78 38 75 50 L65 50 Q62 38 72 35" style={getStyle('ombros')} />
 
-            {/* TRÍCEPS (Cabeça Longa e Lateral) */}
-            <path d="M25 50 Q20 70 26 90 L34 85 Q32 65 32 50 Z" style={getStyle('triceps')} />
-            <path d="M75 50 Q80 70 74 90 L66 85 Q68 65 68 50 Z" style={getStyle('triceps')} />
+            {/* TRÍCEPS (Longo e Lateral) */}
+            <path d="M24 55 Q18 78 26 100 L34 95 Q32 75 32 55 Z" style={getStyle('triceps')} />
+            <path d="M76 55 Q82 78 74 100 L66 95 Q68 75 68 55 Z" style={getStyle('triceps')} />
 
-            {/* GLÚTEOS (Grande Glúteo) */}
-            <path d="M32 105 Q30 115 35 135 Q42 142 50 138 L50 105 Z" style={getStyle('gluteos')} />
-            <path d="M68 105 Q70 115 65 135 Q58 142 50 138 L50 105 Z" style={getStyle('gluteos')} />
+            {/* GLÚTEOS */}
+            <path d="M30 110 Q26 125 35 145 Q44 152 50 148 L50 110 Z" style={getStyle('gluteos')} />
+            <path d="M70 110 Q74 125 65 145 Q56 152 50 148 L50 110 Z" style={getStyle('gluteos')} />
 
-            {/* ISQUIOTIBIAIS (Bíceps Femoral, Semitendinoso) */}
-            <path d="M34 142 Q30 155 35 175 L45 170 Q48 155 46 142 Z" style={getStyle('isquios')} />
-            <path d="M66 142 Q70 155 65 175 L55 170 Q52 155 54 142 Z" style={getStyle('isquios')} />
+            {/* ISQUIOTIBIAIS (Hamstrings) */}
+            <path d="M32 152 Q28 170 34 185 L46 182 Q48 170 46 152 Z" style={getStyle('isquios')} />
+            <path d="M68 152 Q72 170 66 185 L54 182 Q52 170 54 152 Z" style={getStyle('isquios')} />
 
             {/* PANTURRILHA (Gastrocnêmio) */}
-            <path d="M34 180 Q30 190 38 208 L46 208 Q48 195 46 180 Z" style={getStyle('panturrilha')} />
-            <path d="M66 180 Q70 190 62 208 L54 208 Q52 195 54 180 Z" style={getStyle('panturrilha')} />
+            <path d="M32 190 Q28 200 38 215 L46 215 Q48 205 46 190 Z" style={getStyle('panturrilha')} />
+            <path d="M68 190 Q72 200 62 215 L54 215 Q52 205 54 190 Z" style={getStyle('panturrilha')} />
           </svg>
         </div>
       </div>
 
-      {/* LEGENDA DE ALTA PRECISÃO */}
-      <div className="flex items-center gap-6 px-8 py-3 bg-white/5 rounded-full border border-white/5">
-        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Rest</span>
-        <div className="flex gap-1.5">
-          {[0, 1, 2, 3, 4].map((i) => (
+      {/* LEGENDA PROFISSIONAL */}
+      <div className="flex items-center gap-8 px-10 py-4 bg-zinc-900/50 rounded-full border border-white/5 shadow-inner">
+        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Inativo</span>
+        <div className="flex gap-2">
+          {[0.1, 0.3, 0.5, 0.7, 1].map((lvl, i) => (
             <div 
               key={i} 
-              className={cn(
-                "w-10 h-1 rounded-full transition-all duration-700",
-                i === 0 ? "bg-zinc-800" : 
-                i === 1 ? "bg-primary/20" :
-                i === 2 ? "bg-primary/40" :
-                i === 3 ? "bg-primary/70" :
-                "bg-primary shadow-[0_0_12px_hsla(var(--primary),0.8)]"
-              )} 
+              className="w-12 h-1.5 rounded-full transition-all duration-1000"
+              style={{
+                backgroundColor: i === 0 ? 'rgba(255,255,255,0.05)' : `hsla(var(--primary), ${lvl})`,
+                boxShadow: i === 4 ? `0 0 15px hsla(var(--primary), 0.6)` : 'none'
+              }}
             />
           ))}
         </div>
-        <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] italic">Peak</span>
+        <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em] italic animate-pulse">Pico</span>
       </div>
     </div>
   );
