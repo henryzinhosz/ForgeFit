@@ -38,7 +38,6 @@ export default function ProgressPage() {
   const { toast } = useToast();
   
   const [weightInput, setWeightInput] = useState('');
-  const [loadInput, setLoadInput] = useState('');
   const [selectedEx, setSelectedEx] = useState('Supino Reto');
 
   const profileRef = useMemoFirebase(() => {
@@ -106,16 +105,40 @@ export default function ProgressPage() {
   }, [rawMetrics]);
 
   const loadData = useMemo(() => {
-    if (!rawMetrics) return [];
-    return rawMetrics
-      .filter(m => m.type === 'maxLoad' && m.exerciseName === selectedEx)
+    const combinedData: Record<string, number> = {};
+
+    // 1. Dados de Métricas (Registros Manuais Antigos)
+    if (rawMetrics) {
+      rawMetrics
+        .filter(m => m.type === 'maxLoad' && m.exerciseName === selectedEx)
+        .forEach(m => {
+          const dateStr = m.date.split('T')[0];
+          combinedData[dateStr] = Math.max(combinedData[dateStr] || 0, m.value);
+        });
+    }
+
+    // 2. Dados de Logs (Registros Automáticos de Execução Real)
+    if (rawLogs) {
+      rawLogs
+        .filter(log => {
+          const exInfo = EXERCISE_DATABASE.find(e => e.id === log.exerciseId);
+          return exInfo?.title === selectedEx;
+        })
+        .forEach(log => {
+          const dateStr = log.date.split('T')[0];
+          combinedData[dateStr] = Math.max(combinedData[dateStr] || 0, log.actualWeight || 0);
+        });
+    }
+
+    return Object.entries(combinedData)
+      .map(([date, value]) => ({
+        date,
+        value,
+        label: new Date(date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
+      }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(-15)
-      .map(d => ({
-        ...d,
-        label: new Date(d.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })
-      }));
-  }, [rawMetrics, selectedEx]);
+      .slice(-15);
+  }, [rawMetrics, rawLogs, selectedEx]);
 
   const personalRecord = useMemo(() => {
     if (loadData.length === 0) return 0;
@@ -151,21 +174,6 @@ export default function ProgressPage() {
 
       setWeightInput('');
       toast({ title: "Peso atualizado", description: "Registro salvo com sucesso." });
-    }
-  };
-
-  const handleAddLoad = () => {
-    if (loadInput && db && user) {
-      const ref = collection(db, 'users', user.uid, 'metrics');
-      addDocumentNonBlocking(ref, {
-        type: 'maxLoad',
-        exerciseName: selectedEx,
-        value: parseFloat(loadInput),
-        date: new Date().toISOString(),
-        createdAt: new Date().toISOString()
-      });
-      setLoadInput('');
-      toast({ title: "Novo recorde!", description: `Sua carga em ${selectedEx} foi registrada.` });
     }
   };
 
@@ -339,12 +347,15 @@ export default function ProgressPage() {
             </CardContent>
           </Card>
 
-          {/* Gráfico de Recordes (PR) */}
+          {/* Gráfico de Recordes (PR) - Automatizado */}
           <Card className="border-white/10 bg-card/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-2xl">
             <CardHeader className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
-                <Dumbbell className="w-6 h-6" /> Recordes (PR)
-              </CardTitle>
+              <div className="space-y-1">
+                <CardTitle className="text-2xl font-headline flex items-center gap-2 text-accent italic uppercase">
+                  <Dumbbell className="w-6 h-6" /> Recordes (PR)
+                </CardTitle>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase italic">Memória de treino automática</p>
+              </div>
               <div className="flex flex-col items-end gap-2">
                 <Select value={selectedEx} onValueChange={setSelectedEx}>
                   <SelectTrigger className="w-[180px] rounded-full bg-white/5 border-white/10 text-white h-10 uppercase font-black text-[10px] italic">
@@ -364,27 +375,38 @@ export default function ProgressPage() {
               </div>
             </CardHeader>
             <CardContent className="p-8 pt-0 space-y-8">
-              <div className="h-[250px] w-full">
+              <div className="h-[320px] w-full">
                 {loadData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={loadData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#222" />
                       <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} dy={10} />
                       <YAxis domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
-                      <Tooltip contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}} />
-                      <Line type="monotone" dataKey="value" stroke="hsl(var(--accent))" strokeWidth={4} dot={{r: 4, fill: "hsl(var(--accent))", strokeWidth: 2}} />
+                      <Tooltip 
+                        contentStyle={{borderRadius: '16px', border: '1px solid #333', backgroundColor: '#0c0c0c'}}
+                        formatter={(value: number) => [`${value}kg`, 'Carga']}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="hsl(var(--accent))" 
+                        strokeWidth={4} 
+                        dot={{r: 6, fill: "hsl(var(--accent))", strokeWidth: 2}}
+                        activeDot={{ r: 8, fill: "#fff", stroke: "hsl(var(--accent))" }}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center opacity-20 gap-2">
                     <TrendingUp className="w-12 h-12" />
-                    <p className="text-[10px] font-black uppercase italic">Nenhum dado registrado</p>
+                    <p className="text-[10px] font-black uppercase italic">Nenhuma execução registrada para este exercício</p>
                   </div>
                 )}
               </div>
-              <div className="flex gap-3">
-                <Input type="number" placeholder="Carga (kg)" value={loadInput} onChange={(e) => setLoadInput(e.target.value)} className="rounded-2xl h-14 bg-white/5 border-white/10 text-white font-bold" />
-                <Button onClick={handleAddLoad} className="h-14 px-8 bg-accent text-white font-black rounded-2xl uppercase italic">NOVO RECORDE</Button>
+              <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                <p className="text-[11px] leading-relaxed text-muted-foreground italic text-center">
+                  O sistema identifica automaticamente sua maior carga a partir dos logs de treino registrados na sua agenda.
+                </p>
               </div>
             </CardContent>
           </Card>
